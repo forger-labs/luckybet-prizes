@@ -1,9 +1,11 @@
 "use client";
 
-import { ROUTES } from "@shared/constants";
-import { OpenMenu } from "@shared/icons/OpenMenu";
 import Image from "next/image";
 import Link from "next/link";
+
+import { ROUTES } from "@shared/constants";
+import { OpenMenu } from "@shared/icons/OpenMenu";
+
 import { Balance } from "./Balance";
 
 export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {

@@ -1,10 +1,13 @@
 "use client";
-import { PUBLIC_LINKS } from "@shared/constants";
-import { CloseMenu } from "@shared/icons/CloseMenu";
-import { Stars } from "@shared/icons/Stars";
+
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+
+import { PUBLIC_LINKS } from "@shared/constants";
+import { CloseMenu } from "@shared/icons/CloseMenu";
+import { Stars } from "@shared/icons/Stars";
+
 import { ItemSidebar } from "./ItemSidebar";
 import { Logout } from "./Logout";
 import { Balance } from "./TopAppBar/Balance";

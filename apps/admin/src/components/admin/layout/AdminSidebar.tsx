@@ -1,8 +1,11 @@
 "use client";
 
-import { ADMIN_LINKS } from "@shared/constants";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+
+import { ADMIN_LINKS } from "@shared/constants";
+
+import { useAuthAdmin } from "@/hooks/useAuthAdmin";
 import type { AdminSidebarProps } from "@/types/navbar/AdminSidebar";
 
 /**
@@ -15,15 +18,9 @@ import type { AdminSidebarProps } from "@/types/navbar/AdminSidebar";
  */
 export const AdminSidebar = ({ open, onToggle }: AdminSidebarProps) => {
   const pathname = usePathname();
-  const router = useRouter();
+  const { logout } = useAuthAdmin();
 
   const isActive = (path: string) => pathname === path;
-
-  const logout = () => {
-    // TODO: wire to real auth context
-    localStorage.removeItem("adminToken");
-    router.push("/");
-  };
 
   return (
     <aside

@@ -1,7 +1,9 @@
 "use client";
 
-import type { AdminMission } from "@shared/types";
 import { useCallback, useEffect, useReducer, useState } from "react";
+
+import type { AdminMission } from "@shared/types";
+
 import { MissionFormModal } from "@/components/admin/mission-form/MissionFormModal";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -109,50 +111,45 @@ function MissionsList() {
     [state.missions],
   );
 
-  const handleActivate = useCallback((id: string) => {
+  const handleActivate = useCallback(async (id: string) => {
     const confirmed = window.confirm(
       "¿Activar misión? El contenido quedará bloqueado.",
     );
     if (!confirmed) return;
-    activateMission(dispatch, id).catch((err) => {
-      console.error("Failed to activate mission:", err);
-    });
+    await activateMission(dispatch, id);
   }, []);
 
-  const handleCancel = useCallback((id: string) => {
+  const handleCancel = useCallback(async (id: string) => {
     const reason = window.prompt("Motivo de cancelación:");
     if (!reason || !reason.trim()) return;
-    cancelMission(dispatch, id, reason.trim()).catch((err) => {
-      console.error("Failed to cancel mission:", err);
-    });
+    await cancelMission(dispatch, id, reason.trim());
   }, []);
 
-  const handleDelete = useCallback((id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     const confirmed = window.confirm("¿Eliminar misión?");
     if (!confirmed) return;
-    deleteMission(dispatch, id).catch((err) => {
-      console.error("Failed to delete mission:", err);
-    });
+    await deleteMission(dispatch, id);
   }, []);
 
   /* ── Mission Form Modal handlers ── */
 
   const handleSave = useCallback(
-    (
+    async (
       data: Omit<AdminMission, "id" | "createdAt" | "participants">,
       isCreate: boolean,
     ) => {
+      let ok: boolean;
       if (isCreate) {
-        createMission(dispatch, data).catch((err) => {
-          console.error("Failed to create mission:", err);
-        });
+        ok = await createMission(dispatch, data);
       } else if (editingMission) {
-        updateMission(dispatch, editingMission.id, data).catch((err) => {
-          console.error("Failed to update mission:", err);
-        });
+        ok = await updateMission(dispatch, editingMission.id, data);
+      } else {
+        return;
       }
-      setShowFormModal(false);
-      setEditingMission(null);
+      if (ok) {
+        setShowFormModal(false);
+        setEditingMission(null);
+      }
     },
     [editingMission],
   );

@@ -1,8 +1,11 @@
 "use client";
+
+import { usePathname } from "next/navigation";
+
 import { PUBLIC_LINKS } from "@shared/constants";
 import { ExpandMenu } from "@shared/icons/ExpandMenu";
 import { Stars } from "@shared/icons/Stars";
-import { usePathname } from "next/navigation";
+
 import { ItemSidebar } from "./ItemSidebar";
 import { Logout } from "./Logout";
 

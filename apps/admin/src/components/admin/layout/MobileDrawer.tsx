@@ -1,9 +1,11 @@
 "use client";
 
-import { ADMIN_LINKS } from "@shared/constants";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef } from "react";
+
+import { ADMIN_LINKS } from "@shared/constants";
+
 import type { MobileDrawerProps } from "@/types/navbar/AdminSidebar";
 
 /**

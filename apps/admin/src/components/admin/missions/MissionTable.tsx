@@ -33,7 +33,7 @@ function MissionTable({
   }
 
   return (
-    <div className=" rounded-lg border border-outline-variant/20 overflow-x-auto">
+    <div className=" rounded-lg border border-outline-variant/20 overflow-x-visible">
       <table className="w-full overflow-x-auto">
         <thead>
           <tr className="border-b border-outline-variant/20 bg-surface-container-low">

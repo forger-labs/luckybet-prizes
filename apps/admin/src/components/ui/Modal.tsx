@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import type { ModalProps, ModalSize } from "@/types/Modal";
 
 const sizeStyles: Record<ModalSize, string> = {

@@ -1,15 +1,18 @@
 "use client";
 
+import { useFormik } from "formik";
+import { useCallback, useEffect, useState } from "react";
+import * as Yup from "yup";
+
 import type {
   AdminMission,
   MissionStep,
   VerificationType,
 } from "@shared/types";
-import { useCallback, useEffect, useRef, useState } from "react";
+
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import type {
-  FormErrors,
   MissionFormModalProps,
   PartialAdminMission,
 } from "@/types/missions/MissionFormModalTypes";
@@ -23,7 +26,35 @@ const DEFAULT_STEP: MissionStep = {
   order: 1,
 };
 
-function createEmptyFormData(): PartialAdminMission {
+/* ── Yup validation schema ── */
+
+const validationSchema = Yup.object({
+  title: Yup.string()
+    .required("El título es requerido")
+    .min(3, "El título debe tener al menos 3 caracteres"),
+  description: Yup.string()
+    .required("La descripción es requerida")
+    .min(10, "La descripción debe tener al menos 10 caracteres"),
+  tokenReward: Yup.number()
+    .required("La recompensa es requerida")
+    .min(1, "La recompensa debe ser mayor a 0"),
+  bonusPercent: Yup.number().min(0).max(100),
+  xpReward: Yup.number()
+    .required("La experiencia es requerida")
+    .min(1, "La experiencia debe ser mayor a 0"),
+  category: Yup.string().required("Seleccioná una categoría"),
+  steps: Yup.array()
+    .of(
+      Yup.object({
+        title: Yup.string().required("El título del paso es obligatorio"),
+      }),
+    )
+    .min(1, "Agregá al menos un paso"),
+});
+
+/* ── Helpers ── */
+
+function createEmptyInitialValues(): PartialAdminMission {
   return {
     title: "",
     description: "",
@@ -39,8 +70,9 @@ function createEmptyFormData(): PartialAdminMission {
 /**
  * MissionFormModal — modal de creación/edición de misión.
  *
- * Integra MissionFields + StepBuilder, maneja dirty state para el
- * confirm de descarte, y bloquea contenido en misiones activas.
+ * Usa Formik + Yup para manejo de estado y validación.
+ * Pasa formik directamente a MissionFields y StepBuilder
+ * para que ellos extraigan lo que necesitan.
  */
 function MissionFormModal({
   open,
@@ -51,161 +83,77 @@ function MissionFormModal({
   const isCreating = mission === null;
   const readOnly = !isCreating && mission.status === "active";
 
-  const isDirtyRef = useRef(false);
-  const [formData, setFormData] = useState<PartialAdminMission>(
-    isCreating ? createEmptyFormData() : { ...mission },
-  );
-  const [errors, setErrors] = useState<FormErrors>({});
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
-  /* ── Reset form state when modal opens ── */
+  const formik = useFormik({
+    initialValues: isCreating ? createEmptyInitialValues() : { ...mission },
+    validationSchema,
+    validateOnChange: false,
+    validateOnBlur: false,
+    onSubmit: (values) => {
+      const steps = ((values.steps as MissionStep[]) || []).map((s, i) => ({
+        ...s,
+        order: i + 1,
+      }));
+      console.log("whatsup");
+      if (isCreating) {
+        const createData: PartialAdminMission = {
+          title: (values.title as string) || "",
+          description: (values.description as string) || "",
+          tokenReward: Number(values.tokenReward) || 0,
+          bonusPercent: Number(values.bonusPercent) || 0,
+          xpReward: Number(values.xpReward) || 0,
+          category: (values.category as AdminMission["category"]) || "daily",
+          status: "inactive",
+          steps,
+          coverImage: values.coverImage as string | undefined,
+        };
+        console.log(createData);
+        onSave(createData, true);
+      } else {
+        const updateData: PartialAdminMission = {
+          title: values.title as string,
+          description: values.description as string,
+          tokenReward: Number(values.tokenReward),
+          bonusPercent: Number(values.bonusPercent),
+          xpReward: Number(values.xpReward),
+          category: values.category as AdminMission["category"],
+          status: (values.status as AdminMission["status"]) || "inactive",
+          steps,
+          coverImage: values.coverImage as string | undefined,
+        };
+        onSave(updateData, false);
+      }
+    },
+  });
+
+  /* ── Reset form when modal opens ── */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: use formik
   useEffect(() => {
     if (open) {
-      if (isCreating) {
-        setFormData(createEmptyFormData());
-      } else {
-        setFormData({ ...mission });
-      }
-      setErrors({});
-      isDirtyRef.current = false;
+      formik.resetForm({
+        values: isCreating
+          ? createEmptyInitialValues()
+          : ({ ...mission } as PartialAdminMission),
+      });
       setShowDiscardConfirm(false);
     }
   }, [open, isCreating, mission]);
 
-  /* ── Field change handler ── */
-  const handleFieldChange = useCallback((field: string, value: unknown) => {
-    isDirtyRef.current = true;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for the changed field
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[field as keyof FormErrors];
-      return next;
-    });
-  }, []);
-
-  /* ── Steps change handler ── */
-  const handleStepsChange = useCallback((steps: MissionStep[]) => {
-    isDirtyRef.current = true;
-    setFormData((prev) => ({ ...prev, steps }));
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next.steps;
-      // Clear per-step errors
-      Object.keys(next).forEach((key) => {
-        if (key.startsWith("step_")) delete next[key as keyof FormErrors];
-      });
-      return next;
-    });
-  }, []);
-
-  /* ── Validation ── */
-  const validate = useCallback((): boolean => {
-    const newErrors: FormErrors = {};
-
-    // Title: required, min 3 chars
-    const title = formData.title;
-    if (!title || title.toString().trim().length < 3) {
-      newErrors.title = "El título debe tener al menos 3 caracteres";
-    }
-
-    // Description: required, min 10 chars
-    const description = formData.description;
-    if (!description || description.toString().trim().length < 10) {
-      newErrors.description =
-        "La descripción debe tener al menos 10 caracteres";
-    }
-
-    // Token reward: required, > 0
-    const tokenReward = Number(formData.tokenReward);
-    if (
-      !formData.tokenReward ||
-      Number.isNaN(tokenReward) ||
-      tokenReward <= 0
-    ) {
-      newErrors.tokenReward = "La recompensa debe ser mayor a 0";
-    }
-
-    // XP reward: required, > 0
-    const xpReward = Number(formData.xpReward);
-    if (!formData.xpReward || Number.isNaN(xpReward) || xpReward <= 0) {
-      newErrors.xpReward = "La experiencia debe ser mayor a 0";
-    }
-
-    // Category: required
-    if (!formData.category) {
-      newErrors.category = "Seleccioná una categoría";
-    }
-
-    // Steps: at least 1, each with title
-    const steps = (formData.steps as MissionStep[]) || [];
-    if (steps.length === 0) {
-      newErrors.steps = "Agregá al menos un paso";
-    }
-    steps.forEach((step, i) => {
-      if (!step.title || step.title.trim().length < 1) {
-        newErrors[`step_${i}_title`] = "El título del paso es obligatorio";
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
-
-  /* ── Save handler ── */
-  const handleSave = useCallback(() => {
-    if (!validate()) return;
-
-    const steps = ((formData.steps as MissionStep[]) || []).map((s, i) => ({
-      ...s,
-      order: i + 1,
-    }));
-
-    if (isCreating) {
-      const createData: PartialAdminMission = {
-        title: (formData.title as string) || "",
-        description: (formData.description as string) || "",
-        tokenReward: Number(formData.tokenReward) || 0,
-        bonusPercent: Number(formData.bonusPercent) || 0,
-        xpReward: Number(formData.xpReward) || 0,
-        category: (formData.category as AdminMission["category"]) || "daily",
-        status: "inactive",
-        steps,
-        coverImage: formData.coverImage as string | undefined,
-      };
-      onSave(createData, true);
-    } else {
-      const updateData: PartialAdminMission = {
-        title: formData.title as string,
-        description: formData.description as string,
-        tokenReward: Number(formData.tokenReward),
-        bonusPercent: Number(formData.bonusPercent),
-        xpReward: Number(formData.xpReward),
-        category: formData.category as AdminMission["category"],
-        status: (formData.status as AdminMission["status"]) || "inactive",
-        steps,
-        coverImage: formData.coverImage as string | undefined,
-      };
-      onSave(updateData, false);
-    }
-
-    isDirtyRef.current = false;
-  }, [isCreating, formData, validate, onSave]);
-
   /* ── Close with dirty guard ── */
   const handleClose = useCallback(() => {
-    if (isDirtyRef.current) {
+    if (formik.dirty) {
       setShowDiscardConfirm(true);
     } else {
       onClose();
     }
-  }, [onClose]);
+  }, [formik.dirty, onClose]);
 
   const confirmDiscard = useCallback(() => {
     setShowDiscardConfirm(false);
-    isDirtyRef.current = false;
+    formik.resetForm();
     onClose();
-  }, [onClose]);
+  }, [formik, onClose]);
 
   const cancelDiscard = useCallback(() => {
     setShowDiscardConfirm(false);
@@ -238,52 +186,41 @@ function MissionFormModal({
           </div>
         )}
 
-        {/* Mission Fields */}
-        <MissionFields
-          mission={formData}
-          onChange={handleFieldChange}
-          errors={errors as Record<string, string>}
-          readOnly={readOnly}
-        />
+        <form onSubmit={formik.handleSubmit}>
+          {/* Mission Fields — recibe formik completo */}
+          <MissionFields formik={formik} readOnly={readOnly} />
 
-        {/* Step Builder — hidden in readOnly mode */}
-        {!readOnly && (
-          <>
-            <div className="mt-6 pt-6 border-t border-outline-variant/20">
-              <StepBuilder
-                steps={(formData.steps as MissionStep[]) || []}
-                onChange={handleStepsChange}
-                readOnly={readOnly}
-                errors={undefined}
-              />
-            </div>
-            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-outline-variant/20">
-              <Button
-                variant="ghost"
-                onClick={handleClose}
-                className="text-base"
-              >
-                Descartar
-              </Button>
-              <Button
-                variant="primary"
-                disabled={readOnly}
-                onClick={handleSave}
-                className="text-base"
-              >
-                Guardar
-              </Button>
-            </div>
-          </>
-        )}
-
-        {/* Footer */}
+          {/* Step Builder — hidden in readOnly mode */}
+          {!readOnly && (
+            <>
+              <div className="mt-6 pt-6 border-t border-outline-variant/20">
+                <StepBuilder formik={formik} readOnly={readOnly} />
+              </div>
+              <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-outline-variant/20">
+                <Button
+                  variant="ghost"
+                  onClick={handleClose}
+                  className="text-base"
+                >
+                  Descartar
+                </Button>
+                <Button
+                  variant="primary"
+                  disabled={readOnly}
+                  className="text-base cursor-pointer"
+                  type="submit"
+                >
+                  Guardar
+                </Button>
+              </div>
+            </>
+          )}
+        </form>
       </Modal>
 
       {/* Discard Confirmation Dialog */}
       {showDiscardConfirm && (
         <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-          {/* Invisible backdrop */}
           <button
             type="button"
             aria-label="Cancelar descarte"

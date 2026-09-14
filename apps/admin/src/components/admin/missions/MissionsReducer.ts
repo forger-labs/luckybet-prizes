@@ -6,9 +6,16 @@
  * mission CRUD / state transitions.
  */
 
-import type { AdminMission, MissionStatus } from "@shared/types";
 import type { Dispatch } from "react";
-import { MockDataService } from "./MockDataService";
+import { sileo } from "sileo";
+
+import type { AdminMission, MissionStatus } from "@shared/types";
+
+import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
+import {
+  mapAdminToBackend,
+  mapBackendToAdmin,
+} from "@/types/missions/api-mappers";
 
 /* ── Constants ── */
 
@@ -190,51 +197,136 @@ export function getCurrentPageItems(
   return filtered.slice(start, start + PAGE_SIZE);
 }
 
+/* ── Helpers ── */
+
+function getMessage(msg: string | string[] | undefined): string {
+  if (!msg) return "Ocurrió un error inesperado";
+  return Array.isArray(msg) ? msg.join("; ") : msg;
+}
+
 /* ── Action dispatchers (thunk-like wrappers) ── */
 
 export async function loadMissions(dispatch: Dispatch<MissionsAction>) {
-  const missions = await MockDataService.getMissions();
-  dispatch({ type: "LOAD_MISSIONS", payload: { missions } });
+  const result = await apiAdminGanaya.getMissions();
+
+  if (result.status && result.data) {
+    const missions = result.data.map(mapBackendToAdmin);
+    dispatch({ type: "LOAD_MISSIONS", payload: { missions } });
+    return;
+  }
+
+  sileo.error({
+    title: "Error al cargar misiones",
+    description: getMessage(result.message),
+  });
 }
 
 export async function createMission(
   dispatch: Dispatch<MissionsAction>,
-  data: Parameters<typeof MockDataService.createMission>[0],
-) {
-  const mission = await MockDataService.createMission(data);
-  dispatch({ type: "CREATE_MISSION", payload: { mission } });
+  data: Parameters<typeof mapAdminToBackend>[0],
+): Promise<boolean> {
+  const payload = mapAdminToBackend(data);
+  console.log(payload);
+  const result = await apiAdminGanaya.createMission(payload);
+
+  if (result.status && result.data) {
+    const mission = mapBackendToAdmin(result.data);
+    dispatch({ type: "CREATE_MISSION", payload: { mission } });
+    return true;
+  }
+
+  sileo.error({
+    title: "Error al crear misión",
+    description: getMessage(result.message),
+  });
+  return false;
 }
 
 export async function updateMission(
   dispatch: Dispatch<MissionsAction>,
   id: string,
   data: Partial<AdminMission>,
-) {
-  const mission = await MockDataService.updateMission(id, data);
-  dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+): Promise<boolean> {
+  const payload = mapAdminToBackend(
+    data as Parameters<typeof mapAdminToBackend>[0],
+  );
+  const result = await apiAdminGanaya.updateMission(Number(id), payload);
+
+  if (result.status && result.data) {
+    const mission = mapBackendToAdmin(result.data);
+    dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+    return true;
+  }
+
+  sileo.error({
+    title: "Error al guardar misión",
+    description: getMessage(result.message),
+  });
+  return false;
 }
 
 export async function activateMission(
   dispatch: Dispatch<MissionsAction>,
   id: string,
-) {
-  const mission = await MockDataService.activateMission(id);
-  dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+): Promise<boolean> {
+  const result = await apiAdminGanaya.activateMission(Number(id));
+
+  if (result.status && result.data) {
+    const mission = mapBackendToAdmin(result.data);
+    dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+    sileo.success({ title: "Misión activada correctamente" });
+    return true;
+  }
+
+  sileo.error({
+    title: "Error al activar misión",
+    description: getMessage(result.message),
+  });
+  return false;
 }
 
 export async function cancelMission(
   dispatch: Dispatch<MissionsAction>,
   id: string,
-  reason: string,
-) {
-  const mission = await MockDataService.cancelMission(id, reason);
-  dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+  _reason: string,
+): Promise<boolean> {
+  const result = await apiAdminGanaya.updateMissionStatus(
+    Number(id),
+    "CANCELLED",
+  );
+
+  if (result.status && result.data) {
+    const mission = mapBackendToAdmin(result.data);
+    dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+    sileo.success({ title: "Misión cancelada" });
+    return true;
+  }
+
+  sileo.error({
+    title: "Error al cancelar misión",
+    description: getMessage(result.message),
+  });
+  return false;
 }
 
 export async function deleteMission(
   dispatch: Dispatch<MissionsAction>,
   id: string,
-) {
-  await MockDataService.deleteMission(id);
-  dispatch({ type: "DELETE_MISSION", payload: { id } });
+): Promise<boolean> {
+  const result = await apiAdminGanaya.updateMissionStatus(
+    Number(id),
+    "CANCELLED",
+  );
+
+  if (result.status) {
+    dispatch({ type: "DELETE_MISSION", payload: { id } });
+    sileo.success({ title: "Misión eliminada" });
+    return true;
+  }
+
+  sileo.error({
+    title: "Error al eliminar misión",
+    description: getMessage(result.message),
+  });
+  return false;
 }

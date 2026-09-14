@@ -1,7 +1,8 @@
 "use client";
 
-import { LoadingIcon } from "@shared/icons/LoadingIcon";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
+
+import { LoadingIcon } from "@shared/icons/LoadingIcon";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 

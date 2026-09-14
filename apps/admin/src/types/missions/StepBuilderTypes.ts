@@ -1,10 +1,12 @@
+import type { FormikProps } from "formik";
+
 import type { MissionStep } from "@shared/types";
 
+import type { PartialAdminMission } from "./MissionFormModalTypes";
+
 export interface StepBuilderProps {
-  steps: MissionStep[];
-  onChange: (steps: MissionStep[]) => void;
+  formik: FormikProps<PartialAdminMission>;
   readOnly?: boolean;
-  errors?: Record<string, Record<string, string>>;
 }
 
 export interface StepCardProps {

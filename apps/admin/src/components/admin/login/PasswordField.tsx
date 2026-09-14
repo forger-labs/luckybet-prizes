@@ -1,6 +1,7 @@
 "use client";
 
 import { type InputHTMLAttributes, useState } from "react";
+
 import { Input } from "@/components/ui/Input";
 
 interface PasswordFieldProps
@@ -9,6 +10,8 @@ interface PasswordFieldProps
   label?: string;
   /** Forgot-password link node (rendered inline with label) */
   forgotLink?: React.ReactNode;
+  /** Validation error message */
+  error?: string;
 }
 
 /**
@@ -20,6 +23,7 @@ interface PasswordFieldProps
 export default function PasswordField({
   label = "Secure Password",
   forgotLink,
+  error,
   placeholder = "••••••••••••",
   className = "",
   ...props
@@ -52,11 +56,17 @@ export default function PasswordField({
           className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors"
           tabIndex={-1}
         >
-          <span className="material-symbols-outlined !text-[20px]">
+          <span className="material-symbols-outlined text-[20px]!">
             {visible ? "visibility_off" : "visibility"}
           </span>
         </button>
       </div>
+      {error && (
+        <p className="text-error font-body-md text-body-md flex items-center gap-2 mt-1">
+          <span className="material-symbols-outlined text-[18px]!">error</span>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

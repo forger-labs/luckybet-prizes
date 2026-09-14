@@ -1,5 +1,7 @@
-import type { Mission } from "@shared/types/mission";
 import Link from "next/link";
+
+import type { Mission } from "@shared/types/mission";
+
 import { MissionActionButton } from "../atoms/MissionActionButton";
 import { MissionIcon } from "../atoms/MissionIcon";
 import { MissionReward } from "../atoms/MissionReward";

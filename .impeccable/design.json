@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-26T12:00:00.000Z",
+  "title": "Design System: Midnight Harbor",
+  "extensions": {
+    "colorMeta": {
+      "abismo-profundo": {
+        "role": "neutral",
+        "displayName": "Abismo Profundo",
+        "canonical": "oklch(16% 0.04 265)",
+        "tonalRamp": [
+          "oklch(8% 0.02 265)",
+          "oklch(12% 0.03 265)",
+          "oklch(16% 0.04 265)",
+          "oklch(24% 0.04 265)",
+          "oklch(32% 0.04 265)",
+          "oklch(45% 0.03 265)",
+          "oklch(55% 0.03 265)",
+          "oklch(70% 0.02 265)"
+        ]
+      },
+      "superficie-container": {
+        "role": "neutral",
+        "displayName": "Superficie Container",
+        "canonical": "oklch(20% 0.035 270)",
+        "tonalRamp": [
+          "oklch(10% 0.02 270)",
+          "oklch(15% 0.03 270)",
+          "oklch(20% 0.035 270)",
+          "oklch(27% 0.04 270)",
+          "oklch(35% 0.04 270)",
+          "oklch(46% 0.03 270)",
+          "oklch(56% 0.03 270)",
+          "oklch(72% 0.02 270)"
+        ]
+      },
+      "superficie-container-high": {
+        "role": "neutral",
+        "displayName": "Superficie Container High",
+        "canonical": "oklch(25% 0.04 270)",
+        "tonalRamp": [
+          "oklch(12% 0.02 270)",
+          "oklch(18% 0.03 270)",
+          "oklch(25% 0.04 270)",
+          "oklch(32% 0.04 270)",
+          "oklch(40% 0.04 270)",
+          "oklch(50% 0.03 270)",
+          "oklch(60% 0.03 270)",
+          "oklch(75% 0.02 270)"
+        ]
+      },
+      "on-surface": {
+        "role": "neutral",
+        "displayName": "On Surface",
+        "canonical": "oklch(90% 0.02 275)",
+        "tonalRamp": [
+          "oklch(40% 0.02 275)",
+          "oklch(55% 0.02 275)",
+          "oklch(70% 0.02 275)",
+          "oklch(82% 0.02 275)",
+          "oklch(90% 0.02 275)",
+          "oklch(93% 0.01 275)",
+          "oklch(96% 0.01 275)",
+          "oklch(99% 0.005 275)"
+        ]
+      },
+      "on-surface-variant": {
+        "role": "neutral",
+        "displayName": "On Surface Variant",
+        "canonical": "oklch(78% 0.025 255)",
+        "tonalRamp": [
+          "oklch(35% 0.02 255)",
+          "oklch(50% 0.02 255)",
+          "oklch(65% 0.025 255)",
+          "oklch(78% 0.025 255)",
+          "oklch(86% 0.02 255)",
+          "oklch(91% 0.015 255)",
+          "oklch(95% 0.01 255)",
+          "oklch(99% 0.005 255)"
+        ]
+      },
+      "neon-artico": {
+        "role": "primary",
+        "displayName": "Neón Ártico",
+        "canonical": "oklch(82% 0.07 235)",
+        "tonalRamp": [
+          "oklch(35% 0.07 235)",
+          "oklch(48% 0.08 235)",
+          "oklch(60% 0.09 235)",
+          "oklch(70% 0.08 235)",
+          "oklch(82% 0.07 235)",
+          "oklch(88% 0.05 235)",
+          "oklch(94% 0.03 235)",
+          "oklch(98% 0.01 235)"
+        ]
+      },
+      "oro-vespertino": {
+        "role": "secondary",
+        "displayName": "Oro Vespertino",
+        "canonical": "oklch(80% 0.12 85)",
+        "tonalRamp": [
+          "oklch(35% 0.10 85)",
+          "oklch(48% 0.12 85)",
+          "oklch(60% 0.14 85)",
+          "oklch(70% 0.13 85)",
+          "oklch(80% 0.12 85)",
+          "oklch(88% 0.08 85)",
+          "oklch(94% 0.05 85)",
+          "oklch(98% 0.02 85)"
+        ]
+      },
+      "luz-de-luna": {
+        "role": "tertiary",
+        "displayName": "Luz de Luna",
+        "canonical": "oklch(82% 0.05 285)",
+        "tonalRamp": [
+          "oklch(35% 0.05 285)",
+          "oklch(48% 0.06 285)",
+          "oklch(60% 0.06 285)",
+          "oklch(70% 0.055 285)",
+          "oklch(82% 0.05 285)",
+          "oklch(88% 0.035 285)",
+          "oklch(94% 0.02 285)",
+          "oklch(98% 0.01 285)"
+        ]
+      },
+      "error": {
+        "role": "primary",
+        "displayName": "Error",
+        "canonical": "oklch(80% 0.09 30)",
+        "tonalRamp": [
+          "oklch(35% 0.08 30)",
+          "oklch(48% 0.09 30)",
+          "oklch(60% 0.10 30)",
+          "oklch(70% 0.10 30)",
+          "oklch(80% 0.09 30)",
+          "oklch(88% 0.06 30)",
+          "oklch(94% 0.04 30)",
+          "oklch(98% 0.02 30)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero headlines and main section titles only. Never in cards, buttons, or labels."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings. Mobile variant at 24px/32px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles, modal headers, panel titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text, card content, table cells. Max 75ch in prose."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Button text, form labels, active tabs."
+      },
+      "labelSmall": {
+        "displayName": "Label Small",
+        "purpose": "Badges, status pills, metadata, timestamps. Uppercase with extra tracking."
+      }
+    },
+    "shadows": [
+      {
+        "name": "glow-primary-sm",
+        "value": "0 0 12px rgba(56, 189, 248, 0.1)",
+        "purpose": "Small primary glow for pagination active and small active indicators."
+      },
+      {
+        "name": "glow-primary",
+        "value": "0 0 20px rgba(56, 189, 248, 0.15)",
+        "purpose": "Primary glow for hover states on primary buttons and active badges."
+      },
+      {
+        "name": "glow-gold-sm",
+        "value": "0 0 12px rgba(255, 198, 64, 0.2)",
+        "purpose": "Small gold glow for reward badges."
+      },
+      {
+        "name": "glow-gold",
+        "value": "0 0 20px rgba(255, 198, 64, 0.25)",
+        "purpose": "Gold glow for reward claims, mission complete states, CTA buttons."
+      },
+      {
+        "name": "modal-glow",
+        "value": "0 0 40px rgba(56, 189, 248, 0.1)",
+        "purpose": "Ambient primary glow behind modal panels."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Premium exit easing for modals and panel reveals."
+      },
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Standard easing for state transitions (hover, focus, scale)."
+      },
+      {
+        "name": "duration-fast",
+        "value": "150ms",
+        "purpose": "Hover and active state transitions."
+      },
+      {
+        "name": "duration-standard",
+        "value": "200ms",
+        "purpose": "Modal enter, panel expand, standard UI transitions."
+      },
+      {
+        "name": "duration-slow",
+        "value": "300ms",
+        "purpose": "Sidebar collapse/expand, complex layout transitions."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px",
+        "purpose": "Mobile breakpoint threshold."
+      },
+      {
+        "name": "md",
+        "value": "768px",
+        "purpose": "Tablet / mobile-hamburger to sidebar switch."
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "purpose": "Desktop layout (sidebar + full content)."
+      },
+      {
+        "name": "xl",
+        "value": "1280px",
+        "purpose": "Max content width for admin panels."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action button. One per view. Light blue on dark, high contrast.",
+      "html": "<button class=\"ds-btn-primary\">Acción</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 24px; background: #8ed5ff; color: #00354a; border: none; border-radius: 8px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; letter-spacing: 0.01em; cursor: pointer; transition: background 0.2s ease, transform 0.15s ease; } .ds-btn-primary:hover { background: #7bd0ff; box-shadow: 0 0 20px rgba(56,189,248,0.15); } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; } .ds-btn-primary:focus-visible { outline: 2px solid #8ed5ff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary / CTA Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "High-value CTA for rewards, claims, and mission completions. Gold accent, rare.",
+      "html": "<button class=\"ds-btn-secondary\">Reclamar</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 24px; background: #ffc640; color: #402d00; border: none; border-radius: 8px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; letter-spacing: 0.01em; cursor: pointer; transition: background 0.2s ease, transform 0.15s ease; } .ds-btn-secondary:hover { background: #f9bd22; box-shadow: 0 0 20px rgba(255,198,64,0.25); } .ds-btn-secondary:active { transform: scale(0.98); } .ds-btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; } .ds-btn-secondary:focus-visible { outline: 2px solid #ffc640; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action with bordered outline. Transparent background.",
+      "html": "<button class=\"ds-btn-ghost\">Cancelar</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 24px; background: transparent; color: #8ed5ff; border: 1px solid rgba(56,189,248,0.4); border-radius: 8px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px; font-weight: 600; line-height: 20px; letter-spacing: 0.01em; cursor: pointer; transition: background 0.2s ease, transform 0.15s ease; } .ds-btn-ghost:hover { background: rgba(56,189,248,0.1); } .ds-btn-ghost:active { transform: scale(0.98); } .ds-btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; } .ds-btn-ghost:focus-visible { outline: 2px solid #8ed5ff; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Standard form input with recessed dark background and primary glow on focus.",
+      "html": "<div class=\"ds-input-wrapper\"><input type=\"text\" class=\"ds-input\" placeholder=\"Ingresar texto\" /></div>",
+      "css": ".ds-input-wrapper { position: relative; width: 100%; } .ds-input { width: 100%; padding: 14px 16px; background: #060e20; color: #dae2fd; border: 1px solid rgba(62,72,79,0.3); border-radius: 8px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; transition: all 0.3s ease; box-sizing: border-box; } .ds-input::placeholder { color: #87929a; } .ds-input:focus { outline: none; border-color: #8ed5ff; box-shadow: 0 0 12px rgba(56,189,248,0.1); } .ds-input:hover { border-color: rgba(62,72,79,0.6); } .ds-input:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-active",
+      "description": "Pill-shaped status indicator for mission states. Uppercase small label.",
+      "html": "<span class=\"ds-badge ds-badge-active\">Activa</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 9999px; font-family: 'Be Vietnam Pro', sans-serif; font-size: 12px; font-weight: 500; line-height: 16px; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; } .ds-badge-active { background: rgba(56,189,248,0.15); color: #8ed5ff; } .ds-badge-inactive { background: rgba(62,72,79,0.3); color: #bdc8d1; } .ds-badge-completed { background: rgba(34,197,94,0.15); color: #4ade80; } .ds-badge-cancelled { background: rgba(147,0,10,0.3); color: #ffb4ab; }"
+    },
+    {
+      "name": "Mission Card",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Standard mission card with tonal background and rounded corners.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">Daily Login Streak</h3></div><div class=\"ds-card-body\"><p class=\"ds-card-text\">Inicia sesión 3 días consecutivos</p></div><div class=\"ds-card-footer\"><span class=\"ds-reward\">+500 fichas</span></div></div>",
+      "css": ".ds-card { background: #171f33; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; transition: box-shadow 0.2s ease; } .ds-card:hover { box-shadow: 0 0 20px rgba(56,189,248,0.15); } .ds-card-header { margin-bottom: 12px; } .ds-card-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 600; line-height: 28px; color: #dae2fd; margin: 0; } .ds-card-body { margin-bottom: 16px; } .ds-card-text { font-family: 'Be Vietnam Pro', sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; color: #bdc8d1; margin: 0; } .ds-card-footer { display: flex; align-items: center; gap: 8px; } .ds-reward { font-family: 'Be Vietnam Pro', sans-serif; font-size: 14px; font-weight: 600; color: #ffc640; }"
+    },
+    {
+      "name": "Modal Panel",
+      "kind": "card",
+      "refersTo": "modal-panel",
+      "description": "Floating modal dialog with glassmorphism effect.",
+      "html": "<div class=\"ds-modal-bg\"><div class=\"ds-modal\"><div class=\"ds-modal-header\"><h2 class=\"ds-modal-title\">Título del Modal</h2></div><div class=\"ds-modal-body\"><p class=\"ds-modal-text\">Contenido del modal con descripción e información relevante.</p></div></div></div>",
+      "css": ".ds-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; padding: 16px; } .ds-modal { width: 100%; max-width: 512px; background: rgba(23,31,51,0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; box-shadow: 0 0 40px rgba(56,189,248,0.1); } .ds-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 24px 24px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); } .ds-modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 600; line-height: 28px; color: #dae2fd; margin: 0; } .ds-modal-body { padding: 16px 24px 24px; max-height: 70vh; overflow-y: auto; } .ds-modal-text { font-family: 'Be Vietnam Pro', sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; color: #bdc8d1; margin: 0; }"
+    },
+    {
+      "name": "Pagination",
+      "kind": "custom",
+      "refersTo": "pagination-active",
+      "description": "Page navigation with numbered buttons and active glow.",
+      "html": "<nav class=\"ds-pagination\"><button class=\"ds-page-btn ds-page-disabled\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"15 18 9 12 15 6\"></polyline></svg></button><button class=\"ds-page-btn\">1</button><button class=\"ds-page-btn ds-page-active\">2</button><button class=\"ds-page-btn\">3</button><button class=\"ds-page-btn\">...</button><button class=\"ds-page-btn\">5</button><button class=\"ds-page-btn\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"9 18 15 12 9 6\"></polyline></svg></button></nav>",
+      "css": ".ds-pagination { display: flex; align-items: center; gap: 4px; } .ds-page-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; border: none; background: transparent; color: #dae2fd; font-family: 'Be Vietnam Pro', sans-serif; font-size: 16px; font-weight: 400; cursor: pointer; transition: all 0.2s ease; } .ds-page-btn:hover { background: rgba(255,255,255,0.05); } .ds-page-btn:active { transform: scale(0.95); } .ds-page-active { background: rgba(56,189,248,0.15); color: #8ed5ff; box-shadow: 0 0 12px rgba(56,189,248,0.1); } .ds-page-disabled { color: rgba(135,146,154,0.4); cursor: not-allowed; } .ds-page-disabled:hover { background: transparent; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Bóveda del Jugador",
+    "overview": "Midnight Harbor es un sistema de diseño oscuro y sofisticado que evoca la atmósfera de un lounge nocturno de alto nivel. Cada pantalla se siente como entrar a una bóveda exclusiva: el fondo es profundo y contenido (Abismo Profundo), mientras las recompensas y el progreso brillan con luz propia (Neón Ártico, Oro Vespertino). La interfaz nunca compite con el contenido — lo contiene, lo realza y lo celebra.\n\nEl sistema rechaza explícitamente la estética de casinos online baratos: sin fondos degradados chillones, sin parpadeos excesivos, sin tipografía genérica que inspire desconfianza. La energía está en los acentos, no en el fondo. La accesibilidad es parte del lujo: tipografía generosa, contraste alto, espacios amplios.",
+    "keyCharacteristics": [
+      "Oscuro pero no frío: el navy profundo es el ancla visual, pero los acentos de neón y oro dan calidez y energía",
+      "Glassmorphism como herramienta de jerarquía: el blur y la translucencia diferencian niveles sin recurrir a sombras pesadas",
+      "Premio visual en los acentos: el oro es reservado para recompensas; el azul neón para progreso y estados activos",
+      "Geometría amigable: bordes redondeados generosos (8px–24px) para mantener la accesibilidad visual",
+      "Consistente sobre sorpresivo: el usuario navega entre módulos que se sienten del mismo lugar"
+    ],
+    "rules": [
+      {
+        "name": "La Regla de Rareza",
+        "body": "El Oro Vespertino aparece en menos del 10% de cualquier pantalla. Su presencia indica una acción o estado de alto valor. Si el oro está en más de un lugar, pierde su peso semántico.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de la Jerarquía Silenciosa",
+        "body": "Nunca uses Display para un título de card ni Headline para un botón. Cada nivel tipográfico tiene su contexto; romper la escala erosiona la jerarquía visual.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla de la Sombra Cero",
+        "body": "No uses sombras reales (box-shadow con negro) para establecer elevación. Usa tonos de superficie. Los únicos box-shadow permitidos son los glows de acento (primary y oro).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Usá glows (primary u oro) para indicar elementos activos y recompensas en lugar de sombras.",
+      "Usá fondo oscuro (Abismo Profundo) como lienzo base. Los elementos emergen por luminosidad, no por profundidad.",
+      "Mantené un máximo de un botón Oro Vespertino por pantalla. Su rareza es su valor semántico.",
+      "Priorizá tipografía Be Vietnam Pro para cuerpo en todos los textos funcionales (labels, tablas, descripciones).",
+      "Usá Plus Jakarta Sans bold (700–800) solo para titulares y displays. Nunca en botones o labels.",
+      "Asegurate contraste 4.5:1 en body text.",
+      "Usá el modal como último recurso — explorá alternativas inline o progressive disclosure primero."
+    ],
+    "donts": [
+      "No diseñes con estética de casino online barato: fondos degradados chillones, botones que parecen de 2005, tipografía sin personalidad que inspira desconfianza.",
+      "No uses sombras negras para elevación. La jerarquía se construye con tonos de superficie, no con box-shadow.",
+      "No pongas Oro Vespertino en más de un lugar por pantalla a menos que sea estrictamente necesario.",
+      "No mezcles familias tipográficas similares. Plus Jakarta Sans y Be Vietnam Pro fueron elegidas por su contraste controlado.",
+      "No uses Display o Headline para labels de formulario, botones o metadatos.",
+      "No anides cards. Una card dentro de otra rompe el sistema de tonal layering.",
+      "No uses modales por defecto. Son la respuesta lazy. Agotá alternativas inline/progressive disclosure primero.",
+      "No uses estilos de 'app financiera' fría y transaccional. Midnight Harbor es un lounge, no un panel de inversiones."
+    ]
+  }
+}

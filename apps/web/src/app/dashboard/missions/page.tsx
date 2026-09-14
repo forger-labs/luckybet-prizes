@@ -1,7 +1,9 @@
 "use client";
 
-import type { Mission } from "@shared/types/mission";
 import { useEffect, useState } from "react";
+
+import type { Mission } from "@shared/types/mission";
+
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MissionSection } from "@/components/mission/organisms/MissionSection";
 

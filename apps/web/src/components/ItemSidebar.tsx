@@ -1,5 +1,6 @@
-import type { SidebarLinkType } from "@shared/types";
 import Link from "next/link";
+
+import type { SidebarLinkType } from "@shared/types";
 
 const isActive = (path: string, actualPath: string) => {
   return actualPath === path;

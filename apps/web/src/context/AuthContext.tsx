@@ -1,7 +1,5 @@
 "use client";
-import { AUTH_TOKEN, ROUTES } from "@shared/constants";
-import type { AuthContextType, UserType } from "@shared/types/authContext";
-import { jwtDecode } from "@shared/utils/decodeJWT";
+
 import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
@@ -11,6 +9,10 @@ import {
   useMemo,
   useState,
 } from "react";
+
+import { AUTH_TOKEN, ROUTES } from "@shared/constants";
+import type { AuthContextType, UserType } from "@shared/types/authContext";
+import { jwtDecode } from "@shared/utils/decodeJWT";
 
 export const AuthContext = createContext<AuthContextType>({
   authToken: null,

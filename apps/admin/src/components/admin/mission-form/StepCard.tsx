@@ -1,6 +1,7 @@
 "use client";
 
 import type { VerificationType } from "@shared/types";
+
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import type { StepCardProps } from "@/types/missions/StepBuilderTypes";

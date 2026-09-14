@@ -1,7 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import { sileo } from "sileo";
+
+import { ROUTES } from "@/constant";
+import { useAuthAdmin } from "@/hooks/useAuthAdmin";
 import LoginCard from "./LoginCard";
 import LoginForm from "./LoginForm";
 
@@ -10,23 +14,22 @@ import LoginForm from "./LoginForm";
  *
  * Compone LoginCard + LoginForm con los efectos ambientales
  * (background glows, partículas flotantes) y el footer legal.
- *
- * Sigue diseño atómico flexible: no fuerza separación donde no tiene sentido.
  */
 export default function AdminLogin() {
-  const navigation = useRouter();
+  const { login } = useAuthAdmin();
+  const router = useRouter();
   const particleRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const handleLogin = useCallback(
-    async (data: { email: string; password: string; remember: boolean }) => {
-      // Simulated auth — will be replaced with real AuthAdminContext
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      // eslint-disable-next-line no-console
-      console.log("Admin login:", data.email, "remember:", data.remember);
-      navigation.push("/panel");
-    },
-    [navigation],
-  );
+  const handleLogin = async (username: string, password: string) => {
+    await login(username, password);
+
+    sileo.success({
+      title: `Bienvenido, ${username}`,
+      duration: 4000,
+    });
+
+    router.push(ROUTES.panel.index);
+  };
 
   // Floating particles — pure atmosphere, no state
   useEffect(() => {

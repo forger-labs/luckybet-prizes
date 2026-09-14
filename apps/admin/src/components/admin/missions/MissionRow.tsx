@@ -1,6 +1,7 @@
 "use client";
 
 import type { AdminMission } from "@shared/types";
+
 import { Badge, statusLabels } from "@/components/ui/Badge";
 import { RowActions } from "./RowActions";
 

@@ -1,8 +1,8 @@
-import type { AdminMission } from "@shared/types";
+import type { FormikProps } from "formik";
+
+import type { PartialAdminMission } from "./MissionFormModalTypes";
 
 export interface MissionFieldsProps {
-  mission: Partial<AdminMission>;
-  onChange: (field: string, value: unknown) => void;
-  errors?: Record<string, string>;
+  formik: FormikProps<PartialAdminMission>;
   readOnly?: boolean;
 }
