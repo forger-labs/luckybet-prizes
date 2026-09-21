@@ -1,33 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 import { ADMIN_LINKS } from "@shared/constants";
 
+import { useAuthAdmin } from "@/hooks/useAuthAdmin";
 import type { MobileDrawerProps } from "@/types/navbar/AdminSidebar";
 
-/**
- * MobileDrawer — overlay drawer for the admin panel on mobile viewports.
- *
- * Follows the web MobileSidebar.tsx pattern with glassmorphism styling
- * (glass-card-strong), slide-in animation from the left, backdrop click
- * to close, and route-change auto-close. Displays the same nav items
- * as AdminSidebar adapted for the mobile overlay context.
- */
 export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
   const pathname = usePathname();
-  const router = useRouter();
+  const { logout, user } = useAuthAdmin();
   const prevPathname = useRef(pathname);
-  const drawerRef = useRef<HTMLDivElement>(null);
 
-  const logout = () => {
-    localStorage.removeItem("adminToken");
-    router.push("/");
-  };
-
-  // Close drawer on route change
   useEffect(() => {
     if (prevPathname.current !== pathname) {
       prevPathname.current = pathname;
@@ -35,7 +21,6 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
     }
   }, [pathname, onClose]);
 
-  // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && open) {
@@ -47,103 +32,118 @@ export const MobileDrawer = ({ open, onClose }: MobileDrawerProps) => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
 
-  const isActive = useCallback((path: string) => pathname === path, [pathname]);
+  const isActive = (path: string) => pathname === path;
 
   return (
     <>
       {/* Backdrop */}
       <div
-        className={
-          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 md:hidden " +
-          (open ? "opacity-100" : "opacity-0 pointer-events-none")
-        }
+        className={`
+          fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden
+          ${open ? "opacity-100" : "opacity-0 pointer-events-none"}
+        `}
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Drawer */}
       <aside
-        ref={drawerRef}
-        className={
-          "fixed top-0 left-0 z-45 h-dvh w-72 bg-surface-container pt-20 pb-6 grid grid-cols-1 grid-rows-[auto_1fr_auto_auto] transition-transform duration-300 md:hidden " +
-          (open ? "translate-x-0" : "-translate-x-full")
-        }
+        className={`
+          fixed top-0 left-0 z-50 h-dvh w-80 max-w-[85vw] bg-surface-container-low/95 backdrop-blur-2xl
+          border-r border-outline-variant/30 flex flex-col justify-between p-6 transition-transform duration-300 ease-out md:hidden shadow-2xl
+          ${open ? "translate-x-0" : "-translate-x-full"}
+        `}
       >
-        {/* ── Logo / Close Area ── */}
-        <div className="flex items-center justify-between pr-4 pl-6 self-start">
-          <div className="flex items-center gap-3">
-            <div className="block p-2 pb-0 bg-primary/20 rounded-lg shrink-0">
-              <span className="material-symbols-outlined text-primary text-2xl">
-                admin_panel_settings
+        {/* Top: Brand & Close */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary/25 to-primary-container/10 border border-primary/30 text-primary shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+                <span className="material-symbols-outlined text-2xl">
+                  admin_panel_settings
+                </span>
+              </div>
+              <div>
+                <span className="font-(--font-plus-jakarta-sans) text-title-md font-bold text-on-surface block leading-tight">
+                  LuckyBet
+                </span>
+                <span className="font-label-sm text-[10px] text-primary/80 uppercase tracking-widest block">
+                  Panel de Administración
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-lg bg-surface-container border border-outline-variant/30 flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors cursor-pointer"
+              aria-label="Cerrar menú"
+              type="button"
+            >
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+          </div>
+
+          {/* Nav List */}
+          <nav>
+            <ul className="space-y-2">
+              {ADMIN_LINKS.map((link) => {
+                const active = isActive(link.path);
+                return (
+                  <li key={link.path}>
+                    <Link
+                      href={link.path}
+                      onClick={onClose}
+                      className={`
+                        flex items-center gap-3 px-4 py-3 rounded-xl font-label-md text-sm
+                        transition-all duration-200
+                        ${
+                          active
+                            ? "bg-primary/15 text-primary border border-primary/30 font-semibold shadow-[0_0_12px_rgba(56,189,248,0.1)]"
+                            : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60"
+                        }
+                      `}
+                    >
+                      <span
+                        className={`material-symbols-outlined text-xl ${
+                          active ? "text-primary" : "text-on-surface-variant"
+                        }`}
+                      >
+                        {link.icon}
+                      </span>
+                      <span>{link.text}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </div>
+
+        {/* Bottom: User & Logout */}
+        <div className="pt-4 border-t border-outline-variant/20 space-y-3">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-surface-container-lowest/80 border border-outline-variant/20">
+            <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+              <span className="material-symbols-outlined text-lg">
+                account_circle
               </span>
             </div>
-            <div>
-              <p className="font-(--font-plus-jakarta-sans) text-title-md font-semibold text-on-surface whitespace-nowrap leading-tight">
-                LuckyBet
+            <div className="min-w-0 flex-1">
+              <p className="font-label-md text-xs font-semibold text-on-surface truncate">
+                {user?.username || "Administrador"}
+              </p>
+              <p className="font-label-sm text-[10px] text-secondary font-medium tracking-wide uppercase">
+                {user?.role || "ADMIN"}
               </p>
             </div>
           </div>
 
           <button
-            onClick={onClose}
-            className="p-2 pb-0 rounded-md hover:bg-surface-container-high transition-colors"
-            aria-label="Cerrar menú"
             type="button"
-          >
-            <span className="material-symbols-outlined text-on-surface">
-              close
-            </span>
-          </button>
-        </div>
-
-        {/* ── Navigation ── */}
-        <nav className="mt-6 self-start">
-          <ul className="flex flex-col">
-            {ADMIN_LINKS.map((link) => (
-              <li
-                key={link.path}
-                className={
-                  "relative font-medium transition-colors " +
-                  (isActive(link.path)
-                    ? "bg-primary/10 text-primary border-r-4 border-primary"
-                    : "text-on-surface-variant hover:bg-surface-container-high active:bg-surface-variant")
-                }
-              >
-                <Link className="flex items-center gap-3 p-3" href={link.path}>
-                  <span
-                    className={
-                      "material-symbols-outlined " +
-                      (isActive(link.path)
-                        ? "text-primary"
-                        : "text-on-surface-variant")
-                    }
-                  >
-                    {link.icon}
-                  </span>
-                  <span className="pt-0.5 whitespace-nowrap">{link.text}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        {/* ── Settings + Logout ── */}
-        <div className="border-t border-outline-variant/30 pt-2">
-          <Link
-            href="#"
-            className="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-container-high active:bg-surface-variant transition-colors "
-          >
-            <span className="material-symbols-outlined">settings</span>
-            <span>Configuración</span>
-          </Link>
-
-          <button
-            type="button"
-            className="w-full flex items-center gap-3 p-3 hover:cursor-pointer text-on-surface-variant hover:bg-surface-container-high active:bg-surface-variant transition-colors "
             onClick={logout}
+            className="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl font-label-md text-sm text-error hover:bg-error-container/20 border border-error/20 transition-all cursor-pointer"
           >
-            <span className="material-symbols-outlined">logout</span>
-            <span>Cierra sesión</span>
+            <span className="material-symbols-outlined text-xl">logout</span>
+            <span>Cerrar sesión</span>
           </button>
         </div>
       </aside>

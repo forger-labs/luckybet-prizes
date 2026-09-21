@@ -18,13 +18,18 @@ import type { AdminUser } from "@/types/auth";
 
 interface AuthAdminContextType {
   user: AdminUser | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (
+    username: string,
+    password: string,
+  ) => Promise<{ status: boolean; message: string }>;
   logout: () => Promise<void>;
 }
 
 export const AuthAdminContext = createContext<AuthAdminContextType>({
   user: null,
-  login: async () => {},
+  login: async () => {
+    return { status: false, message: "Api no integrada" };
+  },
   logout: async () => {},
 });
 
@@ -45,6 +50,11 @@ export const AuthAdminProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(payload);
     }
+
+    return {
+      status: res.status,
+      message: Array.isArray(res.message) ? res.message[0] : res.message,
+    };
   }, []);
 
   const getMe = useCallback(async () => {

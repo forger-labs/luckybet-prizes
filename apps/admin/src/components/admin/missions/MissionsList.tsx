@@ -251,8 +251,8 @@ function MissionsList() {
                 Configuración bloqueada
               </p>
               <p>
-                Las misiones activas tienen su contenido bloqueado. Cancelá la
-                misión primero si necesitás editarla.
+                Las misiones activas tienen su contenido bloqueado. Cancele la
+                misión primero si necesita editarla.
               </p>
             </div>
           </div>
