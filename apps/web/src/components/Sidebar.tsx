@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { PUBLIC_LINKS } from "@shared/constants";
 import { Stars } from "@shared/icons/Stars";
 
+import { useAuthContext } from "@/hooks/useAuth";
 import { ChevronLeftIcon, SparklesIcon } from "@/icons";
 import { ItemSidebar } from "./ItemSidebar";
 import { Logout } from "./Logout";
@@ -18,6 +19,8 @@ export const Sidebar = ({
   onToggle: () => void;
 }) => {
   const pathname = usePathname();
+  const { user, logout } = useAuthContext();
+  const displayName = user?.name || user?.login || "Jugador";
 
   return (
     <aside
@@ -66,8 +69,8 @@ export const Sidebar = ({
                 className="overflow-hidden whitespace-nowrap"
               >
                 <div className="flex items-center gap-1.5">
-                  <p className="font-title-md text-sm font-bold text-on-surface tracking-tight">
-                    Ala Del Billete
+                  <p className="font-title-md text-sm font-bold text-on-surface tracking-tight truncate max-w-[130px]">
+                    {displayName}
                   </p>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] text-secondary font-medium mt-0.5">
@@ -95,7 +98,7 @@ export const Sidebar = ({
       </nav>
 
       {/* Bottom Logout Component */}
-      <Logout logout={() => {}} open={open} />
+      <Logout logout={logout} open={open} />
     </aside>
   );
 };

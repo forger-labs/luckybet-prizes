@@ -29,3 +29,4 @@ export type {
   VerificationType,
 } from "./admin";
 export { DEFAULT_SUSPENSION_REASONS } from "./admin";
+export type { Mission, MissionSectionProps } from "./mission";

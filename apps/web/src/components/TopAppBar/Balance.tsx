@@ -4,9 +4,18 @@ import { motion } from "framer-motion";
 
 import { CashIcon } from "@shared/icons/CashIcon";
 
-import { PlusIcon } from "@/icons";
+import { useAuthContext } from "@/hooks/useAuth";
 
 export const Balance = ({ className = "" }: { className?: string }) => {
+  const { user } = useAuthContext();
+
+  const formattedCash =
+    typeof user?.cash === "number"
+      ? user.cash.toLocaleString("es-AR")
+      : user?.cash || "0";
+
+  const currency = user?.currency || "ARS";
+
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
       <motion.div
@@ -22,23 +31,14 @@ export const Balance = ({ className = "" }: { className?: string }) => {
           </span>
           <div className="flex items-center gap-1">
             <span className="text-xs sm:text-sm font-bold text-secondary tracking-tight">
-              1.000
+              {formattedCash}
             </span>
-            <span className="text-[10px] font-semibold text-primary">USD</span>
+            <span className="text-[10px] font-semibold text-primary">
+              {currency}
+            </span>
           </div>
         </div>
       </motion.div>
-
-      {/* Quick Deposit Button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        type="button"
-        className="hidden sm:inline-flex items-center justify-center p-2 rounded-xl bg-secondary/15 hover:bg-secondary/25 border border-secondary/30 text-secondary text-xs font-bold transition-colors cursor-pointer"
-        aria-label="Depositar fondos"
-      >
-        <PlusIcon className="w-3.5 h-3.5 text-secondary" />
-      </motion.button>
     </div>
   );
 };

@@ -7,10 +7,14 @@ import Link from "next/link";
 import { ROUTES } from "@shared/constants";
 import { OpenMenu } from "@shared/icons/OpenMenu";
 
+import { useAuthContext } from "@/hooks/useAuth";
 import { BellIcon, SparklesIcon } from "@/icons";
 import { Balance } from "./Balance";
 
 export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {
+  const { user } = useAuthContext();
+  const displayName = user?.name || user?.login || "Jugador";
+
   return (
     <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-white/10 flex items-center justify-between px-4 sm:px-6 md:px-container-padding-desktop h-16 transition-colors">
       {/* Brand / Logo */}
@@ -67,8 +71,8 @@ export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {
             />
           </div>
           <div className="hidden xl:flex flex-col text-left leading-tight">
-            <span className="text-xs font-bold text-on-surface">
-              Ala Del Billete
+            <span className="text-xs font-bold text-on-surface truncate max-w-[120px]">
+              {displayName}
             </span>
             <span className="text-[10px] text-secondary font-medium">
               VIP Elite I

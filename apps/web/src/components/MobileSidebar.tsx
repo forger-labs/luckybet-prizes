@@ -9,6 +9,7 @@ import { PUBLIC_LINKS } from "@shared/constants";
 import { CloseMenu } from "@shared/icons/CloseMenu";
 import { Stars } from "@shared/icons/Stars";
 
+import { useAuthContext } from "@/hooks/useAuth";
 import { SparklesIcon } from "@/icons";
 import { ItemSidebar } from "./ItemSidebar";
 import { Logout } from "./Logout";
@@ -22,6 +23,8 @@ export const MobileSidebar = ({
 }) => {
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
+  const { user, logout } = useAuthContext();
+  const displayName = user?.name || user?.login || "Jugador";
 
   // Close drawer on route change
   useEffect(() => {
@@ -62,8 +65,8 @@ export const MobileSidebar = ({
                     <Stars height={24} width={24} />
                   </div>
                   <div>
-                    <p className="font-title-md text-sm font-bold text-on-surface">
-                      Ala Del Billete
+                    <p className="font-title-md text-sm font-bold text-on-surface truncate max-w-[130px]">
+                      {displayName}
                     </p>
                     <div className="flex items-center gap-1 text-[11px] text-secondary font-medium">
                       <SparklesIcon className="w-3 h-3 text-secondary" />
@@ -110,8 +113,8 @@ export const MobileSidebar = ({
                   />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-bold text-on-surface">
-                    Agustín
+                  <span className="text-xs font-bold text-on-surface truncate max-w-[140px]">
+                    {displayName}
                   </span>
                   <span className="text-[11px] text-on-surface-variant">
                     Nivel 14 • 8.450 XP
@@ -119,7 +122,7 @@ export const MobileSidebar = ({
                 </div>
               </div>
 
-              <Logout logout={() => {}} open={true} />
+              <Logout logout={logout} open={true} />
             </div>
           </motion.aside>
         </div>
