@@ -20,7 +20,22 @@ import type {
   AuthContextType,
   LuckyBetLoginData,
   LuckyBetPlayerUser,
+  LuckyBetTerminalInfoContent,
 } from "@/types/luckybet";
+
+function mapProfileToUser(
+  content: LuckyBetTerminalInfoContent,
+): LuckyBetPlayerUser {
+  return {
+    id: content.id,
+    login: content.login,
+    cash: content.cash ?? 0,
+    currency: content.currency ?? "ARS",
+    language: content.language,
+    name: content.name,
+    group: content.group,
+  };
+}
 
 export const AuthContext = createContext<AuthContextType>({
   token: null,
@@ -40,7 +55,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   const router = useRouter();
   const pathname = usePathname();
-  const isMountedRef = useRef(false);
+  const isValidatingRef = useRef(false);
 
   const clearSession = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -54,178 +69,131 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     async (
       tokenToVerify: string,
       isFirst = false,
-      showToastOnError = false,
+      showToast = false,
     ): Promise<boolean> => {
+      if (isValidatingRef.current) return true;
+      isValidatingRef.current = true;
       setIsValidating(true);
       try {
-        const response = await luckybetClient.terminalInfo(
-          tokenToVerify,
-          isFirst,
-        );
-
-        if (response.status === "success" && response.content) {
-          const profile = response.content;
-          setUser({
-            id: profile.id,
-            login: profile.login,
-            cash: profile.cash ?? 0,
-            currency: profile.currency ?? "ARS",
-            language: profile.language,
-            name: profile.name,
-            group: profile.group,
-          });
+        const res = await luckybetClient.terminalInfo(tokenToVerify, isFirst);
+        if (res.status === "success" && res.content) {
+          setUser(mapProfileToUser(res.content));
           return true;
         }
+        const isAuthError =
+          res.status === "fail" &&
+          (res.errorCode === "authorize_error" ||
+            res.errorCode === "invalid_token" ||
+            res.errorCode === "session_expired" ||
+            res.errorCode === "user_not_found" ||
+            res.error?.toLowerCase().includes("autorizaci"));
 
-        clearSession();
-        if (showToastOnError) {
-          casinoToast.error({
-            title: "Sesión expirada",
-            description:
-              "Su sesión ha expirado. Por favor, inicie sesión nuevamente.",
-          });
+        if (isAuthError) {
+          clearSession();
+          if (showToast) {
+            casinoToast.error({
+              title: "Sesión expirada",
+              description:
+                "Su sesión ha expirado. Por favor, inicie sesión nuevamente.",
+            });
+          }
+          return false;
         }
-        return false;
+        return true;
       } catch {
-        return false;
+        return true;
       } finally {
+        isValidatingRef.current = false;
         setIsValidating(false);
       }
     },
     [clearSession],
   );
 
-  // Initial session restoration
   useEffect(() => {
-    isMountedRef.current = true;
     const restoreSession = async () => {
       if (typeof window === "undefined") {
         setIsLoading(false);
         return;
       }
-
       const storedToken = localStorage.getItem(LOCAL_STORAGE_KEYS.token);
       if (storedToken) {
         setToken(storedToken);
         const isValid = await validateToken(storedToken, true, false);
-        if (!isValid) {
-          clearSession();
-        }
+        if (!isValid) clearSession();
       }
       setIsLoading(false);
     };
-
     restoreSession();
-
-    return () => {
-      isMountedRef.current = false;
-    };
   }, [validateToken, clearSession]);
 
-  // Constant token verification interval and visibility check
   useEffect(() => {
     if (!token || isLoading) return;
-
     const intervalId = setInterval(async () => {
       const isValid = await validateToken(token, false, true);
-      if (!isValid) {
-        router.push(ROUTES.LOGIN);
-      }
+      if (!isValid) router.push(ROUTES.LOGIN);
     }, TOKEN_CHECK_INTERVAL_MS);
 
-    const handleVisibilityChange = async () => {
+    const handleVisibility = async () => {
       if (document.visibilityState === "visible" && token) {
         const isValid = await validateToken(token, false, true);
-        if (!isValid) {
-          router.push(ROUTES.LOGIN);
-        }
+        if (!isValid) router.push(ROUTES.LOGIN);
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [token, isLoading, validateToken, router]);
 
-  // Route guard
   useEffect(() => {
     if (isLoading) return;
-
     const isAuth = Boolean(token && user);
     const isLoginPage = pathname === ROUTES.LOGIN;
-
-    if (isAuth && isLoginPage) {
-      router.push(ROUTES.DASHBOARD);
-      return;
-    }
-
-    if (!isAuth && !isLoginPage && pathname.startsWith("/dashboard")) {
+    if (isAuth && isLoginPage) router.push(ROUTES.DASHBOARD);
+    else if (!isAuth && !isLoginPage && pathname.startsWith("/dashboard"))
       router.push(ROUTES.LOGIN);
-    }
   }, [isLoading, token, user, pathname, router]);
 
-  const login = useCallback(
-    async (
-      credentials: LuckyBetLoginData,
-    ): Promise<{ success: boolean; error?: string }> => {
-      setIsLoading(true);
-      try {
-        const response = await luckybetClient.login(credentials);
-
-        if (response.status === "success" && response.token) {
-          const newToken = response.token;
-          if (typeof window !== "undefined") {
-            localStorage.setItem(LOCAL_STORAGE_KEYS.token, newToken);
-          }
-          setToken(newToken);
-
-          // Retrieve player terminal info immediately
-          const profileResponse = await luckybetClient.terminalInfo(
-            newToken,
-            true,
-          );
-          if (profileResponse.status === "success" && profileResponse.content) {
-            const profile = profileResponse.content;
-            setUser({
-              id: profile.id,
-              login: profile.login,
-              cash: profile.cash ?? 0,
-              currency: profile.currency ?? "ARS",
-              language: profile.language,
-              name: profile.name,
-              group: profile.group,
-            });
-          }
-
-          setIsLoading(false);
-          return { success: true };
+  const login = useCallback(async (credentials: LuckyBetLoginData) => {
+    setIsLoading(true);
+    try {
+      const res = await luckybetClient.login(credentials);
+      if (res.status === "success" && res.token) {
+        const newToken = res.token;
+        if (typeof window !== "undefined") {
+          localStorage.setItem(LOCAL_STORAGE_KEYS.token, newToken);
         }
-
+        setToken(newToken);
+        const profile = await luckybetClient.terminalInfo(newToken, true);
+        if (profile.status === "success" && profile.content) {
+          setUser(mapProfileToUser(profile.content));
+        }
         setIsLoading(false);
-        return {
-          success: false,
-          error: response.error || "Usuario o contraseña incorrectos",
-        };
-      } catch {
-        setIsLoading(false);
-        return {
-          success: false,
-          error: "Error inesperado al intentar iniciar sesión",
-        };
+        return { success: true };
       }
-    },
-    [],
-  );
+      setIsLoading(false);
+      return {
+        success: false,
+        error: res.error || "Usuario o contraseña incorrectos",
+      };
+    } catch {
+      setIsLoading(false);
+      return {
+        success: false,
+        error: "Error inesperado al intentar iniciar sesión",
+      };
+    }
+  }, []);
 
   const logout = useCallback(async () => {
     if (token) {
       try {
         await luckybetClient.logout(token);
       } catch {
-        // Best effort logout
+        // Best effort
       }
     }
     clearSession();
