@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { sileo } from "sileo";
 
 import type { AdminMission } from "@shared/types";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { MissionFormModal } from "@/components/admin/mission-form/MissionFormModal";
 import { Button } from "@/components/ui/Button";
@@ -90,7 +90,7 @@ export function MissionsList() {
   );
 
   const handleActivate = useCallback(async (id: string) => {
-    sileo.action({
+    casinoToast.action({
       title: "¿Activar misión?",
       description:
         "Al activar la misión su contenido quedará bloqueado para edición.",
@@ -98,7 +98,6 @@ export function MissionsList() {
         title: "Activar",
         onClick: async () => {
           await activateMission(dispatch, id);
-          sileo.clear();
         },
       },
     });

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useState } from "react";
-import { sileo } from "sileo";
+
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -76,7 +77,7 @@ export function UsersList() {
       const willActivate = !user.isActive;
       const actionVerb = willActivate ? "activar" : "desactivar";
 
-      sileo.action({
+      casinoToast.action({
         title: willActivate ? "¿Activar usuario?" : "¿Desactivar usuario?",
         description: `¿Desea ${actionVerb} la cuenta de "${user.username}"?`,
         button: {
@@ -86,14 +87,14 @@ export function UsersList() {
               isActive: !user.isActive,
             });
             if (ok) {
-              sileo.success({
+              casinoToast.success({
                 title: willActivate
                   ? "Usuario activado"
                   : "Usuario desactivado",
                 description: `El usuario "${user.username}" fue ${actionVerb} correctamente.`,
               });
             } else {
-              sileo.error({
+              casinoToast.error({
                 title: "Error",
                 description: `No fue posible ${actionVerb} al usuario "${user.username}".`,
               });
@@ -116,12 +117,12 @@ export function UsersList() {
       if (ok) {
         setShowFormModal(false);
         setEditingUser(null);
-        sileo.success({
+        casinoToast.success({
           title: isCreate ? "Usuario creado" : "Usuario actualizado",
           description: `El usuario "${data.username}" fue ${isCreate ? "creado" : "actualizado"} exitosamente.`,
         });
       } else {
-        sileo.error({
+        casinoToast.error({
           title: "Error",
           description: `No fue posible ${isCreate ? "crear" : "actualizar"} el usuario.`,
         });
@@ -159,6 +160,7 @@ export function UsersList() {
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+      {/* ── Metric Cards ── */}
       <UserStatsCards
         totalUsers={state.users.length}
         superAdminCount={superAdminCount}
@@ -166,6 +168,7 @@ export function UsersList() {
         activeCount={activeCount}
       />
 
+      {/* ── Search + Create Action ── */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="w-full sm:max-w-md">
           <Input
@@ -188,6 +191,7 @@ export function UsersList() {
         </Button>
       </div>
 
+      {/* ── Filters ── */}
       <UserFilterTabs
         roleFilter={state.roleFilter}
         activeFilter={state.activeFilter}
@@ -195,12 +199,14 @@ export function UsersList() {
         onActiveChange={handleActiveChange}
       />
 
+      {/* ── Table ── */}
       <UsersTable
         users={pageUsers}
         onEdit={handleEdit}
         onToggleActive={handleToggleActive}
       />
 
+      {/* ── Pagination ── */}
       <div className="flex justify-center pt-4 border-t border-outline-variant/15">
         <Pagination
           current={state.page}
@@ -209,6 +215,7 @@ export function UsersList() {
         />
       </div>
 
+      {/* ── Form Modal ── */}
       {showFormModal && (
         <UserFormModal
           open={showFormModal}

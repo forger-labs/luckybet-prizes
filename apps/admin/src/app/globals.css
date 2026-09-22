@@ -1,10 +1,6 @@
 @import "tailwindcss";
 @import "../../../../packages/shared/src/styles/tokens.css";
-
-[data-sileo-viewport] {
-  /* biome-ignore lint/complexity/noImportantStyles: allowed important */
-  z-index: 10000 !important;
-}
+@source "../../../../packages/shared/src";
 
 /* ───────── Overdrive Ambient & Motion ───────── */
 @keyframes float-subtle {

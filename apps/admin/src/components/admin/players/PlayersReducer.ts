@@ -1,5 +1,6 @@
 import type { Dispatch } from "react";
-import { sileo } from "sileo";
+
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
 import type {
@@ -120,7 +121,7 @@ export async function loadPlayers(
 
   // Evita dejar el spinner en loop y permite mostrar el empty state.
   dispatch({ type: "SET_PLAYERS", payload: { players: [], totalPages: 1 } });
-  sileo.error({
+  casinoToast.error({
     title: "Error al cargar jugadores",
     description: getMessage(result.message),
   });

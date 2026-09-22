@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-import { Toaster } from "sileo";
-import "sileo/styles.css";
+import { CasinoToaster } from "@shared/components/toasts/CasinoToaster";
 
 import { AuthContextProvider } from "@/context/AuthContext";
 
@@ -51,7 +50,7 @@ export default function RootLayout({
       <body className="min-h-dvh flex flex-col bg-[#200C42] text-on-surface antialiased">
         <AuthContextProvider>
           {children}
-          <Toaster position="top-right" theme="dark" />
+          <CasinoToaster />
         </AuthContextProvider>
       </body>
     </html>

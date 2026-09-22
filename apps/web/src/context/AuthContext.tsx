@@ -10,9 +10,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { sileo } from "sileo";
 
 import { ROUTES } from "@shared/constants";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { LOCAL_STORAGE_KEYS, TOKEN_CHECK_INTERVAL_MS } from "@/constant";
 import { luckybetClient } from "@/libs/luckybetClient";
@@ -79,10 +79,10 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
         clearSession();
         if (showToastOnError) {
-          sileo.error({
+          casinoToast.error({
             title: "Sesión expirada",
             description:
-              "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.",
+              "Su sesión ha expirado. Por favor, inicie sesión nuevamente.",
           });
         }
         return false;

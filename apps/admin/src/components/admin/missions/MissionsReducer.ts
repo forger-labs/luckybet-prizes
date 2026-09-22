@@ -7,9 +7,9 @@
  */
 
 import type { Dispatch } from "react";
-import { sileo } from "sileo";
 
 import type { AdminMission, MissionStatus } from "@shared/types";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
 import {
@@ -200,7 +200,7 @@ export async function loadMissions(
 
   // Evita dejar el spinner en loop y permite mostrar el empty state.
   dispatch({ type: "LOAD_MISSIONS", payload: { missions: [], totalPages: 1 } });
-  sileo.error({
+  casinoToast.error({
     title: "Error al cargar misiones",
     description: getMessage(result.message),
   });
@@ -219,7 +219,7 @@ export async function createMission(
     return true;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al crear misión",
     description: getMessage(result.message),
   });
@@ -242,7 +242,7 @@ export async function updateMission(
     return true;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al guardar misión",
     description: getMessage(result.message),
   });
@@ -258,11 +258,11 @@ export async function activateMission(
   if (result.status && result.data) {
     const mission = mapBackendToAdmin(result.data);
     dispatch({ type: "UPDATE_MISSION", payload: { mission } });
-    sileo.success({ title: "Misión activada correctamente" });
+    casinoToast.success({ title: "Misión activada correctamente" });
     return true;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al activar misión",
     description: getMessage(result.message),
   });
@@ -282,11 +282,11 @@ export async function cancelMission(
   if (result.status && result.data) {
     const mission = mapBackendToAdmin(result.data);
     dispatch({ type: "UPDATE_MISSION", payload: { mission } });
-    sileo.success({ title: "Misión cancelada" });
+    casinoToast.success({ title: "Misión cancelada" });
     return true;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al cancelar misión",
     description: getMessage(result.message),
   });
@@ -304,11 +304,11 @@ export async function deleteMission(
 
   if (result.status) {
     dispatch({ type: "DELETE_MISSION", payload: { id } });
-    sileo.success({ title: "Misión eliminada" });
+    casinoToast.success({ title: "Misión eliminada" });
     return true;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al eliminar misión",
     description: getMessage(result.message),
   });

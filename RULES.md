@@ -12,7 +12,7 @@ This repo follows strict rules when developing components:
 - Image tags uses Image component from Next
 - Text should be in neutral Spanish
 - Forms and validations uses Formik and Yup
-- Use sileo for toasts
+- Use casinoToast for toasts (react-hot-toast wrapper in shared)
 - Label forms always has to use htmlFor
 
 <!-- CODEGRAPH_START -->

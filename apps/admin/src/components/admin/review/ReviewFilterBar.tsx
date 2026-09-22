@@ -6,6 +6,7 @@ import type {
   ReviewFilter,
   ReviewFilterBarProps,
 } from "@/types/review/ReviewSubmission";
+import { ReviewViewToggle } from "./ReviewViewToggle";
 
 const TABS: { value: ReviewFilter; label: string; icon: string }[] = [
   { value: "pending", label: "Pendientes", icon: "pending" },
@@ -23,11 +24,13 @@ const TYPE_OPTIONS: { value: ReviewMissionType | "all"; label: string }[] = [
 export function ReviewFilterBar({
   activeTab,
   activeType,
+  viewMode,
   onTabChange,
   onTypeChange,
+  onViewModeChange,
 }: ReviewFilterBarProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
+    <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
       {/* Status tabs */}
       <div
         className="flex flex-wrap gap-1.5 p-1 rounded-2xl bg-surface-container-low/80 border border-outline-variant/20 w-fit backdrop-blur-sm"
@@ -61,15 +64,19 @@ export function ReviewFilterBar({
         })}
       </div>
 
-      {/* Category select filter */}
-      <div className="w-full sm:w-64">
-        <Select
-          id="review-category"
-          icon="category"
-          options={TYPE_OPTIONS}
-          value={activeType}
-          onChange={(v) => onTypeChange(v as ReviewMissionType | "all")}
-        />
+      {/* Right: Category selector & View mode switch */}
+      <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex-1 md:w-56">
+          <Select
+            id="review-category"
+            icon="category"
+            options={TYPE_OPTIONS}
+            value={activeType}
+            onChange={(v) => onTypeChange(v as ReviewMissionType | "all")}
+          />
+        </div>
+
+        <ReviewViewToggle viewMode={viewMode} onChange={onViewModeChange} />
       </div>
     </div>
   );

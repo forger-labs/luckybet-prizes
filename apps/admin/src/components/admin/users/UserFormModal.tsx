@@ -2,8 +2,9 @@
 
 import { Form, Formik } from "formik";
 import { useCallback, useRef } from "react";
-import { sileo } from "sileo";
 import * as Yup from "yup";
+
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { Modal } from "@/components/ui/Modal";
 import type { UserFormModalProps } from "@/types/adminUsers";
@@ -51,14 +52,13 @@ export function UserFormModal({
 
   const handleRequestClose = useCallback(() => {
     if (dirtyRef.current) {
-      sileo.action({
+      casinoToast.action({
         title: "¿Descartar cambios?",
         description: "Hay modificaciones sin guardar. ¿Desea descartarlas?",
         button: {
           title: "Sí, descartar",
           onClick: () => {
             onClose();
-            sileo.clear();
           },
         },
       });

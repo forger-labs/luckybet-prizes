@@ -1,14 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useReducer } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 
 import { Pagination } from "@/components/ui/Pagination";
 import type { ReviewMissionType } from "@/types/review/ReviewQueueByPlayer";
-import type { ReviewFilter } from "@/types/review/ReviewSubmission";
+import type {
+  ReviewFilter,
+  ReviewViewMode,
+} from "@/types/review/ReviewSubmission";
 import { ReviewableCard } from "./ReviewableCard";
 import { ReviewFilterBar } from "./ReviewFilterBar";
 import { ReviewModal } from "./ReviewModal";
 import { ReviewStatsCards } from "./ReviewStatsCards";
+import { ReviewTable } from "./ReviewTable";
 import {
   initialState,
   loadReviewQueue,
@@ -40,6 +44,7 @@ const EMPTY_MESSAGES: Record<
 
 export function ReviewList() {
   const [state, dispatch] = useReducer(reviewReducer, initialState);
+  const [viewMode, setViewMode] = useState<ReviewViewMode>("list");
 
   useEffect(() => {
     loadReviewQueue(dispatch, {
@@ -113,15 +118,17 @@ export function ReviewList() {
         totalPages={state.totalPages}
       />
 
-      {/* ── Filter Bar ── */}
+      {/* ── Filter Bar with View Mode Toggle ── */}
       <ReviewFilterBar
         activeTab={state.filter}
         activeType={state.missionType}
+        viewMode={viewMode}
         onTabChange={handleTabChange}
         onTypeChange={handleTypeChange}
+        onViewModeChange={setViewMode}
       />
 
-      {/* ── Submission Grid / Loading / Empty State ── */}
+      {/* ── Content (List or Grid) ── */}
       {state.loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {Array.from({ length: 6 }, () => crypto.randomUUID()).map((key) => (
@@ -144,15 +151,24 @@ export function ReviewList() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {state.submissions.map((submission) => (
-              <ReviewableCard
-                key={submission.id}
-                submission={submission}
-                onClick={handleSelect}
-              />
-            ))}
-          </div>
+          {viewMode === "list" ? (
+            <ReviewTable
+              submissions={state.submissions}
+              onSelect={handleSelect}
+              onApprove={(id) => handleApprove(id)}
+              onReject={(id) => handleSelect(id)}
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {state.submissions.map((submission) => (
+                <ReviewableCard
+                  key={submission.id}
+                  submission={submission}
+                  onClick={handleSelect}
+                />
+              ))}
+            </div>
+          )}
 
           <div className="flex justify-center pt-4 border-t border-outline-variant/15">
             <Pagination

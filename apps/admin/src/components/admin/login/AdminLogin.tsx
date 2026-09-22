@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { sileo } from "sileo";
+
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { ROUTES } from "@/constant";
 import { useAuthAdmin } from "@/hooks/useAuthAdmin";
@@ -16,7 +17,7 @@ export default function AdminLogin() {
     try {
       const res = await login(username, password);
       if (res.status) {
-        sileo.success({
+        casinoToast.success({
           title: `Bienvenido, ${username}`,
           duration: 3500,
         });
@@ -25,13 +26,13 @@ export default function AdminLogin() {
         return;
       }
 
-      sileo.error({
-        title: "Error en el inicio de sesion",
+      casinoToast.error({
+        title: "Error al iniciar sesión",
         description: `${res.message}`,
       });
     } catch (err) {
-      sileo.error({
-        title: "Error en el inicio de sesion",
+      casinoToast.error({
+        title: "Error al iniciar sesión",
         description: `${err}`,
       });
     }

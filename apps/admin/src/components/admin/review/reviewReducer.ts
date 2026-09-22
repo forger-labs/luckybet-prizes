@@ -1,7 +1,7 @@
 import type { Dispatch } from "react";
-import { sileo } from "sileo";
 
 import type { ReviewSubmission } from "@shared/types";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
 import { reviewQueueByPlayerToReviews } from "@/types/review/api-mappers";
@@ -147,7 +147,7 @@ export async function loadReviewQueue(
     return;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al cargar la cola de revisión",
     description: getMessage(result.message),
   });
@@ -165,7 +165,7 @@ export async function submitReview(
   const result = await apiAdminGanaya.reviewStep(Number(submissionId), body);
 
   if (result.status) {
-    sileo.success({
+    casinoToast.success({
       title:
         body.status === "APPROVED"
           ? "Tarea aprobada correctamente"
@@ -176,7 +176,7 @@ export async function submitReview(
     return;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al enviar la revisión",
     description: getMessage(result.message),
   });

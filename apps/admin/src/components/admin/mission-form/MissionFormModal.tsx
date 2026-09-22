@@ -2,7 +2,6 @@
 
 import { useFormik } from "formik";
 import { useCallback, useEffect, useState } from "react";
-import { sileo } from "sileo";
 import * as Yup from "yup";
 
 import type {
@@ -10,6 +9,7 @@ import type {
   MissionStep,
   VerificationType,
 } from "@shared/types";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -120,14 +120,13 @@ export function MissionFormModal({
 
   const handleRequestClose = useCallback(() => {
     if (dirty) {
-      sileo.action({
+      casinoToast.action({
         title: "¿Descartar cambios?",
         description: "Hay modificaciones sin guardar. ¿Desea descartarlas?",
         button: {
           title: "Sí, descartar",
           onClick: () => {
             onClose();
-            sileo.clear();
           },
         },
       });

@@ -1,5 +1,4 @@
 import axios from "axios";
-import { sileo } from "sileo";
 
 import HttpClient, { handleApiError } from "@shared/libs/httpClient";
 import type {
@@ -13,6 +12,7 @@ import type {
   LoginResponse,
   PaginatedApiResponse,
 } from "@shared/types/http";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { API_URL, LOCAL_STORAGE_KEYS, ROUTES } from "@/constant";
 import type { Player } from "@/types/adminPlayers";
@@ -43,7 +43,7 @@ axios.interceptors.response.use(
       if (!isRedirecting) {
         isRedirecting = true;
         localStorage.removeItem(LOCAL_STORAGE_KEYS.accessToken);
-        sileo.error({
+        casinoToast.error({
           title: "Sesión expirada",
           description:
             "Tu sesión ha expirado, por favor inicia sesión de nuevo",

@@ -3,11 +3,11 @@
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { sileo } from "sileo";
 import * as Yup from "yup";
 
 import { ROUTES } from "@shared/constants";
 import { LoadingIcon } from "@shared/icons/LoadingIcon";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { useAuthContext } from "@/hooks/useAuth";
 import type { LoginFormValues } from "@/types/luckybet";
@@ -40,13 +40,13 @@ export const LoginForm = () => {
         });
 
         if (result.success) {
-          sileo.success({
+          casinoToast.success({
             title: "¡Bienvenido!",
             description: "Has iniciado sesión exitosamente.",
           });
           router.push(ROUTES.DASHBOARD);
         } else {
-          sileo.error({
+          casinoToast.error({
             title: "Error al iniciar sesión",
             description:
               result.error ||
@@ -54,7 +54,7 @@ export const LoginForm = () => {
           });
         }
       } catch {
-        sileo.error({
+        casinoToast.error({
           title: "Error inesperado",
           description: "Ocurrió un error al intentar conectarse al servidor.",
         });
