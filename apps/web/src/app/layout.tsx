@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
+import { CasinoToaster } from "@shared/components/toasts/CasinoToaster";
+
+import { AuthContextProvider } from "@/context/AuthContext";
+
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam-pro",
   weight: ["400", "500", "600", "700"],
@@ -16,7 +20,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "LuckyBet Premios",
-  description: "Completá misiones y ganá premios reales.",
+  description: "Completa misiones y gana premios reales.",
 };
 
 export const viewport = {
@@ -43,10 +47,11 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-dvh flex flex-col bg-background text-on-surface antialiased">
-        {/* <AuthContextProvider> */}
-        {children}
-        {/* </AuthContextProvider> */}
+      <body className="min-h-dvh flex flex-col bg-[#200C42] text-on-surface antialiased">
+        <AuthContextProvider>
+          {children}
+          <CasinoToaster />
+        </AuthContextProvider>
       </body>
     </html>
   );

@@ -33,6 +33,19 @@ export class HttpClient implements HttpClientInterface {
   }
 
   /**
+   * @returns headers por defecto, omitiendo Content-Type cuando el body es
+   * FormData para que el navegador agregue el boundary multipart automáticamente.
+   */
+  private getDefaultHeaders(body?: unknown) {
+    if (body instanceof FormData) {
+      const { Accept, "Access-Control-Allow-Origin": origin } =
+        this.default_headers;
+      return { Accept, "Access-Control-Allow-Origin": origin };
+    }
+    return this.default_headers;
+  }
+
+  /**
    * @param {string}  uri Detecta si estamos usando una URI o es una nueva URL base
    * (comienza con http:// o https://). En caso de ser asi, retorna la url,
    * en caso contrario, se asume que es un fragmento
@@ -67,7 +80,7 @@ export class HttpClient implements HttpClientInterface {
 
     return this.http.post(this.readUrl(url), body, {
       headers: {
-        ...this.default_headers,
+        ...this.getDefaultHeaders(body),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
         ...headers_,
@@ -81,7 +94,7 @@ export class HttpClient implements HttpClientInterface {
 
     return this.http.put(this.readUrl(url), body, {
       headers: {
-        ...this.default_headers,
+        ...this.getDefaultHeaders(body),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },
@@ -94,7 +107,7 @@ export class HttpClient implements HttpClientInterface {
 
     return this.http.patch(this.readUrl(url), body, {
       headers: {
-        ...this.default_headers,
+        ...this.getDefaultHeaders(body),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
       },

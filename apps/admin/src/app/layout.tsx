@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
-import { Toaster } from "sileo";
-import "sileo/styles.css";
+import { CasinoToaster } from "@shared/components/toasts/CasinoToaster";
 
 import { AuthAdminProvider } from "@/context/AuthAdminContext";
 
@@ -46,7 +45,7 @@ export default function AdminRootLayout({
       </head>
       <body className="min-h-dvh flex flex-col bg-background text-on-surface antialiased">
         <AuthAdminProvider>{children}</AuthAdminProvider>
-        <Toaster position="top-right" theme="light" />
+        <CasinoToaster />
       </body>
     </html>
   );

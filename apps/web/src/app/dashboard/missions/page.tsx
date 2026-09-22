@@ -7,12 +7,12 @@ import type { Mission } from "@shared/types/mission";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MissionSection } from "@/components/mission/organisms/MissionSection";
 
-const dailyMissions: Mission[] = [
+const DAILY_MISSIONS: Mission[] = [
   {
     id: "instagram",
     title: "Seguir en Instagram",
     description:
-      "Seguí la cuenta oficial de LuckyBet en Instagram para mantenerte al día con las últimas promociones.",
+      "Sigue la cuenta oficial de LuckyBet en Instagram para mantenerte al día con las promociones exclusivas.",
     reward: "500 fichas",
     icon: "camera",
     color: "#E1306C",
@@ -21,9 +21,9 @@ const dailyMissions: Mission[] = [
   },
   {
     id: "telegram",
-    title: "Unirse al Telegram",
+    title: "Unirse al canal de Telegram",
     description:
-      "Unite al canal oficial de Telegram y recibí notificaciones exclusivas de eventos especiales.",
+      "Únete al canal oficial de Telegram y recibe alertas inmediatas de torneos y eventos especiales.",
     reward: "750 fichas",
     icon: "send",
     color: "#0088cc",
@@ -33,7 +33,7 @@ const dailyMissions: Mission[] = [
     id: "whatsapp",
     title: "Compartir en WhatsApp",
     description:
-      "Compartí LuckyBet con tus amigos en WhatsApp y ambos recibirán una recompensa.",
+      "Comparte LuckyBet con tus amigos de WhatsApp y ambos recibirán un paquete de bienvenida.",
     reward: "300 fichas",
     icon: "chat",
     color: "#25D366",
@@ -41,9 +41,9 @@ const dailyMissions: Mission[] = [
   },
   {
     id: "twitter",
-    title: "Seguir en Twitter/X",
+    title: "Seguir en Twitter / X",
     description:
-      "Seguí a LuckyBet en Twitter/X para participar en sorteos semanales exclusivos.",
+      "Sigue a LuckyBet en Twitter/X para participar en sorteos semanales de fichas de juego.",
     reward: "400 fichas",
     icon: "x",
     color: "#1da1f2",
@@ -51,12 +51,12 @@ const dailyMissions: Mission[] = [
   },
 ];
 
-const fixedMissions: Mission[] = [
+const FIXED_MISSIONS: Mission[] = [
   {
     id: "profile",
     title: "Completar perfil",
     description:
-      "Asegurá tu cuenta verificando tu correo y completando tu información de perfil.",
+      "Asegura tu cuenta verificando tu correo electrónico y completando tus datos personales.",
     reward: "200 fichas",
     icon: "person",
     color: "#a78bfa",
@@ -67,7 +67,7 @@ const fixedMissions: Mission[] = [
     id: "referral",
     title: "Invitar a un amigo",
     description:
-      "Invitá a un amigo a registrarse y ambos recibirán un bono de bienvenida.",
+      "Invita a un amigo a registrarse con tu código y recibe recompensas adicionales por sus partidas.",
     reward: "1000 fichas",
     icon: "share",
     color: "#f97316",
@@ -77,7 +77,7 @@ const fixedMissions: Mission[] = [
     id: "first-deposit",
     title: "Primer depósito",
     description:
-      "Realizá tu primer depósito y recibí un bono del 100% inmediato.",
+      "Realiza tu primer depósito en el cajero y recibe un bono del 100% de inmediato.",
     reward: "5000 fichas",
     icon: "account_balance",
     color: "#22c55e",
@@ -85,18 +85,16 @@ const fixedMissions: Mission[] = [
   },
 ];
 
-const INTERVAL_IN_MILISECONDS = 100;
-
+const INTERVAL_IN_MILLISECONDS = 1000;
 const DAY_HOURS = 24;
 const HOURS_IN_SECONDS = 60;
 const MINUTES_IN_SECONDS = 60;
 
-const showTime = (hour: number, minute: number, second: number) => {
-  const formattedHour = hour >= 10 ? hour : `0${hour}`;
-  const formattedMinute = minute >= 10 ? minute : `0${minute}`;
-  const formattedSecond = second >= 10 ? second : `0${second}`;
-
-  return `${formattedHour}:${formattedMinute}:${formattedSecond}`;
+const formatTime = (hour: number, minute: number, second: number) => {
+  const h = hour.toString().padStart(2, "0");
+  const m = minute.toString().padStart(2, "0");
+  const s = second.toString().padStart(2, "0");
+  return `${h}:${m}:${s}`;
 };
 
 export default function MissionsPage() {
@@ -105,62 +103,49 @@ export default function MissionsPage() {
   const [second, setSecond] = useState(0);
 
   useEffect(() => {
-    const countDownUntilZero = () => {
+    const updateCountdown = () => {
       const date = new Date();
       const hours = DAY_HOURS - date.getUTCHours() - 1;
       const minutes = MINUTES_IN_SECONDS - date.getUTCMinutes() - 1;
       const seconds = HOURS_IN_SECONDS - date.getUTCSeconds() - 1;
 
-      setHour(hours);
-      setMinute(minutes);
-      setSecond(seconds);
+      setHour(Math.max(0, hours));
+      setMinute(Math.max(0, minutes));
+      setSecond(Math.max(0, seconds));
     };
 
-    const timeoutToClear = setInterval(
-      countDownUntilZero,
-      INTERVAL_IN_MILISECONDS,
-    );
-
-    return () => clearInterval(timeoutToClear);
+    updateCountdown();
+    const timer = setInterval(updateCountdown, INTERVAL_IN_MILLISECONDS);
+    return () => clearInterval(timer);
   }, []);
 
   return (
-    <>
-      {/* Ambient glows */}
-      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
-      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-secondary/5 rounded-full blur-[120px]" />
+    <div className="max-w-[1280px] mx-auto space-y-6 sm:space-y-stack-md">
+      <DashboardHeader />
 
-      <div className="md:pb-12 px-container-padding-mobile md:px-container-padding-desktop">
-        <div className="max-w-7xl mx-auto space-y-stack-md md:space-y-stack-lg">
-          <DashboardHeader />
+      {/* Bento grid for Missions */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Daily Missions */}
+        <div className="lg:col-span-8">
+          <MissionSection
+            title="Misiones Diarias"
+            titleColor="#8ed5ff"
+            timer={`Se renueva en ${formatTime(hour, minute, second)}`}
+            missions={DAILY_MISSIONS}
+            columns={2}
+          />
+        </div>
 
-          {/* 12-column bento grid */}
-          <div className="grid grid-cols-12 gap-stack-md">
-            {/* Daily Missions */}
-            <div className="col-span-12 lg:col-span-8">
-              <MissionSection
-                title="Misiones Diarias"
-                titleColor="#8ed5ff"
-                icon="schedule"
-                timer={`Se renueva en ${showTime(hour, minute, second)}`}
-                missions={dailyMissions}
-                columns={2}
-              />
-            </div>
-
-            {/* Fixed Missions */}
-            <div className="col-span-12 lg:col-span-4">
-              <MissionSection
-                title="Misiones Fijas"
-                titleColor="#ffc640"
-                icon="verified"
-                missions={fixedMissions}
-                columns={1}
-              />
-            </div>
-          </div>
+        {/* Fixed Missions */}
+        <div className="lg:col-span-4">
+          <MissionSection
+            title="Misiones Permanentes"
+            titleColor="#ffc640"
+            missions={FIXED_MISSIONS}
+            columns={1}
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }

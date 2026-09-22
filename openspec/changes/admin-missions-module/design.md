@@ -90,7 +90,7 @@ The reducer handles: `LOAD_MISSIONS`, `SET_FILTER`, `SET_SEARCH`, `CREATE_MISSIO
 // packages/shared/src/types/admin.ts
 type MissionStatus = 'inactive' | 'active' | 'completed' | 'cancelled';
 type MissionCategory = 'daily' | 'weekly' | 'fixed' | 'special_event';
-type VerificationType = 'upload_image' | 'submit_text' | 'manual_review';
+type VerificationType = 'IMAGE' | 'TEXT';
 
 interface MissionStep {
   id: string;

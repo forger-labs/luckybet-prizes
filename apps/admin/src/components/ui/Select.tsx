@@ -21,6 +21,8 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
   (
     {
       icon,
+      id,
+      name,
       options,
       placeholder = "Seleccionar...",
       value,
@@ -90,6 +92,8 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
         {/* Trigger */}
         <button
           type="button"
+          id={id}
+          name={name}
           disabled={disabled}
           onClick={handleToggle}
           className={`

@@ -5,6 +5,8 @@ export interface SelectOption {
 
 export interface SelectProps {
   icon?: string;
+  id?: string;
+  name?: string;
   options: SelectOption[];
   placeholder?: string;
   value?: string;

@@ -1,40 +1,41 @@
 "use client";
 
-import type { ReviewFilter } from "@/types/review/ReviewSubmission";
+import { Select } from "@/components/ui/Select";
+import type { ReviewMissionType } from "@/types/review/ReviewQueueByPlayer";
+import type {
+  ReviewFilter,
+  ReviewFilterBarProps,
+} from "@/types/review/ReviewSubmission";
+import { ReviewViewToggle } from "./ReviewViewToggle";
 
-const TABS: { value: ReviewFilter; label: string }[] = [
-  { value: "pending", label: "Pendientes" },
-  { value: "approved", label: "Aprobadas" },
-  { value: "rejected", label: "Rechazadas" },
+const TABS: { value: ReviewFilter; label: string; icon: string }[] = [
+  { value: "pending", label: "Pendientes", icon: "pending" },
+  { value: "approved", label: "Aprobadas", icon: "task_alt" },
+  { value: "rejected", label: "Rechazadas", icon: "cancel" },
 ];
 
-const SORT_OPTIONS: { value: "newest" | "oldest"; label: string }[] = [
-  { value: "newest", label: "Más recientes" },
-  { value: "oldest", label: "Más antiguas" },
+const TYPE_OPTIONS: { value: ReviewMissionType | "all"; label: string }[] = [
+  { value: "all", label: "Todas las categorías" },
+  { value: "DAILY", label: "Diarias" },
+  { value: "WEEKLY", label: "Semanales" },
+  { value: "FIXED", label: "Fijas" },
 ];
 
-interface ReviewFilterBarProps {
-  activeTab: ReviewFilter;
-  counts: Record<ReviewFilter, number>;
-  sortOrder: "newest" | "oldest";
-  onTabChange: (tab: ReviewFilter) => void;
-  onSortChange: (order: "newest" | "oldest") => void;
-}
-
-function ReviewFilterBar({
+export function ReviewFilterBar({
   activeTab,
-  counts,
-  sortOrder,
+  activeType,
+  viewMode,
   onTabChange,
-  onSortChange,
+  onTypeChange,
+  onViewModeChange,
 }: ReviewFilterBarProps) {
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between">
       {/* Status tabs */}
       <div
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-1.5 p-1 rounded-2xl bg-surface-container-low/80 border border-outline-variant/20 w-fit backdrop-blur-sm"
         role="tablist"
-        aria-label="Filtrar por estado"
+        aria-label="Filtrar por estado de revisión"
       >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.value;
@@ -46,56 +47,39 @@ function ReviewFilterBar({
               aria-selected={isActive}
               onClick={() => onTabChange(tab.value)}
               className={`
-                px-4 py-2 rounded-full text-label-sm font-semibold
-                transition-all duration-200 cursor-pointer inline-flex items-center gap-1.5
+                px-4 py-2 rounded-xl text-label-sm font-semibold transition-all duration-200 cursor-pointer select-none inline-flex items-center gap-1.5
                 ${
                   isActive
-                    ? "bg-primary text-on-primary"
-                    : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
+                    ? "bg-primary text-on-primary shadow-[0_0_14px_rgba(56,189,248,0.25)] font-bold"
+                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60"
                 }
               `}
             >
-              {tab.label}
-              <span
-                className={`inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[11px] font-bold ${
-                  isActive
-                    ? "bg-on-primary/20 text-on-primary"
-                    : "bg-white/10 text-on-surface-variant"
-                }`}
-              >
-                {counts[tab.value]}
+              <span className="material-symbols-outlined text-base">
+                {tab.icon}
               </span>
+              <span>{tab.label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Date filter */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-label-sm text-on-surface-variant shrink-0">
-            Orden:
-          </span>
-          <select
-            value={sortOrder}
-            onChange={(e) =>
-              onSortChange(e.target.value as "newest" | "oldest")
-            }
-            className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary transition-colors cursor-pointer"
-            aria-label="Ordenar por fecha"
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+      {/* Right: Category selector & View mode switch */}
+      <div className="flex items-center gap-3 w-full md:w-auto">
+        <div className="flex-1 md:w-56">
+          <Select
+            id="review-category"
+            icon="category"
+            options={TYPE_OPTIONS}
+            value={activeType}
+            onChange={(v) => onTypeChange(v as ReviewMissionType | "all")}
+          />
         </div>
+
+        <ReviewViewToggle viewMode={viewMode} onChange={onViewModeChange} />
       </div>
     </div>
   );
 }
 
 ReviewFilterBar.displayName = "ReviewFilterBar";
-
-export { ReviewFilterBar };

@@ -95,7 +95,12 @@ export function mapBackendToAdmin(
     xpReward: backendMission.experiencePoints,
     category: TYPE_TO_CATEGORY[backendMission.type],
     status: STATUS_TO_FRONTEND[backendMission.status],
-    steps: [], // Steps are managed separately via MissionFormModal
+    steps: (backendMission?.steps ?? []).map((s) => ({
+      title: s.content ?? "",
+      order: s.stepOrder,
+      verificationType: s.type,
+      id: s.id,
+    })), // Steps are managed separately via MissionFormModal
     coverImage: backendMission.imageUrl,
     participants: 0, // Not provided by backend list endpoint
     createdAt: backendMission.activatedAt ?? "",
@@ -120,4 +125,45 @@ export function mapStatusToFrontend(
   status: BackendMissionStatus,
 ): MissionStatus {
   return STATUS_TO_FRONTEND[status];
+}
+
+/* ── Create (multipart) ── */
+
+/**
+ * Build the multipart/form-data payload for mission creation
+ * (POST /missions consumes multipart, with `image` as a required file).
+ */
+export function buildCreateMissionFormData(
+  partial: PartialAdminMission,
+  image?: File,
+): FormData {
+  const formData = new FormData();
+
+  formData.append("title", partial.title ?? "");
+  if (partial.description) formData.append("description", partial.description);
+
+  formData.append("type", CATEGORY_TO_TYPE[partial.category ?? "daily"]);
+
+  formData.append("coinsAmount", String(partial.tokenReward ?? 0));
+
+  const bonus =
+    partial.bonusPercent > 0 && partial.tokenReward > 0
+      ? Math.round((partial.bonusPercent / 100) * partial.tokenReward)
+      : undefined;
+  if (bonus !== undefined && bonus > 0) {
+    formData.append("bonus", String(bonus));
+  }
+
+  formData.append("experiencePoints", String(partial.xpReward ?? 0));
+
+  const steps = (partial.steps ?? []).map((step) => ({
+    stepOrder: step.order,
+    type: step.verificationType,
+    content: step.title,
+  }));
+  formData.append("missionSteps", JSON.stringify(steps));
+
+  if (image) formData.append("image", image);
+
+  return formData;
 }

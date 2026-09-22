@@ -1,6 +1,6 @@
 export type MissionStatus = "inactive" | "active" | "completed" | "cancelled";
 export type MissionCategory = "daily" | "weekly" | "fixed" | "special_event";
-export type VerificationType = "upload_image" | "submit_text" | "manual_review";
+export type VerificationType = "IMAGE" | "TEXT";
 
 export type BackendMissionType = "DAILY" | "WEEKLY" | "FIXED";
 export type BackendMissionStatus =
@@ -38,10 +38,9 @@ export type BackendCreateMissionPayload = Omit<
 >;
 
 export interface MissionStep {
-  id: string;
+  id: number;
   title: string;
   verificationType: VerificationType;
-  description?: string;
   order: number;
 }
 

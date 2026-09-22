@@ -49,3 +49,19 @@ export interface ApiResponse<T> {
 export interface LoginResponse {
   accessToken: string;
 }
+
+export interface PaginationMeta {
+  total: number;
+  totalPages: number;
+  page: number;
+  limit: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+export interface PaginatedApiResponse<T> {
+  status: boolean;
+  data: T | null;
+  message: string | string[];
+  meta: PaginationMeta | null;
+}

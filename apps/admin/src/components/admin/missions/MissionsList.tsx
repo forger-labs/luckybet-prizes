@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 
 import type { AdminMission } from "@shared/types";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { MissionFormModal } from "@/components/admin/mission-form/MissionFormModal";
 import { Button } from "@/components/ui/Button";
@@ -10,12 +11,14 @@ import { Input } from "@/components/ui/Input";
 import { Pagination } from "@/components/ui/Pagination";
 import type { FilterValue } from "@/types/missions/FilterTabs";
 import { FilterTabs } from "./FilterTabs";
+import { MissionIntegrityBanner } from "./MissionIntegrityBanner";
+import { MissionStatsCards } from "./MissionStatsCards";
 import {
   activateMission,
+  applyFilters,
   cancelMission,
   createMission,
   deleteMission,
-  getCurrentPageItems,
   initialState,
   loadMissions,
   missionsReducer,
@@ -23,41 +26,18 @@ import {
 } from "./MissionsReducer";
 import { MissionTable } from "./MissionTable";
 
-/**
- * MissionsList — main orchestrator for the Mission Control page.
- *
- * Provides:
- * 1. Search bar + "Crear misión" button (top)
- * 2. Status filter tabs
- * 3. Missions table (left) + Right sidebar (assets + hints)
- * 4. Pagination (bottom)
- *
- * Uses useReducer for page-local state. All actions go through
- * the reducer → MockDataService → dispatch cycle.
- */
-function MissionsList() {
+export function MissionsList() {
   const [state, dispatch] = useReducer(missionsReducer, initialState);
-
-  /* ── Mission Form Modal state ── */
   const [editingMission, setEditingMission] = useState<AdminMission | null>(
     null,
   );
   const [showFormModal, setShowFormModal] = useState(false);
 
-  /* ── Load missions on mount ── */
   useEffect(() => {
-    loadMissions(dispatch);
-  }, []);
+    loadMissions(dispatch, state.page);
+  }, [state.page]);
 
-  /* ── Filtered + paginated items ── */
-  const pageMissions = getCurrentPageItems(
-    state.missions,
-    state.filter,
-    state.search,
-    state.page,
-  );
-
-  /* ── Handlers ── */
+  const pageMissions = applyFilters(state.missions, state.filter, state.search);
 
   const handleFilterChange = useCallback((filter: FilterValue) => {
     dispatch({ type: "SET_FILTER", payload: { filter } });
@@ -101,10 +81,8 @@ function MissionsList() {
 
   const handleDuplicate = useCallback(
     (id: string) => {
-      // Duplicate through modal — future enhancement
       const mission = state.missions.find((m) => m.id === id);
       if (!mission) return;
-      // Pre-fill as a new mission with copy of existing data
       setEditingMission(null);
       setShowFormModal(true);
     },
@@ -112,40 +90,42 @@ function MissionsList() {
   );
 
   const handleActivate = useCallback(async (id: string) => {
-    const confirmed = window.confirm(
-      "¿Activar misión? El contenido quedará bloqueado.",
-    );
-    if (!confirmed) return;
-    await activateMission(dispatch, id);
+    casinoToast.action({
+      title: "¿Activar misión?",
+      description:
+        "Al activar la misión su contenido quedará bloqueado para edición.",
+      button: {
+        title: "Activar",
+        onClick: async () => {
+          await activateMission(dispatch, id);
+        },
+      },
+    });
   }, []);
 
   const handleCancel = useCallback(async (id: string) => {
     const reason = window.prompt("Motivo de cancelación:");
-    if (!reason || !reason.trim()) return;
+    if (!reason?.trim()) return;
     await cancelMission(dispatch, id, reason.trim());
   }, []);
 
   const handleDelete = useCallback(async (id: string) => {
-    const confirmed = window.confirm("¿Eliminar misión?");
+    const confirmed = window.confirm("¿Desea eliminar la misión?");
     if (!confirmed) return;
     await deleteMission(dispatch, id);
   }, []);
-
-  /* ── Mission Form Modal handlers ── */
 
   const handleSave = useCallback(
     async (
       data: Omit<AdminMission, "id" | "createdAt" | "participants">,
       isCreate: boolean,
     ) => {
-      let ok: boolean;
-      if (isCreate) {
-        ok = await createMission(dispatch, data);
-      } else if (editingMission) {
-        ok = await updateMission(dispatch, editingMission.id, data);
-      } else {
-        return;
-      }
+      const ok = isCreate
+        ? await createMission(dispatch, data)
+        : editingMission
+          ? await updateMission(dispatch, editingMission.id, data)
+          : false;
+
       if (ok) {
         setShowFormModal(false);
         setEditingMission(null);
@@ -154,21 +134,25 @@ function MissionsList() {
     [editingMission],
   );
 
-  const handleCloseModal = useCallback(() => {
-    setShowFormModal(false);
-    setEditingMission(null);
-  }, []);
+  const activeCount = state.missions.filter(
+    (m) => m.status === "active",
+  ).length;
+  const totalParticipants = state.missions.reduce(
+    (acc, m) => acc + (m.participants || 0),
+    0,
+  );
 
-  /* ── Loading ── */
   if (state.loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="flex flex-col items-center gap-3">
-          <span className="material-symbols-outlined text-4xl text-primary animate-pulse">
-            sync
-          </span>
-          <p className="text-body-md text-on-surface-variant">
-            Cargando misiones...
+      <div className="flex items-center justify-center py-28">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(56,189,248,0.2)]">
+            <span className="material-symbols-outlined text-3xl animate-spin">
+              sync
+            </span>
+          </div>
+          <p className="text-body-md text-on-surface-variant font-medium">
+            Cargando catálogo de misiones...
           </p>
         </div>
       </div>
@@ -176,34 +160,40 @@ function MissionsList() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* ── Top bar: Search + Create Button ── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <div className="w-full md:max-w-sm">
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+      <MissionStatsCards
+        totalMissions={state.missions.length}
+        activeCount={activeCount}
+        totalParticipants={totalParticipants}
+        page={state.page}
+        totalPages={state.totalPages}
+      />
+
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="w-full sm:max-w-md">
           <Input
-            id="search"
+            id="search-missions"
             icon="search"
-            placeholder="Buscar misiones..."
+            placeholder="Buscar por título o recompensa..."
             value={state.search}
             onChange={handleSearchChange}
             wrapperClassName="w-full"
+            className="bg-surface-container-low/90 border-outline-variant/30 focus:border-primary"
           />
         </div>
         <Button
           leadingIcon="add_circle"
           onClick={handleCreate}
-          className="whitespace-nowrap shrink-0 cursor-pointer max-sm:w-full text-base font-bold bg-secondary hover:bg-secondary-fixed-dim"
+          variant="secondary"
+          className="whitespace-nowrap shrink-0 font-bold shadow-[0_0_15px_rgba(255,198,64,0.2)] hover:shadow-[0_0_20px_rgba(255,198,64,0.35)] cursor-pointer"
         >
           Crear misión
         </Button>
       </div>
 
-      {/* ── Filter Tabs ── */}
       <FilterTabs activeFilter={state.filter} onChange={handleFilterChange} />
 
-      {/* ── Main content: Table + Right sidebar ── */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Table area */}
         <div className="flex-1 min-w-0">
           <MissionTable
             missions={pageMissions}
@@ -216,49 +206,10 @@ function MissionsList() {
           />
         </div>
 
-        {/* Right sidebar */}
-        {/* TODO: Probably this will be deleted */}
-        <aside className="w-full lg:w-80 shrink-0 flex flex-col gap-6">
-          {/* Mission Assets placeholder */}
-          {/*<div className="rounded-lg border-2 border-dashed border-outline-variant/40 p-8 flex flex-col items-center text-center gap-3 transition-colors hover:border-primary/30">
-            <span className="material-symbols-outlined text-4xl text-outline/60">
-              cloud_upload
-            </span>
-            <p className="text-body-md font-semibold text-on-surface-variant">
-              Mission Assets
-            </p>
-            <p className="text-label-sm text-outline">
-              Subí imágenes, íconos o recursos multimedia para la misión
-            </p>
-            <button
-              type="button"
-              className="mt-2 px-4 py-2 rounded-lg border border-primary/40 text-primary text-label-sm font-semibold hover:bg-primary/10 transition-colors cursor-pointer"
-              onClick={() => console.log("Upload assets — coming in future PR")}
-            >
-              Seleccionar archivos
-            </button>
-          </div>*/}
-
-          {/* Configuration hint */}
-          <div className="rounded-lg bg-primary/5 border border-primary/15 p-4 flex items-start gap-3">
-            <span className="material-symbols-outlined text-primary shrink-0 mt-0.5">
-              info
-            </span>
-            <div className="text-body-md text-on-surface-variant">
-              <p className="font-semibold text-on-surface mb-1">
-                Configuración bloqueada
-              </p>
-              <p>
-                Las misiones activas tienen su contenido bloqueado. Cancelá la
-                misión primero si necesitás editarla.
-              </p>
-            </div>
-          </div>
-        </aside>
+        <MissionIntegrityBanner />
       </div>
 
-      {/* ── Pagination ── */}
-      <div className="flex justify-center pt-4 border-t border-outline-variant/20">
+      <div className="flex justify-center pt-4 border-t border-outline-variant/15">
         <Pagination
           current={state.page}
           total={state.totalPages}
@@ -266,11 +217,13 @@ function MissionsList() {
         />
       </div>
 
-      {/* ── Mission Form Modal ── */}
       {showFormModal && (
         <MissionFormModal
           open={showFormModal}
-          onClose={handleCloseModal}
+          onClose={() => {
+            setShowFormModal(false);
+            setEditingMission(null);
+          }}
           mission={editingMission}
           onSave={handleSave}
         />
@@ -280,5 +233,3 @@ function MissionsList() {
 }
 
 MissionsList.displayName = "MissionsList";
-
-export { MissionsList };

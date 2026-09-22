@@ -24,72 +24,90 @@ function relativeTime(iso: string): string {
   return `hace ${days} d`;
 }
 
-function ReviewableCard({ submission, onClick }: ReviewableCardProps) {
+export function ReviewableCard({ submission, onClick }: ReviewableCardProps) {
+  const initial = submission.userName
+    ? submission.userName[0].toUpperCase()
+    : "J";
+
   return (
     <button
       type="button"
       onClick={() => onClick(submission.id)}
-      className="w-full text-left bg-surface-container border border-white/10 rounded-xl p-4 flex flex-col gap-3 transition-all duration-200 hover:bg-surface-container-high hover:border-primary/30 hover:shadow-[0_0_20px_rgba(56,189,248,0.1)] cursor-pointer"
+      className="w-full text-left bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 rounded-2xl p-5 flex flex-col gap-4 transition-all duration-300 hover:bg-surface-container-high/60 hover:border-primary/40 hover:shadow-[0_0_25px_rgba(56,189,248,0.15)] group cursor-pointer text-on-surface"
     >
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 overflow-hidden">
-          {submission.userAvatar ? (
-            <Image
-              height={40}
-              width={40}
-              src={submission.userAvatar}
-              alt=""
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="material-symbols-outlined text-on-surface-variant text-lg">
-              person
-            </span>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-label-md text-on-surface truncate font-semibold">
-            {submission.userName || "Jugador"}
-          </p>
-          {submission.submittedAt ? (
-            <p className="text-label-sm text-on-surface-variant">
-              {relativeTime(submission.submittedAt)}
+      {/* Player header */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-surface-container-highest to-surface-container-high border border-outline-variant/30 flex items-center justify-center shrink-0 overflow-hidden font-bold text-primary shadow-sm">
+            {submission.userAvatar ? (
+              <Image
+                height={40}
+                width={40}
+                src={submission.userAvatar}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{initial}</span>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="font-(--font-plus-jakarta-sans) text-label-md text-on-surface truncate font-bold group-hover:text-primary transition-colors">
+              {submission.userName || "Jugador"}
             </p>
-          ) : null}
+            {submission.submittedAt && (
+              <p className="text-label-sm text-[11px] text-on-surface-variant">
+                {relativeTime(submission.submittedAt)}
+              </p>
+            )}
+          </div>
         </div>
-      </div>
 
-      <p className="text-body-md text-on-surface font-semibold line-clamp-2">
-        {submission.missionTitle}
-      </p>
-
-      <div className="flex items-center gap-2">
-        {submission.missionCategory ? (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-label-sm">
-            <span className="material-symbols-outlined text-xs">sell</span>
-            {categoryLabels[submission.missionCategory]}
-          </span>
-        ) : null}
         <ReviewStatusBadge status={submission.status} />
       </div>
 
-      <div className="w-full h-30 rounded-md bg-surface-container-high flex items-center justify-center overflow-hidden">
+      {/* Mission title */}
+      <p className="font-(--font-plus-jakarta-sans) text-body-md text-on-surface font-semibold line-clamp-2 leading-snug">
+        {submission.missionTitle}
+      </p>
+
+      {/* Evidence image preview */}
+      <div className="relative w-full h-36 rounded-xl bg-surface-container-lowest/80 border border-outline-variant/15 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-colors">
         {submission.images && submission.images.length > 0 ? (
           <Image
             src={submission.images[0]}
-            height={120}
-            width={120}
-            alt=""
-            className="w-full h-full object-cover"
+            height={144}
+            width={240}
+            alt="Evidencia"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
-          <span className="material-symbols-outlined text-4xl text-outline/40">
-            image
-          </span>
+          <div className="flex flex-col items-center gap-1 text-outline/50">
+            <span className="material-symbols-outlined text-3xl">image</span>
+            <span className="text-xs font-medium">Sin imagen adjunta</span>
+          </div>
         )}
+
+        {/* Hover zoom hint */}
+        <div className="absolute inset-0 bg-surface-container/60 opacity-0 group-hover:opacity-100 backdrop-blur-[2px] flex items-center justify-center gap-1.5 text-primary text-xs font-bold transition-opacity">
+          <span className="material-symbols-outlined text-base">
+            visibility
+          </span>
+          <span>Revisar evidencia</span>
+        </div>
       </div>
+
+      {/* Footer Category Tag */}
+      {submission.missionCategory && (
+        <div className="flex items-center gap-2 pt-1 border-t border-outline-variant/10 text-xs">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary font-medium">
+            <span className="material-symbols-outlined text-xs">sell</span>
+            <span>{categoryLabels[submission.missionCategory]}</span>
+          </span>
+        </div>
+      )}
     </button>
   );
 }
 
-export { ReviewableCard };
+ReviewableCard.displayName = "ReviewableCard";

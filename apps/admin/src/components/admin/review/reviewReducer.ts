@@ -1,17 +1,34 @@
 import type { Dispatch } from "react";
-import { sileo } from "sileo";
 
 import type { ReviewSubmission } from "@shared/types";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
-import { stepSubmissionToReview } from "@/types/review/api-mappers";
+import { reviewQueueByPlayerToReviews } from "@/types/review/api-mappers";
+import type { ReviewMissionType } from "@/types/review/ReviewQueueByPlayer";
 import type { ReviewFilter } from "@/types/review/ReviewSubmission";
+
+/* ── Constants ── */
+
+export const PAGE_SIZE = 12;
+
+const FILTER_TO_STATUS: Record<
+  ReviewFilter,
+  "PENDING" | "APPROVED" | "REJECTED"
+> = {
+  pending: "PENDING",
+  approved: "APPROVED",
+  rejected: "REJECTED",
+};
+
+/* ── State ── */
 
 export interface ReviewState {
   submissions: ReviewSubmission[];
   filter: ReviewFilter;
-  sortOrder: "newest" | "oldest";
-  search: string;
+  missionType: ReviewMissionType | "all";
+  page: number;
+  totalPages: number;
   loading: boolean;
   selectedSubmission:
     | (ReviewSubmission & {
@@ -21,14 +38,34 @@ export interface ReviewState {
   modalOpen: boolean;
 }
 
+export const initialState: ReviewState = {
+  submissions: [],
+  filter: "pending",
+  missionType: "all",
+  page: 1,
+  totalPages: 1,
+  loading: true,
+  selectedSubmission: null,
+  modalOpen: false,
+};
+
 export type ReviewAction =
-  | { type: "LOAD_SUBMISSIONS"; payload: { submissions: ReviewSubmission[] } }
+  | {
+      type: "LOAD_SUBMISSIONS";
+      payload: { submissions: ReviewSubmission[]; totalPages: number };
+    }
   | { type: "SET_FILTER"; payload: { filter: ReviewFilter } }
-  | { type: "SET_SORT_ORDER"; payload: { sortOrder: "newest" | "oldest" } }
-  | { type: "SET_SEARCH"; payload: { search: string } }
+  | {
+      type: "SET_MISSION_TYPE";
+      payload: { missionType: ReviewMissionType | "all" };
+    }
+  | { type: "SET_PAGE"; payload: { page: number } }
+  | { type: "SET_LOADING" }
   | { type: "SELECT_SUBMISSION"; payload: { submission: ReviewSubmission } }
   | { type: "CLOSE_MODAL" }
   | { type: "UPDATE_STATUS"; payload: { id: string } };
+
+/* ── Reducer ── */
 
 export function reviewReducer(
   state: ReviewState,
@@ -39,14 +76,17 @@ export function reviewReducer(
       return {
         ...state,
         submissions: action.payload.submissions,
+        totalPages: action.payload.totalPages,
         loading: false,
       };
     case "SET_FILTER":
-      return { ...state, filter: action.payload.filter };
-    case "SET_SORT_ORDER":
-      return { ...state, sortOrder: action.payload.sortOrder };
-    case "SET_SEARCH":
-      return { ...state, search: action.payload.search };
+      return { ...state, filter: action.payload.filter, page: 1 };
+    case "SET_MISSION_TYPE":
+      return { ...state, missionType: action.payload.missionType, page: 1 };
+    case "SET_PAGE":
+      return { ...state, page: action.payload.page };
+    case "SET_LOADING":
+      return { ...state, loading: true };
     case "SELECT_SUBMISSION":
       return {
         ...state,
@@ -69,27 +109,52 @@ export function reviewReducer(
   }
 }
 
+/* ── Helpers ── */
+
 function getMessage(msg: string | string[] | undefined): string {
   if (!msg) return "Ocurrió un error inesperado";
   return Array.isArray(msg) ? msg.join("; ") : msg;
 }
 
-/* ── Action dispatchers (thunk-like wrappers) ── */
+/* ── Action dispatchers ── */
 
-export async function loadReviewQueue(dispatch: Dispatch<ReviewAction>) {
-  const result = await apiAdminGanaya.getReviewQueue();
+export async function loadReviewQueue(
+  dispatch: Dispatch<ReviewAction>,
+  options: {
+    filter: ReviewFilter;
+    missionType: ReviewMissionType | "all";
+    page: number;
+  },
+) {
+  dispatch({ type: "SET_LOADING" });
+
+  const result = await apiAdminGanaya.getReviewQueue({
+    status: FILTER_TO_STATUS[options.filter],
+    type: options.missionType === "all" ? undefined : options.missionType,
+    take: PAGE_SIZE,
+    skip: (options.page - 1) * PAGE_SIZE,
+  });
 
   if (result.status && result.data) {
-    const submissions = result.data.map(stepSubmissionToReview);
-    dispatch({ type: "LOAD_SUBMISSIONS", payload: { submissions } });
+    const submissions = result.data.flatMap(reviewQueueByPlayerToReviews);
+    dispatch({
+      type: "LOAD_SUBMISSIONS",
+      payload: {
+        submissions,
+        totalPages: result.meta?.totalPages ?? 1,
+      },
+    });
     return;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al cargar la cola de revisión",
     description: getMessage(result.message),
   });
-  dispatch({ type: "LOAD_SUBMISSIONS", payload: { submissions: [] } });
+  dispatch({
+    type: "LOAD_SUBMISSIONS",
+    payload: { submissions: [], totalPages: 1 },
+  });
 }
 
 export async function submitReview(
@@ -100,7 +165,7 @@ export async function submitReview(
   const result = await apiAdminGanaya.reviewStep(Number(submissionId), body);
 
   if (result.status) {
-    sileo.success({
+    casinoToast.success({
       title:
         body.status === "APPROVED"
           ? "Tarea aprobada correctamente"
@@ -111,7 +176,7 @@ export async function submitReview(
     return;
   }
 
-  sileo.error({
+  casinoToast.error({
     title: "Error al enviar la revisión",
     description: getMessage(result.message),
   });

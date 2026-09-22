@@ -1,31 +1,17 @@
 "use client";
 
-import { type InputHTMLAttributes, useState } from "react";
+import { useState } from "react";
 
 import { Input } from "@/components/ui/Input";
+import type { PasswordFieldProps } from "@/types/login";
 
-interface PasswordFieldProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "icon"> {
-  /** Label text */
-  label?: string;
-  /** Forgot-password link node (rendered inline with label) */
-  forgotLink?: React.ReactNode;
-  /** Validation error message */
-  error?: string;
-}
-
-/**
- * PasswordField — molécula que extiende Input con toggle de visibilidad.
- *
- * No es un átomo puro porque agrupa lógica de estado (mostrar/ocultar)
- * que solo aplica a passwords. Sigue el enfoque flexible.
- */
 export default function PasswordField({
-  label = "Secure Password",
+  label = "Contraseña",
   forgotLink,
   error,
   placeholder = "••••••••••••",
   className = "",
+  id = "password",
   ...props
 }: PasswordFieldProps) {
   const [visible, setVisible] = useState(false);
@@ -34,37 +20,40 @@ export default function PasswordField({
     <div className="space-y-2">
       <div className="flex justify-between items-center px-1">
         <label
-          className="font-label-md text-label-md text-on-surface-variant"
-          htmlFor="password"
+          className="font-label-md text-sm text-on-surface-variant font-medium cursor-pointer"
+          htmlFor={id}
         >
           {label}
         </label>
         {forgotLink}
       </div>
-      <div className="relative">
+
+      <div className="relative group">
         <Input
           icon="lock"
-          id="password"
+          id={id}
           type={visible ? "text" : "password"}
           placeholder={placeholder}
-          className={`pr-12 ${className}`}
+          className={`pr-12 transition-all ${className}`}
           {...props}
         />
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary active:scale-95 transition-all cursor-pointer p-1"
+          aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
           tabIndex={-1}
         >
-          <span className="material-symbols-outlined text-[20px]!">
+          <span className="material-symbols-outlined text-xl">
             {visible ? "visibility_off" : "visibility"}
           </span>
         </button>
       </div>
+
       {error && (
-        <p className="text-error font-body-md text-body-md flex items-center gap-2 mt-1">
-          <span className="material-symbols-outlined text-[18px]!">error</span>
-          {error}
+        <p className="text-error font-body-md text-xs flex items-center gap-1.5 mt-1 animate-in fade-in duration-200">
+          <span className="material-symbols-outlined text-base">error</span>
+          <span>{error}</span>
         </p>
       )}
     </div>

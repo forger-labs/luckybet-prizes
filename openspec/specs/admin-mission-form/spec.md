@@ -61,7 +61,7 @@ The form MUST include these fields:
 | Property | Value |
 |----------|-------|
 | Min steps | 1 |
-| Verification types | `upload_image`, `submit_text`, `manual_review` |
+| Verification types | `IMAGE`, `TEXT` |
 
 Each step MUST have: title (required), verification type (required, select), optional description. Steps MUST be reorderable (drag or up/down buttons).
 

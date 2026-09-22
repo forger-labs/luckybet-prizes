@@ -1,25 +1,22 @@
 /**
- * api-mappers — field mappers between UI ReviewSubmission and backend StepSubmission.
+ * api-mappers — field mappers entre la UI (ReviewSubmission) y el backend.
  *
- * Handles:
- * - status (lowercase ↔ UPPERCASE)
- * - degraded fallbacks for derived fields the backend response does not yet
- *   include (player name, mission title/category, submission timestamp)
+ * GET /admin/missions/review-queue devuelve la cola paginada por jugador
+ * (ReviewQueueByPlayer[]), con el nombre de jugador, título/tipo de la misión
+ * y descripción ya incluidos. reviewQueueByPlayerToReviews aplana ese árbol
+ * (jugador → misiones → pasos) en una lista plana de subs pronto revisables.
  */
-
-// TODO(backend): backend enhancements needed to fully populate the admin review panel:
-// 1. Enrich GET /admin/missions/review-queue to return mission title/type and player name (the panel currently cannot show them).
-// 2. Expose a submittedAt/createdAt timestamp on StepSubmission for relative-time display (only reviewedAt is available now, and it's null while PENDING).
-// 3. Persist the real reviewer id on review (backend currently hardcodes reviewerId = 1, see TODO in backend).
-// 4. Validate the review request body with a DTO (backend currently uses an inline unvalidated body).
-// 5. Expose an endpoint for APPROVED/REJECTED review history (the panel has history tabs but the queue endpoint returns only PENDING).
-
-import type { ReviewStatus, ReviewSubmission } from "@shared/types";
+import type {
+  MissionCategory,
+  ReviewStatus,
+  ReviewSubmission,
+} from "@shared/types";
 
 import type {
-  StepSubmission,
-  StepSubmissionStatus,
-} from "@/types/review/StepSubmission";
+  ReviewMissionType,
+  ReviewQueueByPlayer,
+} from "@/types/review/ReviewQueueByPlayer";
+import type { StepSubmissionStatus } from "@/types/review/StepSubmission";
 
 /* ── Constants ── */
 
@@ -27,6 +24,12 @@ const STATUS_TO_FRONTEND: Record<StepSubmissionStatus, ReviewStatus> = {
   PENDING: "pending",
   APPROVED: "approved",
   REJECTED: "rejected",
+};
+
+const TYPE_TO_CATEGORY: Record<ReviewMissionType, MissionCategory> = {
+  DAILY: "daily",
+  WEEKLY: "weekly",
+  FIXED: "fixed",
 };
 
 /* ── Mappers ── */
@@ -39,23 +42,29 @@ export function mapStepStatus(status: StepSubmissionStatus): ReviewStatus {
 }
 
 /**
- * Convert backend StepSubmission → frontend ReviewSubmission.
- *
- * Derived fields not present in the backend response degrade gracefully;
- * each one is annotated with a TODO(backend).
+ * Flatten a ReviewQueueByPlayer (jugador + sus misiones + sus pasos) into a
+ * flat list of reviewable submissions (one per step).
  */
-export function stepSubmissionToReview(step: StepSubmission): ReviewSubmission {
-  return {
-    id: String(step.id),
-    missionId: String(step.userMissionId), // TODO(backend): real missionId not in response
-    userId: String(step.userMissionId), // TODO(backend): real userId not in response
-    userName: "", // TODO(backend): player name not in response
-    missionTitle: `Paso ${step.missionStepId}`, // TODO(backend): mission title not in response
-    missionCategory: undefined, // TODO(backend): mission type not in response
-    missionDescription: undefined,
-    submittedAt: step.reviewedAt ?? "", // TODO(backend): no submittedAt field
-    images: step.submissionImageUrl ? [step.submissionImageUrl] : [],
-    userNote: step.submissionText ?? undefined,
-    status: mapStepStatus(step.status),
-  };
+export function reviewQueueByPlayerToReviews(
+  player: ReviewQueueByPlayer,
+): ReviewSubmission[] {
+  return player.missions.flatMap((mission) =>
+    mission.steps.map((step) => ({
+      id: String(step.id),
+      missionId: String(mission.missionId),
+      userId: String(player.playerId),
+      userName: player.playerName ?? "",
+      missionTitle: mission.missionTitle,
+      missionCategory: TYPE_TO_CATEGORY[mission.missionType],
+      missionDescription: mission.missionDescription ?? undefined,
+      submittedAt: step.reviewedAt ?? "",
+      images: step.submissionImageUrl
+        ? [step.submissionImageUrl]
+        : mission.imageUrl
+          ? [mission.imageUrl]
+          : [],
+      userNote: step.submissionText ?? undefined,
+      status: mapStepStatus(step.status),
+    })),
+  );
 }

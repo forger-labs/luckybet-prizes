@@ -19,6 +19,7 @@ export const ADMIN_ROUTES = {
   MISIONES: "/panel",
   REVISION: "/panel/revision",
   USUARIOS: "/panel/usuarios",
+  JUGADORES: "/panel/jugadores",
 };
 
 export const ADMIN_LINKS: AdminSidebarLink[] = [
@@ -31,6 +32,11 @@ export const ADMIN_LINKS: AdminSidebarLink[] = [
     path: ADMIN_ROUTES.REVISION,
     icon: "fact_check",
     text: "Revisión de Tareas",
+  },
+  {
+    path: ADMIN_ROUTES.JUGADORES,
+    icon: "stadia_controller",
+    text: "Jugadores",
   },
   {
     path: ADMIN_ROUTES.USUARIOS,

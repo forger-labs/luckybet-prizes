@@ -1,27 +1,25 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useReducer } from "react";
+import { useCallback, useEffect, useReducer, useState } from "react";
 
+import { Pagination } from "@/components/ui/Pagination";
+import type { ReviewMissionType } from "@/types/review/ReviewQueueByPlayer";
+import type {
+  ReviewFilter,
+  ReviewViewMode,
+} from "@/types/review/ReviewSubmission";
 import { ReviewableCard } from "./ReviewableCard";
 import { ReviewFilterBar } from "./ReviewFilterBar";
 import { ReviewModal } from "./ReviewModal";
+import { ReviewStatsCards } from "./ReviewStatsCards";
+import { ReviewTable } from "./ReviewTable";
 import {
+  initialState,
   loadReviewQueue,
-  type ReviewState,
   reviewReducer,
   submitReview,
 } from "./reviewReducer";
 import { SkeletonCard } from "./SkeletonCard";
-
-const INITIAL_STATE: ReviewState = {
-  submissions: [],
-  filter: "pending",
-  sortOrder: "newest",
-  search: "",
-  loading: true,
-  selectedSubmission: null,
-  modalOpen: false,
-};
 
 const EMPTY_MESSAGES: Record<
   string,
@@ -30,35 +28,37 @@ const EMPTY_MESSAGES: Record<
   pending: {
     icon: "fact_check",
     title: "No hay tareas pendientes de revisión",
-    desc: "Los submissions aparecerán aquí cuando los usuarios completen misiones.",
+    desc: "Las evidencias enviadas por los jugadores aparecerán aquí.",
   },
   approved: {
     icon: "task_alt",
-    title: "No hay tareas aprobadas",
-    desc: "Las revisiones aprobadas aún no están disponibles: el endpoint de cola solo expone pendientes.",
+    title: "Sin tareas aprobadas en este filtro",
+    desc: "Las tareas aprobadas se archivarán en esta sección.",
   },
   rejected: {
     icon: "gpp_bad",
-    title: "No hay tareas rechazadas",
-    desc: "Las revisiones rechazadas aún no están disponibles: el endpoint de cola solo expone pendientes.",
+    title: "Sin tareas rechazadas en este filtro",
+    desc: "Las tareas rechazadas con observaciones se mostrarán aquí.",
   },
 };
 
-function ReviewList() {
-  const [state, dispatch] = useReducer(reviewReducer, INITIAL_STATE);
+export function ReviewList() {
+  const [state, dispatch] = useReducer(reviewReducer, initialState);
+  const [viewMode, setViewMode] = useState<ReviewViewMode>("list");
 
   useEffect(() => {
-    loadReviewQueue(dispatch);
-  }, []);
+    loadReviewQueue(dispatch, {
+      filter: state.filter,
+      missionType: state.missionType,
+      page: state.page,
+    });
+  }, [state.filter, state.missionType, state.page]);
 
   const handleSelect = useCallback(
     (id: string) => {
       const sub = state.submissions.find((s) => s.id === id);
       if (sub)
-        dispatch({
-          type: "SELECT_SUBMISSION",
-          payload: { submission: sub },
-        });
+        dispatch({ type: "SELECT_SUBMISSION", payload: { submission: sub } });
     },
     [state.submissions],
   );
@@ -81,95 +81,106 @@ function ReviewList() {
     });
   }, []);
 
-  const filtered = useMemo(() => {
-    const { filter, sortOrder, search, submissions } = state;
+  const handleTabChange = useCallback((filter: ReviewFilter) => {
+    dispatch({ type: "SET_FILTER", payload: { filter } });
+  }, []);
 
-    let result = submissions;
-
-    // Status filter
-    result = result.filter((s) => s.status === filter);
-
-    // Search
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(
-        (s) =>
-          s.userName.toLowerCase().includes(q) ||
-          s.userNote?.toLowerCase().includes(q) ||
-          s.missionTitle.toLowerCase().includes(q),
-      );
-    }
-
-    // Date sort (missing/empty dates sort as the oldest)
-    result = [...result].sort((a, b) => {
-      const timeA = Date.parse(a.submittedAt || "") || 0;
-      const timeB = Date.parse(b.submittedAt || "") || 0;
-      const diff = timeB - timeA;
-      return sortOrder === "newest" ? diff : -diff;
-    });
-
-    return result;
-  }, [state]);
-
-  const counts = useMemo(
-    () => ({
-      pending: state.submissions.filter((s) => s.status === "pending").length,
-      approved: state.submissions.filter((s) => s.status === "approved").length,
-      rejected: state.submissions.filter((s) => s.status === "rejected").length,
-    }),
-    [state.submissions],
+  const handleTypeChange = useCallback(
+    (missionType: ReviewMissionType | "all") => {
+      dispatch({ type: "SET_MISSION_TYPE", payload: { missionType } });
+    },
+    [],
   );
 
-  const empty = EMPTY_MESSAGES[state.filter];
+  const handlePageChange = useCallback((page: number) => {
+    dispatch({ type: "SET_PAGE", payload: { page } });
+  }, []);
+
+  const empty = EMPTY_MESSAGES[state.filter] || EMPTY_MESSAGES.pending;
+  const pendingCount = state.submissions.filter(
+    (s) => s.status === "pending",
+  ).length;
+  const approvedCount = state.submissions.filter(
+    (s) => s.status === "approved",
+  ).length;
+  const rejectedCount = state.submissions.filter(
+    (s) => s.status === "rejected",
+  ).length;
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-headline-lg text-on-surface font-headline-lg">
-        Revisión de Tareas
-      </h1>
-
-      <ReviewFilterBar
-        activeTab={state.filter}
-        counts={counts}
-        sortOrder={state.sortOrder}
-        onTabChange={(tab) =>
-          dispatch({ type: "SET_FILTER", payload: { filter: tab } })
-        }
-        onSortChange={(order) =>
-          dispatch({ type: "SET_SORT_ORDER", payload: { sortOrder: order } })
-        }
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+      {/* ── Stats Overview ── */}
+      <ReviewStatsCards
+        totalPending={pendingCount}
+        totalApproved={approvedCount}
+        totalRejected={rejectedCount}
+        page={state.page}
+        totalPages={state.totalPages}
       />
 
+      {/* ── Filter Bar with View Mode Toggle ── */}
+      <ReviewFilterBar
+        activeTab={state.filter}
+        activeType={state.missionType}
+        viewMode={viewMode}
+        onTabChange={handleTabChange}
+        onTypeChange={handleTypeChange}
+        onViewModeChange={setViewMode}
+      />
+
+      {/* ── Content (List or Grid) ── */}
       {state.loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {Array.from({ length: 6 }, () => crypto.randomUUID()).map((key) => (
             <SkeletonCard key={key} />
           ))}
         </div>
-      ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <span className="material-symbols-outlined text-6xl text-outline/40">
-            {empty.icon}
-          </span>
-          <p className="text-title-md text-on-surface-variant text-center">
+      ) : state.submissions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 px-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low/60 backdrop-blur-md text-center">
+          <div className="w-16 h-16 rounded-2xl bg-surface-container-high/60 border border-outline-variant/30 flex items-center justify-center text-outline/60 mb-4 shadow-inner">
+            <span className="material-symbols-outlined text-3xl">
+              {empty.icon}
+            </span>
+          </div>
+          <p className="font-(--font-plus-jakarta-sans) text-title-md font-bold text-on-surface">
             {empty.title}
           </p>
-          <p className="text-body-md text-outline text-center max-w-md">
+          <p className="font-body-md text-sm text-on-surface-variant max-w-md mt-1">
             {empty.desc}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((submission) => (
-            <ReviewableCard
-              key={submission.id}
-              submission={submission}
-              onClick={handleSelect}
+        <>
+          {viewMode === "list" ? (
+            <ReviewTable
+              submissions={state.submissions}
+              onSelect={handleSelect}
+              onApprove={(id) => handleApprove(id)}
+              onReject={(id) => handleSelect(id)}
             />
-          ))}
-        </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {state.submissions.map((submission) => (
+                <ReviewableCard
+                  key={submission.id}
+                  submission={submission}
+                  onClick={handleSelect}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="flex justify-center pt-4 border-t border-outline-variant/15">
+            <Pagination
+              current={state.page}
+              total={state.totalPages}
+              onChange={handlePageChange}
+            />
+          </div>
+        </>
       )}
 
+      {/* ── Evidence Review Modal ── */}
       {state.selectedSubmission && (
         <ReviewModal
           submission={state.selectedSubmission}
@@ -183,4 +194,4 @@ function ReviewList() {
   );
 }
 
-export { ReviewList };
+ReviewList.displayName = "ReviewList";

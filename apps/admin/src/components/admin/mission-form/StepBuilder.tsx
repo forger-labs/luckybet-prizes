@@ -8,19 +8,11 @@ import { Button } from "@/components/ui/Button";
 import type { StepBuilderProps } from "@/types/missions/StepBuilderTypes";
 import { StepCard } from "./StepCard";
 
-/**
- * StepBuilder — lista de pasos con ordenamiento y agregado.
- *
- * Recibe formik directamente y extrae steps, setFieldValue y errores.
- * Renderiza un StepCard por cada paso y un botón "Agregar paso"
- * al final. Reordena los pasos al mover arriba/abajo o eliminar.
- */
-function StepBuilder({ formik, readOnly = false }: StepBuilderProps) {
+export function StepBuilder({ formik, readOnly = false }: StepBuilderProps) {
   const steps = (formik.values.steps as MissionStep[]) || [];
   const onChange = (newSteps: MissionStep[]) =>
     formik.setFieldValue("steps", newSteps);
 
-  // Extract per-step errors from formik errors
   const stepsErrors = formik.errors.steps;
   const perStepErrors: Record<string, Record<string, string>> = {};
   if (Array.isArray(stepsErrors)) {
@@ -70,9 +62,9 @@ function StepBuilder({ formik, readOnly = false }: StepBuilderProps) {
 
   const handleAdd = () => {
     const newStep: MissionStep = {
-      id: crypto.randomUUID(),
+      id: Date.now(),
       title: "",
-      verificationType: "upload_image" as VerificationType,
+      verificationType: "IMAGE" as VerificationType,
       order: steps.length + 1,
     };
     onChange([...steps, newStep]);
@@ -81,42 +73,55 @@ function StepBuilder({ formik, readOnly = false }: StepBuilderProps) {
   if (readOnly) return null;
 
   return (
-    <div className="flex flex-col gap-3">
-      <h3 className="text-title-md text-on-surface font-semibold">Pasos</h3>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="font-(--font-plus-jakarta-sans) text-title-md font-bold text-on-surface">
+            Pasos de Verificación
+          </h4>
+          <p className="text-label-sm text-on-surface-variant">
+            Defina la secuencia de acciones que el jugador debe completar
+          </p>
+        </div>
+
+        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+          {steps.length} {steps.length === 1 ? "paso" : "pasos"}
+        </span>
+      </div>
 
       {steps.length === 0 && (
         <p className="text-body-md text-outline">
-          No hay pasos. Agregá al menos uno para crear la misión.
+          No hay pasos configurados. Agregue al menos un paso para crear la
+          misión.
         </p>
       )}
 
-      {steps.map((step, index) => (
-        <StepCard
-          key={step.id}
-          step={step}
-          index={index}
-          totalSteps={steps.length}
-          onChange={(updated) => handleChange(index, updated)}
-          onRemove={() => handleRemove(index)}
-          onMoveUp={() => handleMoveUp(index)}
-          onMoveDown={() => handleMoveDown(index)}
-          errors={perStepErrors[index]}
-        />
-      ))}
+      <div className="space-y-3">
+        {steps.map((step, index) => (
+          <StepCard
+            key={step.id}
+            step={step}
+            index={index}
+            totalSteps={steps.length}
+            onChange={(updated) => handleChange(index, updated)}
+            onRemove={() => handleRemove(index)}
+            onMoveUp={() => handleMoveUp(index)}
+            onMoveDown={() => handleMoveDown(index)}
+            errors={perStepErrors[index]}
+          />
+        ))}
+      </div>
 
       <Button
         variant="ghost"
-        leadingIcon="add"
+        leadingIcon="add_circle"
         onClick={handleAdd}
-        className="self-start mt-2 text-base"
+        className="self-start mt-1 text-sm font-semibold border-dashed cursor-pointer"
       >
-        Agregar paso
+        Agregar paso adicional
       </Button>
     </div>
   );
 }
 
 StepBuilder.displayName = "StepBuilder";
-
-export { StepBuilder };
-export type { StepBuilderProps };

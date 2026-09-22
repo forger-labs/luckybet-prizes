@@ -1,31 +1,40 @@
 "use client";
 
-import type { ReviewStatus } from "@/types/review/ReviewSubmission";
+import type { ReviewStatusBadgeProps } from "@/types/review/ReviewSubmission";
 
-const statusStyles: Record<ReviewStatus, string> = {
-  pending: "bg-[#ffc640]/20 text-[#ffc640]",
-  approved: "bg-[#22c55e]/15 text-[#4ade80]",
-  rejected: "bg-[#ffb4ab]/20 text-[#ffb4ab]",
+const statusStyles = {
+  pending: "bg-secondary/15 text-secondary border-secondary/30",
+  approved: "bg-[#22c55e]/15 text-[#4ade80] border-[#22c55e]/30",
+  rejected: "bg-error-container/30 text-error border-error-container/40",
 };
 
-const statusLabels: Record<ReviewStatus, string> = {
+const statusLabels = {
   pending: "Pendiente",
   approved: "Aprobada",
   rejected: "Rechazada",
 };
 
-interface ReviewStatusBadgeProps {
-  status: ReviewStatus;
-}
-
-function ReviewStatusBadge({ status }: ReviewStatusBadgeProps) {
+export function ReviewStatusBadge({ status }: ReviewStatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm uppercase tracking-wider ${statusStyles[status]}`}
+      className={`
+        inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-label-sm font-semibold
+        uppercase tracking-wider border text-xs
+        ${statusStyles[status]}
+      `}
     >
-      {statusLabels[status]}
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${
+          status === "pending"
+            ? "bg-secondary animate-pulse"
+            : status === "approved"
+              ? "bg-[#4ade80]"
+              : "bg-error"
+        }`}
+      />
+      <span>{statusLabels[status]}</span>
     </span>
   );
 }
 
-export { ReviewStatusBadge };
+ReviewStatusBadge.displayName = "ReviewStatusBadge";

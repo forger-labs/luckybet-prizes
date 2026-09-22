@@ -2,7 +2,9 @@ import type { AdminMission } from "@shared/types";
 export type PartialAdminMission = Omit<
   AdminMission,
   "id" | "createdAt" | "participants"
->;
+> & {
+  image?: File;
+};
 
 export interface MissionFormModalProps {
   open: boolean;

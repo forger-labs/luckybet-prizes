@@ -13,7 +13,7 @@ export const LoginHeader = () => {
         ¡Bienvenido a LuckyBet!
       </h1>
       <p className="font-body-md text-on-surface-variant mt-2">
-        Iniciá sesión para seguir con tus misiones
+        Inicia sesión para continuar con tus misiones
       </p>
     </header>
   );
