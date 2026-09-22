@@ -30,7 +30,7 @@ export function useDashboardData() {
       const meRes = await webApi.getMe();
       if (meRes.status && meRes.data) {
         const player = meRes.data;
-        const currentXp = player.experience ?? 0;
+        const currentXp = player.level?.minExperience ?? 0;
         const currentLevel = player.level;
         const currentTier = currentLevel?.name ?? "Nivel 1";
         const currentLevelImage = currentLevel?.image;

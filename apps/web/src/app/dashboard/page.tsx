@@ -19,7 +19,7 @@ export default function DashboardPage() {
 
       {/* User Status & Featured Hero Mission */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-gutter">
-        <div className="lg:col-span-4 min-h-[320px]">
+        <div className="lg:col-span-4">
           <UserStatusWidget status={userRank} isLoading={isLoadingUser} />
         </div>
         <div className="lg:col-span-8 min-h-[320px]">
