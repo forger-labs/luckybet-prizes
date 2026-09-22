@@ -8,6 +8,7 @@ import type { ReviewFilter } from "@/types/review/ReviewSubmission";
 import { ReviewableCard } from "./ReviewableCard";
 import { ReviewFilterBar } from "./ReviewFilterBar";
 import { ReviewModal } from "./ReviewModal";
+import { ReviewStatsCards } from "./ReviewStatsCards";
 import {
   initialState,
   loadReviewQueue,
@@ -23,21 +24,21 @@ const EMPTY_MESSAGES: Record<
   pending: {
     icon: "fact_check",
     title: "No hay tareas pendientes de revisión",
-    desc: "Los submissions aparecerán aquí cuando los usuarios completen misiones.",
+    desc: "Las evidencias enviadas por los jugadores aparecerán aquí.",
   },
   approved: {
     icon: "task_alt",
-    title: "Sin tareas aprobadas",
-    desc: "Cuando apruebes tareas, aparecerán en esta sección.",
+    title: "Sin tareas aprobadas en este filtro",
+    desc: "Las tareas aprobadas se archivarán en esta sección.",
   },
   rejected: {
     icon: "gpp_bad",
-    title: "Sin tareas rechazadas",
-    desc: "Las tareas que rechaces se guardarán en esta sección.",
+    title: "Sin tareas rechazadas en este filtro",
+    desc: "Las tareas rechazadas con observaciones se mostrarán aquí.",
   },
 };
 
-function ReviewList() {
+export function ReviewList() {
   const [state, dispatch] = useReducer(reviewReducer, initialState);
 
   useEffect(() => {
@@ -52,10 +53,7 @@ function ReviewList() {
     (id: string) => {
       const sub = state.submissions.find((s) => s.id === id);
       if (sub)
-        dispatch({
-          type: "SELECT_SUBMISSION",
-          payload: { submission: sub },
-        });
+        dispatch({ type: "SELECT_SUBMISSION", payload: { submission: sub } });
     },
     [state.submissions],
   );
@@ -93,14 +91,29 @@ function ReviewList() {
     dispatch({ type: "SET_PAGE", payload: { page } });
   }, []);
 
-  const empty = EMPTY_MESSAGES[state.filter];
+  const empty = EMPTY_MESSAGES[state.filter] || EMPTY_MESSAGES.pending;
+  const pendingCount = state.submissions.filter(
+    (s) => s.status === "pending",
+  ).length;
+  const approvedCount = state.submissions.filter(
+    (s) => s.status === "approved",
+  ).length;
+  const rejectedCount = state.submissions.filter(
+    (s) => s.status === "rejected",
+  ).length;
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-headline-lg text-on-surface font-headline-lg">
-        Revisión de Tareas
-      </h1>
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+      {/* ── Stats Overview ── */}
+      <ReviewStatsCards
+        totalPending={pendingCount}
+        totalApproved={approvedCount}
+        totalRejected={rejectedCount}
+        page={state.page}
+        totalPages={state.totalPages}
+      />
 
+      {/* ── Filter Bar ── */}
       <ReviewFilterBar
         activeTab={state.filter}
         activeType={state.missionType}
@@ -108,27 +121,30 @@ function ReviewList() {
         onTypeChange={handleTypeChange}
       />
 
+      {/* ── Submission Grid / Loading / Empty State ── */}
       {state.loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {Array.from({ length: 6 }, () => crypto.randomUUID()).map((key) => (
             <SkeletonCard key={key} />
           ))}
         </div>
       ) : state.submissions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 gap-4">
-          <span className="material-symbols-outlined text-6xl text-outline/40">
-            {empty.icon}
-          </span>
-          <p className="text-title-md text-on-surface-variant text-center">
+        <div className="flex flex-col items-center justify-center py-24 px-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low/60 backdrop-blur-md text-center">
+          <div className="w-16 h-16 rounded-2xl bg-surface-container-high/60 border border-outline-variant/30 flex items-center justify-center text-outline/60 mb-4 shadow-inner">
+            <span className="material-symbols-outlined text-3xl">
+              {empty.icon}
+            </span>
+          </div>
+          <p className="font-(--font-plus-jakarta-sans) text-title-md font-bold text-on-surface">
             {empty.title}
           </p>
-          <p className="text-body-md text-outline text-center max-w-md">
+          <p className="font-body-md text-sm text-on-surface-variant max-w-md mt-1">
             {empty.desc}
           </p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {state.submissions.map((submission) => (
               <ReviewableCard
                 key={submission.id}
@@ -138,18 +154,17 @@ function ReviewList() {
             ))}
           </div>
 
-          {state.totalPages > 1 && (
-            <div className="flex justify-center pt-4 border-t border-outline-variant/20">
-              <Pagination
-                current={state.page}
-                total={state.totalPages}
-                onChange={handlePageChange}
-              />
-            </div>
-          )}
+          <div className="flex justify-center pt-4 border-t border-outline-variant/15">
+            <Pagination
+              current={state.page}
+              total={state.totalPages}
+              onChange={handlePageChange}
+            />
+          </div>
         </>
       )}
 
+      {/* ── Evidence Review Modal ── */}
       {state.selectedSubmission && (
         <ReviewModal
           submission={state.selectedSubmission}
@@ -163,4 +178,4 @@ function ReviewList() {
   );
 }
 
-export { ReviewList };
+ReviewList.displayName = "ReviewList";

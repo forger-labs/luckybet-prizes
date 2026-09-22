@@ -1,3 +1,5 @@
+import type { FormikProps } from "formik";
+
 /** Rol de usuario dentro del panel administrativo */
 export type UserRole = "SUPER_ADMIN" | "REVIEWER";
 
@@ -26,6 +28,12 @@ export interface AdminUserFormData {
   isActive: boolean;
 }
 
+/** Props para los campos del formulario de usuario */
+export interface UserFormFieldsProps {
+  formik: FormikProps<AdminUserFormData>;
+  isCreate: boolean;
+}
+
 /** Props para el modal de creación/edición */
 export interface UserFormModalProps {
   open: boolean;
@@ -41,6 +49,14 @@ export interface UserFilterTabsProps {
   activeFilter: UserActiveStatus;
   onRoleChange: (role: UserRole | "all") => void;
   onActiveChange: (active: UserActiveStatus) => void;
+}
+
+/** Props para las tarjetas de estadísticas de usuarios */
+export interface UserStatsProps {
+  totalUsers: number;
+  superAdminCount: number;
+  reviewerCount: number;
+  activeCount: number;
 }
 
 /** Estado del reducer */

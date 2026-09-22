@@ -9,7 +9,7 @@ import type {
 const ROLE_OPTIONS: { value: UserRole | "all"; label: string }[] = [
   { value: "all", label: "Todos los roles" },
   { value: "SUPER_ADMIN", label: "Super Admin" },
-  { value: "REVIEWER", label: "Reviewer" },
+  { value: "REVIEWER", label: "Revisores" },
 ];
 
 const ACTIVE_OPTIONS: { value: UserActiveStatus; label: string }[] = [
@@ -18,24 +18,17 @@ const ACTIVE_OPTIONS: { value: UserActiveStatus; label: string }[] = [
   { value: "inactive", label: "Inactivos" },
 ];
 
-/**
- * UserFilterTabs — filtros de rol y estado para la tabla de usuarios.
- *
- * Dos grupos de chips tipo pill: uno para filtrar por rol (SUPER_ADMIN / REVIEWER / todos),
- * otro para filtrar por estado activo/inactivo. Sigue el mismo patrón que
- * FilterTabs del módulo de misiones.
- */
-function UserFilterTabs({
+export function UserFilterTabs({
   roleFilter,
   activeFilter,
   onRoleChange,
   onActiveChange,
 }: UserFilterTabsProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+    <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
       {/* Role filter */}
       <div
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-1.5 p-1 rounded-2xl bg-surface-container-low/80 border border-outline-variant/20 w-fit backdrop-blur-sm"
         role="tablist"
         aria-label="Filtrar por rol"
       >
@@ -48,11 +41,14 @@ function UserFilterTabs({
               role="tab"
               aria-selected={isActive}
               onClick={() => onRoleChange(opt.value)}
-              className={`px-4 py-2 rounded-full text-label-sm font-semibold transition-all duration-200 cursor-pointer ${
-                isActive
-                  ? "bg-primary text-on-primary"
-                  : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-higher"
-              }`}
+              className={`
+                px-3.5 py-1.5 rounded-xl text-label-sm font-semibold transition-all duration-200 cursor-pointer select-none
+                ${
+                  isActive
+                    ? "bg-primary text-on-primary shadow-[0_0_12px_rgba(56,189,248,0.25)]"
+                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60"
+                }
+              `}
             >
               {opt.label}
             </button>
@@ -62,7 +58,7 @@ function UserFilterTabs({
 
       {/* Active status filter */}
       <div
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-1.5 p-1 rounded-2xl bg-surface-container-low/80 border border-outline-variant/20 w-fit backdrop-blur-sm"
         role="tablist"
         aria-label="Filtrar por estado"
       >
@@ -75,11 +71,14 @@ function UserFilterTabs({
               role="tab"
               aria-selected={isActive}
               onClick={() => onActiveChange(opt.value)}
-              className={`px-4 py-2 rounded-full text-label-sm font-semibold transition-all duration-200 cursor-pointer ${
-                isActive
-                  ? "bg-primary/15 text-primary glow-primary-sm"
-                  : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-higher"
-              }`}
+              className={`
+                px-3.5 py-1.5 rounded-xl text-label-sm font-semibold transition-all duration-200 cursor-pointer select-none
+                ${
+                  isActive
+                    ? "bg-secondary text-on-secondary shadow-[0_0_12px_rgba(255,198,64,0.25)] font-bold"
+                    : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/60"
+                }
+              `}
             >
               {opt.label}
             </button>
@@ -91,5 +90,3 @@ function UserFilterTabs({
 }
 
 UserFilterTabs.displayName = "UserFilterTabs";
-
-export { UserFilterTabs };

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useReducer } from "react";
 
 import { Pagination } from "@/components/ui/Pagination";
 import type { PlayerFilters } from "@/types/adminPlayers";
+import { PlayerStatsCards } from "./PlayerStatsCards";
 import { PlayersFilterBar } from "./PlayersFilterBar";
 import {
   applyFilters,
@@ -13,25 +14,14 @@ import {
 } from "./PlayersReducer";
 import { PlayersTable } from "./PlayersTable";
 
-/**
- * PlayersList — orquestador principal de la pantalla de jugadores.
- *
- * Maneja el estado global (carga, filtros, paginación) y renderiza
- * la barra de búsqueda, filtros, tabla y paginación. Sigue el mismo
- * patrón que UsersList y MissionsList.
- */
-function PlayersList() {
+export function PlayersList() {
   const [state, dispatch] = useReducer(playersReducer, initialState);
 
-  /* ── Load players on mount / page change ── */
   useEffect(() => {
     loadPlayers(dispatch, state.page);
   }, [state.page]);
 
-  /* ── Filtered items ── */
   const pagePlayers = applyFilters(state.players, state.filters);
-
-  /* ── Handlers ── */
 
   const handleFilterChange = useCallback((filter: Partial<PlayerFilters>) => {
     dispatch({ type: "SET_FILTER", payload: { filter } });
@@ -41,16 +31,20 @@ function PlayersList() {
     dispatch({ type: "SET_PAGE", payload: { page } });
   }, []);
 
-  /* ── Loading ── */
+  const activeCount = state.players.filter((p) => p.isActive).length;
+  const suspendedCount = state.players.filter((p) => !p.isActive).length;
+
   if (state.loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="flex flex-col items-center gap-3">
-          <span className="material-symbols-outlined text-4xl text-primary animate-pulse">
-            stadia_controller
-          </span>
-          <p className="text-body-md text-on-surface-variant">
-            Cargando jugadores...
+      <div className="flex items-center justify-center py-28">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(56,189,248,0.2)]">
+            <span className="material-symbols-outlined text-3xl animate-spin">
+              sync
+            </span>
+          </div>
+          <p className="text-body-md text-on-surface-variant font-medium">
+            Cargando registro de jugadores...
           </p>
         </div>
       </div>
@@ -58,28 +52,27 @@ function PlayersList() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* ── Title ── */}
-      <div>
-        <h1 className="text-headline-lg font-bold text-on-surface">
-          Jugadores
-        </h1>
-        <p className="text-body-md text-on-surface-variant mt-1">
-          Explorá los jugadores registrados y su estado
-        </p>
-      </div>
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+      {/* ── Summary Stats ── */}
+      <PlayerStatsCards
+        totalPlayers={state.players.length}
+        activePlayers={activeCount}
+        suspendedPlayers={suspendedCount}
+        page={state.page}
+        totalPages={state.totalPages}
+      />
 
-      {/* ── Filter bar ── */}
+      {/* ── Filter Bar ── */}
       <PlayersFilterBar
         filters={state.filters}
         onFilterChange={handleFilterChange}
       />
 
-      {/* ── Table ── */}
+      {/* ── Players Table ── */}
       <PlayersTable players={pagePlayers} />
 
       {/* ── Pagination ── */}
-      <div className="flex justify-center pt-4 border-t border-outline-variant/20">
+      <div className="flex justify-center pt-4 border-t border-outline-variant/15">
         <Pagination
           current={state.page}
           total={state.totalPages}
@@ -91,5 +84,3 @@ function PlayersList() {
 }
 
 PlayersList.displayName = "PlayersList";
-
-export { PlayersList };

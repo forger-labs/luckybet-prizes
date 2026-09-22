@@ -15,29 +15,13 @@ export interface PlayerFilters {
   status: PlayerStatusFilter;
 }
 
-/* ── Filtros por rango (legados, comentados para uso futuro) ──────────────
- * El modelo backend de Player NO expone level / coins / completedMissions /
- * inProgressMissions. Estos tipos se conservan comentados por si el backend
- * llega a incluirlos; reactivar junto con los helpers y los Selects
- * comentados en PlayersReducer.ts y PlayersFilterBar.tsx.
- */
-// export type LevelRange = "all" | "1-5" | "6-10" | "11-15" | "16-20" | "21+";
-// export type CoinsRange =
-//   | "all"
-//   | "0-1000"
-//   | "1001-5000"
-//   | "5001-10000"
-//   | "10001+";
-// export type MissionsRange = "all" | "0" | "1-5" | "6-10" | "11+";
-// export type InProgressRange = "all" | "0" | "1-2" | "3-5" | "6+";
-
-// export interface PlayerFiltersLegacy {
-//   search: string;
-//   levelRange: LevelRange;
-//   coinsRange: CoinsRange;
-//   completedRange: MissionsRange;
-//   inProgressRange: InProgressRange;
-// }
+export interface PlayerStatsProps {
+  totalPlayers: number;
+  activePlayers: number;
+  suspendedPlayers: number;
+  page: number;
+  totalPages: number;
+}
 
 /** Estado del reducer */
 export interface PlayersState {

@@ -1,32 +1,26 @@
 "use client";
 
-import { Field, Form, Formik } from "formik";
+import { Form, Formik } from "formik";
 import { useCallback, useRef } from "react";
 import { sileo } from "sileo";
 import * as Yup from "yup";
 
-import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
-import { Select } from "@/components/ui/Select";
 import type { UserFormModalProps } from "@/types/adminUsers";
-
-/* ── Validation Schema ── */
+import { UserFormFields } from "./UserFormFields";
 
 const CreateSchema = Yup.object().shape({
   username: Yup.string()
     .min(3, "Mínimo 3 caracteres")
     .max(20, "Máximo 20 caracteres")
-    .matches(
-      /^[a-zA-Z0-9._-]+$/,
-      "Solo letras, números, puntos, guiones y guiones bajos",
-    )
+    .matches(/^[a-zA-Z0-9._-]+$/, "Solo letras, números, puntos y guiones")
     .required("El usuario es obligatorio"),
   password: Yup.string()
     .min(6, "Mínimo 6 caracteres")
     .max(50, "Máximo 50 caracteres")
     .required("La contraseña es obligatoria"),
   role: Yup.string()
-    .oneOf(["SUPER_ADMIN", "REVIEWER"], "Seleccioná un rol válido")
+    .oneOf(["SUPER_ADMIN", "REVIEWER"], "Seleccione un rol válido")
     .required("El rol es obligatorio"),
   isActive: Yup.boolean(),
 });
@@ -35,37 +29,31 @@ const EditSchema = Yup.object().shape({
   username: Yup.string()
     .min(3, "Mínimo 3 caracteres")
     .max(20, "Máximo 20 caracteres")
-    .matches(
-      /^[a-zA-Z0-9._-]+$/,
-      "Solo letras, números, puntos, guiones y guiones bajos",
-    )
+    .matches(/^[a-zA-Z0-9._-]+$/, "Solo letras, números, puntos y guiones")
     .required("El usuario es obligatorio"),
   password: Yup.string()
     .min(6, "Mínimo 6 caracteres")
     .max(50, "Máximo 50 caracteres"),
   role: Yup.string()
-    .oneOf(["SUPER_ADMIN", "REVIEWER"], "Seleccioná un rol válido")
+    .oneOf(["SUPER_ADMIN", "REVIEWER"], "Seleccione un rol válido")
     .required("El rol es obligatorio"),
   isActive: Yup.boolean(),
 });
 
-/**
- * UserFormModal — modal de creación/edición de usuarios administrativos.
- *
- * Usa Formik + Yup para validación. La contraseña se puede establecer
- * pero nunca se ve — la API no la devuelve, así que en edición siempre
- * arranca vacía y es opcional.
- */
-function UserFormModal({ open, onClose, user, onSave }: UserFormModalProps) {
+export function UserFormModal({
+  open,
+  onClose,
+  user,
+  onSave,
+}: UserFormModalProps) {
   const isCreate = user === null;
   const dirtyRef = useRef(false);
 
-  /* ── Request close with dirty-form guard ── */
   const handleRequestClose = useCallback(() => {
     if (dirtyRef.current) {
       sileo.action({
         title: "¿Descartar cambios?",
-        description: "Hay cambios sin guardar. ¿Querés descartarlos?",
+        description: "Hay modificaciones sin guardar. ¿Desea descartarlas?",
         button: {
           title: "Sí, descartar",
           onClick: () => {
@@ -73,17 +61,11 @@ function UserFormModal({ open, onClose, user, onSave }: UserFormModalProps) {
             sileo.clear();
           },
         },
-        duration: 8000,
       });
       return;
     }
     onClose();
   }, [onClose]);
-
-  const roleOptions = [
-    { value: "REVIEWER", label: "Reviewer" },
-    { value: "SUPER_ADMIN", label: "Super Admin" },
-  ];
 
   const initialValues = {
     username: user?.username ?? "",
@@ -96,161 +78,45 @@ function UserFormModal({ open, onClose, user, onSave }: UserFormModalProps) {
     <Modal
       open={open}
       onClose={handleRequestClose}
-      title={isCreate ? "Crear usuario" : "Editar usuario"}
+      title={isCreate ? "Crear Nuevo Usuario" : "Editar Usuario"}
+      subtitle={
+        isCreate
+          ? "Defina el nombre de usuario, contraseña y rol asignado"
+          : "Actualice los permisos o credenciales del usuario"
+      }
+      icon={isCreate ? "person_add" : "manage_accounts"}
       size="md"
     >
-      {/* ── Form ── */}
       <Formik
         initialValues={initialValues}
         validationSchema={isCreate ? CreateSchema : EditSchema}
         onSubmit={(values, { setSubmitting }) => {
-          onSave(
-            {
-              username: values.username,
-              password: values.password,
-              role: values.role,
-              isActive: values.isActive,
-            },
-            isCreate,
-          );
+          onSave(values, isCreate);
           setSubmitting(false);
           onClose();
         }}
         enableReinitialize
       >
-        {({
-          values,
-          handleChange,
-          handleBlur,
-          errors,
-          touched,
-          isSubmitting,
-          dirty,
-          setFieldValue,
-        }) => {
-          dirtyRef.current = dirty;
+        {(formik) => {
+          dirtyRef.current = formik.dirty;
           return (
             <Form className="flex flex-col gap-5">
-              {/* ── Username ── */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="username"
-                  className="text-label-sm font-semibold text-on-surface-variant"
-                >
-                  Nombre de usuario
-                </label>
-                <Input
-                  name="username"
-                  id="username"
-                  value={values.username}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder="ej: admin.nuevo"
-                  icon="person"
-                  wrapperClassName="w-full"
-                />
-                {touched.username && errors.username && (
-                  <p className="text-label-sm text-error mt-1">
-                    {errors.username}
-                  </p>
-                )}
-              </div>
+              <UserFormFields formik={formik} isCreate={isCreate} />
 
-              {/* ── Password ── */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="password"
-                  className="text-label-sm font-semibold text-on-surface-variant"
-                >
-                  Contraseña
-                  {!isCreate && (
-                    <span className="text-outline font-normal ml-1">
-                      (dejá vacío para mantener la actual)
-                    </span>
-                  )}
-                </label>
-                <Input
-                  name="password"
-                  id="password"
-                  type="password"
-                  value={values.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  placeholder={
-                    isCreate ? "Ingresá una contraseña" : "Nueva contraseña"
-                  }
-                  icon="lock"
-                  wrapperClassName="w-full"
-                />
-                {touched.password && errors.password && (
-                  <p className="text-label-sm text-error mt-1">
-                    {errors.password}
-                  </p>
-                )}
-              </div>
-
-              {/* ── Role ── */}
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="role"
-                  className="text-label-sm font-semibold text-on-surface-variant"
-                >
-                  Rol
-                </label>
-                <Select
-                  id="role"
-                  name="role"
-                  icon="badge"
-                  options={roleOptions}
-                  value={values.role}
-                  onChange={(v) => setFieldValue("role", v)}
-                  error={
-                    touched.role && errors.role
-                      ? (errors.role as string)
-                      : undefined
-                  }
-                />
-              </div>
-
-              {/* ── Active state toggle ── */}
-              <div className="flex items-center gap-3">
-                <Field
-                  id="isActive"
-                  name="isActive"
-                  type="checkbox"
-                  className="w-5 h-5 rounded-md border-outline-variant/30
-                      bg-surface-container-lowest
-                      checked:bg-primary checked:border-primary
-                      focus:ring-1 focus:ring-primary
-                      transition-all duration-200 cursor-pointer
-                      accent-primary"
-                />
-                <label
-                  htmlFor="isActive"
-                  className="text-body-md text-on-surface cursor-pointer select-none"
-                >
-                  Usuario activo
-                </label>
-              </div>
-
-              {/* ── Actions ── */}
-              <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/15">
                 <button
                   type="button"
                   onClick={handleRequestClose}
-                  className="px-6 py-3 rounded-lg text-body-md text-on-surface-variant
-                      hover:bg-white/5 transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl text-body-md text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || (isCreate ? false : !dirty)}
-                  className="px-6 py-3 rounded-lg text-body-md font-semibold
-                      bg-primary text-on-primary
-                      hover:bg-primary-fixed-dim
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                  disabled={
+                    formik.isSubmitting || (isCreate ? false : !formik.dirty)
+                  }
+                  className="px-5 py-2.5 rounded-xl text-body-md font-bold bg-primary text-on-primary hover:bg-primary-fixed-dim disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.2)]"
                 >
                   {isCreate ? "Crear usuario" : "Guardar cambios"}
                 </button>
@@ -264,5 +130,3 @@ function UserFormModal({ open, onClose, user, onSave }: UserFormModalProps) {
 }
 
 UserFormModal.displayName = "UserFormModal";
-
-export { UserFormModal };

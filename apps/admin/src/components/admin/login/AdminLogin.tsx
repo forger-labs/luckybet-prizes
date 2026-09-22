@@ -22,7 +22,7 @@ export default function AdminLogin() {
         });
 
         router.push(ROUTES.panel.index);
-        return
+        return;
       }
 
       sileo.error({

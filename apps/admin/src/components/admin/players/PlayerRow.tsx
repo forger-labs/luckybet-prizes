@@ -2,54 +2,63 @@
 
 import type { PlayerRowProps } from "@/types/adminPlayers";
 
-/**
- * PlayerRow — fila individual de la tabla de jugadores.
- *
- * Muestra username con avatar, teléfono y estado (activo/suspendido).
- * Sigue el patrón visual de UserRow según Midnight Harbor.
- */
-function PlayerRow({ player }: PlayerRowProps) {
-  /* ── Avatar por defecto desde el username ── */
-  const initial = player.username.charAt(0).toUpperCase();
+export function PlayerRow({ player }: PlayerRowProps) {
+  const initial = player.username
+    ? player.username.charAt(0).toUpperCase()
+    : "J";
+
   return (
-    <tr className="border-b border-outline-variant/20 last:border-b-0 hover:bg-surface-container-high/50 transition-colors">
-      {/* Username + avatar */}
-      <td className="py-3 px-4">
+    <tr className="border-b border-outline-variant/15 last:border-b-0 hover:bg-surface-container-high/40 transition-colors duration-150 group">
+      {/* Username + Avatar */}
+      <td className="py-4 px-4 sm:pl-6">
         <div className="flex items-center gap-3">
-          <span className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/15 text-primary text-label-md font-bold shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-surface-container-highest to-surface-container-high border border-outline-variant/30 flex items-center justify-center font-bold text-primary shadow-sm shrink-0">
             {initial}
-          </span>
-          <span className="text-body-md text-on-surface font-medium">
-            {player.username}
-          </span>
+          </div>
+          <div className="min-w-0">
+            <span className="font-(--font-plus-jakarta-sans) text-body-md font-semibold text-on-surface block truncate group-hover:text-primary transition-colors">
+              {player.username}
+            </span>
+            <span className="text-[11px] text-on-surface-variant/70 block">
+              ID: #{player.id}
+            </span>
+          </div>
         </div>
       </td>
 
       {/* Phone */}
-      <td className="py-3 px-4 text-body-md text-on-surface-variant">
-        {player.phone ?? "—"}
+      <td className="py-4 px-4 text-body-md text-on-surface-variant">
+        {player.phone ? (
+          <span className="inline-flex items-center gap-1.5 font-mono text-xs">
+            <span className="material-symbols-outlined text-sm text-outline">
+              call
+            </span>
+            <span>{player.phone}</span>
+          </span>
+        ) : (
+          <span className="text-outline text-xs">Sin teléfono</span>
+        )}
       </td>
 
       {/* Status */}
-      <td className="py-3 px-4">
-        {player.isActive ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#4ade80]/15 text-[#4ade80] text-label-sm font-semibold">
-            <span className="material-symbols-outlined text-sm">
-              check_circle
-            </span>
-            Activo
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary/15 text-secondary text-label-sm font-semibold">
-            <span className="material-symbols-outlined text-sm">cancel</span>
-            Suspendido
-          </span>
-        )}
+      <td className="py-4 px-4 sm:pr-6 text-right">
+        <span
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-label-sm font-semibold border ${
+            player.isActive
+              ? "bg-[#22c55e]/15 text-[#4ade80] border-[#22c55e]/30"
+              : "bg-secondary/15 text-secondary border-secondary/30"
+          }`}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              player.isActive ? "bg-[#4ade80] animate-pulse" : "bg-secondary"
+            }`}
+          />
+          <span>{player.isActive ? "Activo" : "Suspendido"}</span>
+        </span>
       </td>
     </tr>
   );
 }
 
 PlayerRow.displayName = "PlayerRow";
-
-export { PlayerRow };

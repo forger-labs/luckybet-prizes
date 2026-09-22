@@ -9,6 +9,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import type { AdminUserFormData, UserRole } from "@/types/adminUsers";
 import { UserFilterTabs } from "./UserFilterTabs";
 import { UserFormModal } from "./UserFormModal";
+import { UserStatsCards } from "./UserStatsCards";
 import {
   createUser,
   getCurrentPageItems,
@@ -19,29 +20,15 @@ import {
 } from "./UsersReducer";
 import { UsersTable } from "./UsersTable";
 
-/**
- * UsersList — orquestador principal de la página de usuarios administrativos.
- *
- * Maneja estado paginado con useReducer, filtros paralelos (rol + estado activo),
- * búsqueda por username, y el modal de creación/edición. Las operaciones
- * CRUD se delegan al API real mediante apiAdminGanaya.
- *
- * La contraseña solo es accesible para SUPER_ADMIN (puede establecerla pero
- * nunca verla — la API no la devuelve).
- */
-function UsersList() {
+export function UsersList() {
   const [state, dispatch] = useReducer(usersReducer, initialState);
-
-  /* ── User Form Modal state ── */
   const [editingUser, setEditingUser] = useState<number | null>(null);
   const [showFormModal, setShowFormModal] = useState(false);
 
-  /* ── Load users on mount ── */
   useEffect(() => {
     loadUsers(dispatch);
   }, []);
 
-  /* ── Filtered + paginated items ── */
   const pageUsers = getCurrentPageItems(
     state.users,
     state.roleFilter,
@@ -49,8 +36,6 @@ function UsersList() {
     state.search,
     state.page,
   );
-
-  /* ── Handlers ── */
 
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,15 +73,14 @@ function UsersList() {
     (id: number) => {
       const user = state.users.find((u) => u.id === id);
       if (!user) return;
-
       const willActivate = !user.isActive;
-      const actionText = willActivate ? "activar" : "desactivar";
+      const actionVerb = willActivate ? "activar" : "desactivar";
 
       sileo.action({
         title: willActivate ? "¿Activar usuario?" : "¿Desactivar usuario?",
-        description: `¿Estás seguro de ${actionText} a "${user.username}"?`,
+        description: `¿Desea ${actionVerb} la cuenta de "${user.username}"?`,
         button: {
-          title: willActivate ? "Sí, activar" : "Sí, desactivar",
+          title: willActivate ? "Activar" : "Desactivar",
           onClick: async () => {
             const ok = await updateUser(dispatch, id, {
               isActive: !user.isActive,
@@ -106,76 +90,67 @@ function UsersList() {
                 title: willActivate
                   ? "Usuario activado"
                   : "Usuario desactivado",
-                description: `El usuario "${user.username}" fue ${actionText} correctamente.`,
+                description: `El usuario "${user.username}" fue ${actionVerb} correctamente.`,
               });
             } else {
               sileo.error({
                 title: "Error",
-                description: `No se pudo ${actionText} al usuario "${user.username}".`,
+                description: `No fue posible ${actionVerb} al usuario "${user.username}".`,
               });
             }
           },
         },
-        duration: 8000,
       });
     },
     [state.users],
   );
 
-  /* ── User Form Modal handlers ── */
-
   const handleSave = useCallback(
     async (data: AdminUserFormData, isCreate: boolean) => {
-      let ok: boolean;
-      if (isCreate) {
-        ok = await createUser(dispatch, data);
-      } else if (editingUser !== null) {
-        ok = await updateUser(dispatch, editingUser, data);
-      } else {
-        return;
-      }
+      const ok = isCreate
+        ? await createUser(dispatch, data)
+        : editingUser !== null
+          ? await updateUser(dispatch, editingUser, data)
+          : false;
+
       if (ok) {
         setShowFormModal(false);
         setEditingUser(null);
         sileo.success({
           title: isCreate ? "Usuario creado" : "Usuario actualizado",
-          description: `El usuario "${data.username}" fue ${
-            isCreate ? "creado" : "actualizado"
-          } correctamente.`,
+          description: `El usuario "${data.username}" fue ${isCreate ? "creado" : "actualizado"} exitosamente.`,
         });
       } else {
         sileo.error({
           title: "Error",
-          description: `No se pudo ${
-            isCreate ? "crear" : "actualizar"
-          } el usuario.`,
+          description: `No fue posible ${isCreate ? "crear" : "actualizar"} el usuario.`,
         });
       }
     },
     [editingUser],
   );
 
-  const handleCloseModal = useCallback(() => {
-    setShowFormModal(false);
-    setEditingUser(null);
-  }, []);
-
-  /* ── Derive editing user object ── */
   const editingUserObj =
     editingUser !== null
       ? (state.users.find((u) => u.id === editingUser) ?? null)
       : null;
+  const superAdminCount = state.users.filter(
+    (u) => u.role === "SUPER_ADMIN",
+  ).length;
+  const reviewerCount = state.users.filter((u) => u.role === "REVIEWER").length;
+  const activeCount = state.users.filter((u) => u.isActive).length;
 
-  /* ── Loading ── */
   if (state.loading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="flex flex-col items-center gap-3">
-          <span className="material-symbols-outlined text-4xl text-primary animate-pulse">
-            sync
-          </span>
-          <p className="text-body-md text-on-surface-variant">
-            Cargando usuarios...
+      <div className="flex items-center justify-center py-28">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(56,189,248,0.2)]">
+            <span className="material-symbols-outlined text-3xl animate-spin">
+              sync
+            </span>
+          </div>
+          <p className="text-body-md text-on-surface-variant font-medium">
+            Cargando directorio de usuarios...
           </p>
         </div>
       </div>
@@ -183,37 +158,36 @@ function UsersList() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* ── Title ── */}
-      <div>
-        <h1 className="text-headline-lg font-bold text-on-surface">Usuarios</h1>
-        <p className="text-body-md text-on-surface-variant mt-1">
-          Gestioná los administradores y revisores del panel
-        </p>
-      </div>
+    <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+      <UserStatsCards
+        totalUsers={state.users.length}
+        superAdminCount={superAdminCount}
+        reviewerCount={reviewerCount}
+        activeCount={activeCount}
+      />
 
-      {/* ── Top bar: Search + Create Button ── */}
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-        <div className="w-full lg:max-w-sm">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="w-full sm:max-w-md">
           <Input
             id="search-users"
             icon="search"
-            placeholder="Buscar por usuario..."
+            placeholder="Buscar por nombre de usuario..."
             value={state.search}
             onChange={handleSearchChange}
             wrapperClassName="w-full"
+            className="bg-surface-container-low/90 border-outline-variant/30 focus:border-primary"
           />
         </div>
         <Button
           leadingIcon="person_add"
           onClick={handleCreate}
-          className="whitespace-nowrap shrink-0 cursor-pointer max-md:w-full text-base font-bold bg-secondary hover:bg-secondary-fixed-dim"
+          variant="secondary"
+          className="whitespace-nowrap shrink-0 font-bold shadow-[0_0_15px_rgba(255,198,64,0.2)] hover:shadow-[0_0_20px_rgba(255,198,64,0.35)] cursor-pointer"
         >
           Crear usuario
         </Button>
       </div>
 
-      {/* ── Filter tabs ── */}
       <UserFilterTabs
         roleFilter={state.roleFilter}
         activeFilter={state.activeFilter}
@@ -221,15 +195,13 @@ function UsersList() {
         onActiveChange={handleActiveChange}
       />
 
-      {/* ── Table ── */}
       <UsersTable
         users={pageUsers}
         onEdit={handleEdit}
         onToggleActive={handleToggleActive}
       />
 
-      {/* ── Pagination ── */}
-      <div className="flex justify-center pt-4 border-t border-outline-variant/20">
+      <div className="flex justify-center pt-4 border-t border-outline-variant/15">
         <Pagination
           current={state.page}
           total={state.totalPages}
@@ -237,11 +209,13 @@ function UsersList() {
         />
       </div>
 
-      {/* ── User Form Modal ── */}
       {showFormModal && (
         <UserFormModal
           open={showFormModal}
-          onClose={handleCloseModal}
+          onClose={() => {
+            setShowFormModal(false);
+            setEditingUser(null);
+          }}
           user={editingUserObj}
           onSave={handleSave}
         />
@@ -251,5 +225,3 @@ function UsersList() {
 }
 
 UsersList.displayName = "UsersList";
-
-export { UsersList };
