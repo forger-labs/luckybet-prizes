@@ -3,8 +3,10 @@ import axios from "axios";
 import HttpClient, { handleApiError } from "@shared/libs/httpClient";
 import type {
   BackendCreateMissionPayload,
+  BackendLevel,
   BackendMission,
   BackendMissionStatus,
+  GetLevelsQuery,
 } from "@shared/types/admin";
 import type {
   ApiResponse,
@@ -477,6 +479,142 @@ export default class ApiAdminGanaya {
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Admin Levels API ──
+
+  async getLevels(
+    params?: GetLevelsQuery,
+  ): Promise<PaginatedApiResponse<BackendLevel[]>> {
+    const result: PaginatedApiResponse<BackendLevel[]> = {
+      data: null,
+      status: false,
+      message: "",
+      meta: null,
+    };
+    try {
+      let url = "/levels";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.take !== undefined && params.take !== null)
+          searchParams.append("take", params.take.toString());
+        if (params.skip !== undefined && params.skip !== null)
+          searchParams.append("skip", params.skip.toString());
+        if (
+          params.name !== undefined &&
+          params.name !== null &&
+          params.name.trim() !== ""
+        )
+          searchParams.append("name", params.name.trim());
+        if (params.bonus !== undefined && params.bonus !== null)
+          searchParams.append("bonus", params.bonus.toString());
+        if (
+          params.minCoins !== undefined &&
+          params.minCoins !== null &&
+          !Number.isNaN(Number(params.minCoins))
+        )
+          searchParams.append("minCoins", params.minCoins.toString());
+        if (
+          params.maxCoins !== undefined &&
+          params.maxCoins !== null &&
+          !Number.isNaN(Number(params.maxCoins))
+        )
+          searchParams.append("maxCoins", params.maxCoins.toString());
+        if (
+          params.minExperience !== undefined &&
+          params.minExperience !== null &&
+          !Number.isNaN(Number(params.minExperience))
+        )
+          searchParams.append("minExperience", params.minExperience.toString());
+        if (
+          params.maxExperience !== undefined &&
+          params.maxExperience !== null &&
+          !Number.isNaN(Number(params.maxExperience))
+        )
+          searchParams.append("maxExperience", params.maxExperience.toString());
+        if (params.sortOrder !== undefined && params.sortOrder !== null)
+          searchParams.append("sortOrder", params.sortOrder);
+
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as PaginatedApiResponse<BackendLevel[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      result.meta = response.meta ?? null;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result) as unknown as PaginatedApiResponse<
+        BackendLevel[]
+      >;
+    }
+  }
+
+  async getLevelById(id: number): Promise<ApiResponse<BackendLevel>> {
+    const result: ApiResponse<BackendLevel> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: `/levels/${id}`,
+      });
+      const response = data as ApiResponse<BackendLevel>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async createLevel(formData: FormData): Promise<ApiResponse<BackendLevel>> {
+    const result: ApiResponse<BackendLevel> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data: response } = await this.httpClient.post({
+        url: "/levels",
+        body: formData,
+      });
+      const responseData = response as ApiResponse<BackendLevel>;
+      if (responseData?.status) result.status = true;
+      result.data = responseData.data;
+      result.message = responseData.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async updateLevel(
+    id: number,
+    formData: FormData,
+  ): Promise<ApiResponse<BackendLevel>> {
+    const result: ApiResponse<BackendLevel> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data: response } = await this.httpClient.patch({
+        url: `/levels/${id}`,
+        body: formData,
+      });
+      const responseData = response as ApiResponse<BackendLevel>;
+      if (responseData?.status) result.status = true;
+      result.data = responseData.data;
+      result.message = responseData.message;
       return result;
     } catch (error) {
       return handleApiError(error, result);

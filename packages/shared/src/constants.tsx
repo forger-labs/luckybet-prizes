@@ -20,6 +20,7 @@ export const ADMIN_ROUTES = {
   REVISION: "/panel/revision",
   USUARIOS: "/panel/usuarios",
   JUGADORES: "/panel/jugadores",
+  NIVELES: "/panel/niveles",
 };
 
 export const ADMIN_LINKS: AdminSidebarLink[] = [
@@ -42,6 +43,11 @@ export const ADMIN_LINKS: AdminSidebarLink[] = [
     path: ADMIN_ROUTES.USUARIOS,
     icon: "group",
     text: "Usuarios",
+  },
+  {
+    path: ADMIN_ROUTES.NIVELES,
+    icon: "military_tech",
+    text: "Niveles",
   },
 ];
 

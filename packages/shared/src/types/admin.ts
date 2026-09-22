@@ -135,3 +135,30 @@ export const DEFAULT_SUSPENSION_REASONS: SuspensionReason[] = [
   { id: "fraud_suspicion", label: "Sospecha de fraude", isCustom: false },
   { id: "other", label: "Otro", isCustom: true },
 ];
+
+/* ── Levels types ── */
+
+export type LevelBonus = "0" | "30" | "40" | "50" | "100" | "150" | "200";
+
+export interface BackendLevel {
+  id: number;
+  name: string;
+  image: string;
+  minExperience: number;
+  coins: number;
+  bonus?: LevelBonus | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface GetLevelsQuery {
+  take?: number;
+  skip?: number;
+  name?: string;
+  bonus?: LevelBonus;
+  minCoins?: number;
+  maxCoins?: number;
+  minExperience?: number;
+  maxExperience?: number;
+  sortOrder?: "ASC" | "DESC" | "asc" | "desc";
+}
