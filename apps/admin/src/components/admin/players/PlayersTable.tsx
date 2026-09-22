@@ -1,9 +1,15 @@
 "use client";
 
+import { Pagination } from "@/components/ui/Pagination";
 import type { PlayersTableProps } from "@/types/adminPlayers";
 import { PlayerRow } from "./PlayerRow";
 
-export function PlayersTable({ players }: PlayersTableProps) {
+export function PlayersTable({
+  players,
+  page,
+  totalPages,
+  onPageChange,
+}: PlayersTableProps) {
   if (players.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low/60 backdrop-blur-md text-center">
@@ -24,27 +30,42 @@ export function PlayersTable({ players }: PlayersTableProps) {
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-2xl border border-outline-variant/20 bg-surface-container-low/70 backdrop-blur-md shadow-xl">
-      <table className="w-full text-left border-collapse min-w-[540px]">
-        <thead>
-          <tr className="border-b border-outline-variant/20 bg-surface-container-high/40">
-            <th className="py-3.5 px-4 sm:pl-6 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-              Jugador
-            </th>
-            <th className="py-3.5 px-4 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-              Teléfono
-            </th>
-            <th className="py-3.5 px-4 sm:pr-6 text-right text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-              Estado
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-outline-variant/10">
-          {players.map((player) => (
-            <PlayerRow key={player.id} player={player} />
-          ))}
-        </tbody>
-      </table>
+    <div className="flex flex-col gap-4">
+      <div className="w-full overflow-x-auto rounded-2xl border border-outline-variant/20 bg-surface-container-low/70 backdrop-blur-md shadow-xl">
+        <table className="w-full text-left border-collapse min-w-[540px]">
+          <thead>
+            <tr className="border-b border-outline-variant/20 bg-surface-container-high/40">
+              <th className="py-3.5 px-4 sm:pl-6 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
+                Jugador
+              </th>
+              <th className="py-3.5 px-4 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
+                Teléfono
+              </th>
+              <th className="py-3.5 px-4 sm:pr-6 text-right text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
+                Estado
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-outline-variant/10">
+            {players.map((player) => (
+              <PlayerRow key={player.id} player={player} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPages !== undefined &&
+        totalPages > 1 &&
+        onPageChange &&
+        page !== undefined && (
+          <div className="flex justify-center pt-2">
+            <Pagination
+              current={page}
+              total={totalPages}
+              onChange={onPageChange}
+            />
+          </div>
+        )}
     </div>
   );
 }

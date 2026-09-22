@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useReducer } from "react";
 
-import { Pagination } from "@/components/ui/Pagination";
 import type { PlayerFilters } from "@/types/adminPlayers";
 import { PlayerStatsCards } from "./PlayerStatsCards";
 import { PlayersFilterBar } from "./PlayersFilterBar";
@@ -68,17 +67,13 @@ export function PlayersList() {
         onFilterChange={handleFilterChange}
       />
 
-      {/* ── Players Table ── */}
-      <PlayersTable players={pagePlayers} />
-
-      {/* ── Pagination ── */}
-      <div className="flex justify-center pt-4 border-t border-outline-variant/15">
-        <Pagination
-          current={state.page}
-          total={state.totalPages}
-          onChange={handlePageChange}
-        />
-      </div>
+      {/* ── Players Table con Paginado ── */}
+      <PlayersTable
+        players={pagePlayers}
+        page={state.page}
+        totalPages={state.totalPages}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 }

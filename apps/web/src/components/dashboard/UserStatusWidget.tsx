@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-import { FlameIcon, SparklesIcon, TrophyIcon } from "@/icons";
+import { SparklesIcon, TrophyIcon } from "@/icons";
 import type { UserRankStatus } from "@/types/dashboard";
 
 const DEFAULT_STATUS_DATA: UserRankStatus = {
@@ -45,7 +45,7 @@ export const UserStatusWidget = ({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-      className="glass-card-strong rounded-2xl p-6 flex flex-col justify-between border border-white/10 relative overflow-hidden h-full shadow-xl"
+      className="glass-card-strong rounded-2xl p-6 flex flex-col justify-between border border-white/10 relative overflow-hidden h-fit shadow-xl"
     >
       {/* Subtle background glow */}
       <div className="absolute -top-12 -right-12 w-36 h-36 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
@@ -89,7 +89,7 @@ export const UserStatusWidget = ({
         </div>
 
         {/* Perks & Streak Highlights */}
-        <div className="grid grid-cols-2 gap-2 mb-5">
+        {/*<div className="grid grid-cols-2 gap-2 mb-5">
           <div className="bg-surface-container-high/60 border border-white/5 rounded-lg p-2.5 flex items-center gap-2.5">
             <div className="p-1.5 rounded-md bg-secondary/20 text-secondary">
               <FlameIcon className="w-4 h-4" />
@@ -117,7 +117,7 @@ export const UserStatusWidget = ({
               </p>
             </div>
           </div>
-        </div>
+        </div>*/}
 
         {/* Animated XP Progress */}
         <div className="space-y-2">

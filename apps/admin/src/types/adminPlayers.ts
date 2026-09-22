@@ -50,6 +50,9 @@ export interface PlayerRowProps {
 /** Props para la tabla de jugadores */
 export interface PlayersTableProps {
   players: Player[];
+  page?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 /** Props para la barra de filtros */
