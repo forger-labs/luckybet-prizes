@@ -1,22 +1,44 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 import { FlameIcon, SparklesIcon, TrophyIcon } from "@/icons";
 import type { UserRankStatus } from "@/types/dashboard";
 
-const STATUS_DATA: UserRankStatus = {
-  currentTier: "Elite I",
-  nextTier: "Elite II",
-  currentXp: 8450,
-  targetXp: 10000,
-  streakDays: 5,
-  multiplier: "1.5x",
+const DEFAULT_STATUS_DATA: UserRankStatus = {
+  currentTier: "Principiante",
+  nextTier: "Bronce",
+  currentXp: 0,
+  targetXp: 1000,
+  streakDays: 1,
+  multiplier: "1.0x",
 };
 
-export const UserStatusWidget = () => {
-  const xpPercentage = (STATUS_DATA.currentXp / STATUS_DATA.targetXp) * 100;
-  const remainingXp = STATUS_DATA.targetXp - STATUS_DATA.currentXp;
+interface UserStatusWidgetProps {
+  status?: UserRankStatus;
+  isLoading?: boolean;
+}
+
+export const UserStatusWidget = ({
+  status = DEFAULT_STATUS_DATA,
+  isLoading = false,
+}: UserStatusWidgetProps) => {
+  if (isLoading) {
+    return (
+      <div className="glass-card-strong rounded-2xl p-6 border border-white/10 h-full animate-pulse flex flex-col justify-between">
+        <div className="space-y-3">
+          <div className="h-4 w-24 bg-surface-container-high rounded" />
+          <div className="h-8 w-40 bg-surface-container-high rounded" />
+        </div>
+        <div className="h-2 w-full bg-surface-container-highest rounded-full" />
+      </div>
+    );
+  }
+  const currentXp = status.currentXp ?? 0;
+  const targetXp = status.targetXp > 0 ? status.targetXp : 1000;
+  const xpPercentage = Math.min(100, Math.max(0, (currentXp / targetXp) * 100));
+  const remainingXp = Math.max(0, targetXp - currentXp);
 
   return (
     <motion.section
@@ -30,7 +52,7 @@ export const UserStatusWidget = () => {
       <div className="absolute -bottom-12 -left-12 w-36 h-36 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative z-10">
-        {/* Header with Rank & Badge */}
+        {/* Header with Rank & Badge / Medal */}
         <div className="flex justify-between items-start mb-5">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -39,19 +61,30 @@ export const UserStatusWidget = () => {
               </span>
               <span className="inline-flex items-center gap-1 bg-secondary/15 text-secondary border border-secondary/30 px-2 py-0.5 rounded-full text-[11px] font-semibold">
                 <SparklesIcon className="w-3 h-3 text-secondary" />
-                VIP
+                {status.currentTier}
               </span>
             </div>
             <p className="font-headline-lg-mobile text-2xl font-bold text-secondary tracking-tight">
-              {STATUS_DATA.currentTier}
+              {status.currentTier}
             </p>
           </div>
 
           <motion.div
             whileHover={{ scale: 1.08, rotate: 4 }}
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary-container to-secondary/40 border border-secondary/40 flex items-center justify-center glow-gold-sm shadow-md cursor-default"
+            className="w-13 h-13 rounded-2xl bg-gradient-to-br from-secondary-container/40 to-secondary/20 border border-secondary/40 flex items-center justify-center glow-gold-sm shadow-md cursor-default overflow-hidden p-1.5"
           >
-            <TrophyIcon className="w-6 h-6 text-on-secondary-container" />
+            {status.currentLevelImage ? (
+              <Image
+                src={status.currentLevelImage}
+                alt={`Medalla ${status.currentTier}`}
+                width={48}
+                height={48}
+                unoptimized
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <TrophyIcon className="w-7 h-7 text-secondary" />
+            )}
           </motion.div>
         </div>
 
@@ -66,7 +99,7 @@ export const UserStatusWidget = () => {
                 Racha
               </p>
               <p className="text-xs font-semibold text-on-surface">
-                {STATUS_DATA.streakDays} días
+                {status.streakDays} {status.streakDays === 1 ? "día" : "días"}
               </p>
             </div>
           </div>
@@ -77,10 +110,10 @@ export const UserStatusWidget = () => {
             </div>
             <div>
               <p className="text-[11px] text-on-surface-variant uppercase font-medium">
-                Bonus XP
+                Bonus Nivel
               </p>
               <p className="text-xs font-semibold text-primary">
-                {STATUS_DATA.multiplier}
+                {status.multiplier}
               </p>
             </div>
           </div>
@@ -89,10 +122,12 @@ export const UserStatusWidget = () => {
         {/* Animated XP Progress */}
         <div className="space-y-2">
           <div className="flex justify-between text-xs font-medium">
-            <span className="text-on-surface-variant">Progreso de XP</span>
+            <span className="text-on-surface-variant">
+              Progreso de Experiencia
+            </span>
             <span className="text-primary font-semibold">
-              {STATUS_DATA.currentXp.toLocaleString("es-ES")} /{" "}
-              {STATUS_DATA.targetXp.toLocaleString("es-ES")} XP
+              {currentXp.toLocaleString("es-ES")} /{" "}
+              {targetXp.toLocaleString("es-ES")} XP
             </span>
           </div>
 
@@ -110,27 +145,21 @@ export const UserStatusWidget = () => {
               Faltan {remainingXp.toLocaleString("es-ES")} XP para el siguiente
               nivel
             </span>
-            <span className="text-secondary font-medium">
-              {STATUS_DATA.nextTier}
+            <span className="text-secondary font-medium flex items-center gap-1">
+              {status.nextLevelImage && (
+                <Image
+                  src={status.nextLevelImage}
+                  alt={status.nextTier}
+                  width={14}
+                  height={14}
+                  unoptimized
+                  className="w-3.5 h-3.5 object-contain"
+                />
+              )}
+              {status.nextTier}
             </span>
           </div>
         </div>
-      </div>
-
-      {/* Footer Actions */}
-      <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between gap-3 relative z-10">
-        <span className="text-xs text-on-surface-variant">
-          Próxima recompensa:{" "}
-          <strong className="text-secondary">+2.000 Fichas</strong>
-        </span>
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          type="button"
-          className="bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-        >
-          Ver Recompensas
-        </motion.button>
       </div>
     </motion.section>
   );

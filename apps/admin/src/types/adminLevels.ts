@@ -1,8 +1,8 @@
 import type { FormikProps } from "formik";
 
-import type { BackendLevel, LevelBonus } from "@shared/types";
+import type { BackendLevel, GetLevelsQuery, LevelBonus } from "@shared/types";
 
-export type { BackendLevel, LevelBonus };
+export type { BackendLevel, GetLevelsQuery, LevelBonus };
 
 /** AdminLevel alias of BackendLevel for domain consistency */
 export type AdminLevel = BackendLevel;

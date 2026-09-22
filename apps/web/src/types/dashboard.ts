@@ -17,6 +17,8 @@ export interface GameItem {
   tagColor?: "gold" | "cyan" | "emerald" | "purple";
   activePlayers: number;
   jackpot?: string;
+  lastPlayedAt?: string;
+  isRecent?: boolean;
 }
 
 export interface TrendingGameItem {
@@ -36,4 +38,9 @@ export interface UserRankStatus {
   targetXp: number;
   streakDays: number;
   multiplier: string;
+  currentLevelImage?: string;
+  nextLevelImage?: string;
+  currentLevelId?: number;
+  nextLevelId?: number;
+  coins?: number;
 }

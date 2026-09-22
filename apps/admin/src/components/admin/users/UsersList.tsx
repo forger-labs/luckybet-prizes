@@ -185,7 +185,7 @@ export function UsersList() {
           leadingIcon="person_add"
           onClick={handleCreate}
           variant="secondary"
-          className="whitespace-nowrap shrink-0 font-bold shadow-[0_0_15px_rgba(255,198,64,0.2)] hover:shadow-[0_0_20px_rgba(255,198,64,0.35)] cursor-pointer"
+          className="whitespace-nowrap shrink-0 cursor-pointer"
         >
           Crear usuario
         </Button>

@@ -28,5 +28,7 @@ If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is 
 
 
 ## Check code
-To check code always use: 
+After every feature achieved, review code using:
 - pnpm format && pnpm ci
+If only checking code, use: 
+- pnpm format

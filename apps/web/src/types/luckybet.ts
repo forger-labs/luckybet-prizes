@@ -68,3 +68,16 @@ export interface LoginFormValues {
   username: string;
   password: string;
 }
+
+export interface LuckyBetGameItem {
+  id?: string | number;
+  game?: string;
+  name?: string;
+  title?: string;
+  provider?: string;
+  img?: string;
+  imageUrl?: string;
+  category?: string;
+  activePlayers?: number;
+  [key: string]: unknown;
+}

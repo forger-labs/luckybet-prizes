@@ -33,6 +33,7 @@ export const GameCard = ({
         fill
         sizes="(max-width: 768px) 50vw, 25vw"
         alt={alt}
+        unoptimized
         className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         src={imageUrl}
       />

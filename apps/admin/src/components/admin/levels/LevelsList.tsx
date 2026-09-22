@@ -104,7 +104,7 @@ export function LevelsList() {
           leadingIcon="add_circle"
           onClick={handleOpenCreate}
           variant="secondary"
-          className="whitespace-nowrap shrink-0 font-bold shadow-[0_0_15px_rgba(255,198,64,0.2)] hover:shadow-[0_0_20px_rgba(255,198,64,0.35)] cursor-pointer"
+          className="whitespace-nowrap shrink-0 cursor-pointer"
         >
           Crear Nivel
         </Button>

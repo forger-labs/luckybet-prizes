@@ -3,106 +3,117 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 
+import { SparklesIcon } from "@/icons";
 import type { GameItem } from "@/types/dashboard";
 import { GameCard } from "./GameCard";
 
-const GAMES: GameItem[] = [
-  {
-    id: "slots-1",
-    title: "Midnight Slots",
-    category: "Tragamonedas",
-    tag: "JACKPOT",
-    tagColor: "gold",
-    activePlayers: 342,
-    jackpot: "50.000 Fichas",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAAWMpaIeCVh-NuniELi-p1JSyNHS-doWaZYRDNlIUHObxmKAt1PNNz2h8y4sB1S8ZIB2Oud5DZbymM8y_PYd-kIh00339IlrL_1zgVRrTJssnrCRLcNWUA22JeaMRbbUiH4t2Vdk7UThKro5PEIX3k4u28G4x91l64ksfwNjeh1oUDoBFGrGQt4lmLsAoUruVGoxMr-agHF-WYP7fY7MWMpZHf54mOpK7_ehtl9enrZf2N_C-3ecP5VOGgJ1-VjJPVugl0TaPkYAES",
-    alt: "Tragamonedas vibrante con temática náutica",
-  },
-  {
-    id: "roulette-1",
-    title: "Nautical Roulette",
-    category: "Ruleta en Vivo",
-    tag: "HOT 🔥",
-    tagColor: "cyan",
-    activePlayers: 189,
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuC2U-QteezK4BQ6uV657KeKXtZVWRmVkcoMs8e4N10W3p6tfgHLovJhcHr_oLQHF5y0gBKnk-hLwAxPJvBHG-r9HHNbvJEA5LT_XwNd_cXZ78dkoH_DnwrP3OjbTz-XXvN1B8PrJf9060Swi-HdPVGG-jdzHIX0FUxJ_HG5wODiuY1xzdJ4n-PgH6H4q9H0mhcwbKWiyJHs6shTxe72aNOtliy9n9AB1qK0_HmKMKNsfa8BFQcnS9m_ICnGjKX-9vwWyKLHW4mTenqc",
-    alt: "Ruleta de casino premium con detalles dorados",
-  },
-  {
-    id: "blackjack-1",
-    title: "Blackjack Harbor",
-    category: "Cartas VIP",
-    tag: "POPULAR",
-    tagColor: "purple",
-    activePlayers: 254,
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAX2cJbGzNF9jDdABZhs7cPnAkrDD-sG1gTlXiWjpezTiiSyaN0Fkmo-AzDLHJdJnMLk-4jYCSlijHvNqhwFTshkUzhkXuCV4ZB-BkK8oovwynHg4kmRTcdlfjl32c3u9ZNkOkRV_KJaiOpVzKRzRDCUz4ZfoTx92xjkAvRXDWakyj-nelnz3NYLzfXA-zQ9nlYcnYm1a8vk3flZO8sFdipd23MCfwTWGGa4xDvivmlF-5WZUwcgTHMPdRfLD9YUS23QS_KCMdfUOwC",
-    alt: "Cartas clásicas de blackjack sobre tapete azul marino",
-  },
-  {
-    id: "poker-1",
-    title: "Deep Sea Poker",
-    category: "Torneo",
-    tag: "NUEVO",
-    tagColor: "emerald",
-    activePlayers: 118,
-    jackpot: "120.000 Fichas",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAkQx2Mp44plPAiopDRzV_TXgKtR1zwJg-KrHsCnS_-DyxJwOFMKRwG3o8p2wuDoBLUa-fyYwzP4kRxHx25zl7g2Et6MiieB0DryUQLhkohZf5JeMjYs8NjLNJobNjv5vJ75T1gmSRdGk352kKvDiftJgiZnVxS5lMiCLnmX-uMgoaK5Izr3GH165pAxMUwJXmOTJm4k3PUztMgw66WcIDv9_JCfQ5YKES8YYLZSOmYZnT1oeM6XBx-4Ror4PWwn5XrY2SAdcK79k2D",
-    alt: "Escena dramática de póker con fichas y escalera real",
-  },
-];
+interface GamesSectionProps {
+  games?: GameItem[];
+  isFallback?: boolean;
+  isLoading?: boolean;
+}
 
-export const GamesSection = () => {
+export const GamesSection = ({
+  games = [],
+  isFallback = false,
+  isLoading = false,
+}: GamesSectionProps) => {
   return (
     <section className="space-y-4">
       {/* Section Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span className="text-xs uppercase tracking-wider text-primary font-semibold">
-              Salas Activas
+              {isFallback ? "Juegos Destacados" : "Actividad Semanal"}
             </span>
+            {!isFallback && games.length > 0 && (
+              <span className="inline-flex items-center gap-1 bg-primary/10 text-primary border border-primary/25 px-2 py-0.5 rounded-full text-[10px] font-semibold">
+                Últimos 7 días
+              </span>
+            )}
           </div>
           <h2 className="font-headline-lg-mobile md:font-headline-lg text-xl md:text-2xl font-bold text-on-surface">
-            Acceso Rápido
+            {isFallback
+              ? "Descubre Juegos Recomendados"
+              : "Jugados Recientemente"}
           </h2>
           <p className="text-on-surface-variant text-xs sm:text-sm">
-            Entra a tus mesas y tragamonedas favoritas al instante
+            {isFallback
+              ? "Explora nuestra selección destacada y empieza a ganar recompensas"
+              : "Tus salas y partidas jugadas durante esta semana"}
           </p>
         </div>
 
         <Link
           href="/dashboard/missions"
-          className="group inline-flex items-center gap-1.5 text-primary hover:text-primary-container font-label-md text-xs sm:text-sm font-semibold transition-colors py-1"
+          className="group inline-flex items-center gap-1.5 text-primary hover:text-primary-container font-label-md text-xs sm:text-sm font-semibold transition-colors py-1 shrink-0"
         >
-          <span>Ver todos los juegos</span>
+          <span>Ver todas las misiones</span>
           <span className="transform transition-transform group-hover:translate-x-1">
             →
           </span>
         </Link>
       </div>
 
+      {/* Fallback Invitation Banner */}
+      {isFallback && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="p-4 rounded-2xl bg-gradient-to-r from-primary/15 via-primary-container/10 to-secondary/10 border border-primary/25 flex items-center gap-3.5 shadow-lg backdrop-blur-md"
+        >
+          <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shrink-0">
+            <SparklesIcon className="w-5 h-5 text-primary" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-body-md text-sm font-semibold text-on-surface">
+              ¡Aún no has jugado esta semana!
+            </p>
+            <p className="text-body-sm text-xs text-on-surface-variant">
+              Descubre estos 5 juegos destacados, participa y comienza a subir
+              de nivel para desbloquear recompensas exclusivas.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Grid of Games */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-gutter">
-        {GAMES.map((game, idx) => (
-          <motion.div
-            key={game.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.4,
-              delay: idx * 0.08,
-              ease: [0.25, 1, 0.5, 1],
-            }}
-          >
-            <GameCard {...game} />
-          </motion.div>
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4">
+          {["sk-1", "sk-2", "sk-3", "sk-4", "sk-5"].map((skId) => (
+            <div
+              key={skId}
+              className="aspect-[3/4] rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : games.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5 sm:gap-4">
+          {games.slice(0, 5).map((game, idx) => (
+            <motion.div
+              key={game.id || idx}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.35,
+                delay: idx * 0.05,
+                ease: [0.25, 1, 0.5, 1],
+              }}
+            >
+              <GameCard {...game} />
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <div className="p-8 text-center rounded-2xl border border-outline-variant/20 bg-surface-container-low/50">
+          <p className="text-on-surface-variant text-sm">
+            No hay juegos disponibles en este momento.
+          </p>
+        </div>
+      )}
     </section>
   );
 };

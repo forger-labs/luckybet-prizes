@@ -106,6 +106,18 @@ export class LuckyBetClient {
   /**
    * Logs out the player session.
    */
+  /**
+   * Retrieves games catalog from LuckyBet server.
+   */
+  async getGameList(
+    token?: string,
+  ): Promise<LuckyBetResponse<Array<Record<string, unknown>>>> {
+    return this.executeCommand<undefined, Array<Record<string, unknown>>>(
+      "gameList",
+      token ? { token } : {},
+    );
+  }
+
   async logout(token: string): Promise<LuckyBetResponse<unknown>> {
     return this.executeCommand("userLogout", {
       token,
