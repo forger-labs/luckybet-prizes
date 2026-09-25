@@ -12,7 +12,7 @@ export function RoleGuard({
 }: RoleGuardProps) {
   const { user } = useAuthAdmin();
   const [isChecking, setIsChecking] = useState(true);
-console.log(user)
+  console.log(user);
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsChecking(false);

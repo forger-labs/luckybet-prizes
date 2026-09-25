@@ -1,3 +1,4 @@
+import { RoleGuard } from "@/components/admin/guards/RoleGuard";
 import { UsersList } from "@/components/admin/users/UsersList";
 
 /**
@@ -8,5 +9,9 @@ import { UsersList } from "@/components/admin/users/UsersList";
  * UsersList — esta página se mantiene como server component.
  */
 export default function UsuariosPage() {
-  return <UsersList />;
+  return (
+    <RoleGuard allowedRoles={["SUPER_ADMIN"]}>
+      <UsersList />
+    </RoleGuard>
+  );
 }

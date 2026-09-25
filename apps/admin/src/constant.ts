@@ -1,4 +1,4 @@
-import { RoomBonus } from "@shared/types";
+import type { RoomBonus } from "@shared/types";
 
 export const LOCAL_STORAGE_KEYS = {
   accessToken: "ac_token_admin",

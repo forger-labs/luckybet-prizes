@@ -140,13 +140,21 @@ export const DEFAULT_SUSPENSION_REASONS: SuspensionReason[] = [
 
 export type LevelBonus = "0" | "30" | "40" | "50" | "100" | "150" | "200";
 
+export interface BackendLevelRoom {
+  id: number;
+  name: string;
+  bonus: string;
+  isActive: boolean;
+}
+
 export interface BackendLevel {
   id: number;
   name: string;
   image: string;
   minExperience: number;
   coins: number;
-  bonus?: LevelBonus | null;
+  roomId?: number | null;
+  room?: BackendLevelRoom | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -155,7 +163,7 @@ export interface GetLevelsQuery {
   take?: number;
   skip?: number;
   name?: string;
-  bonus?: LevelBonus;
+  roomId?: number;
   minCoins?: number;
   maxCoins?: number;
   minExperience?: number;
@@ -194,4 +202,54 @@ export interface UpdateRoomPayload {
   name?: string;
   bonus?: RoomBonus;
   isActive?: boolean;
+}
+
+/* ── Players types ── */
+
+export interface BackendPlayerLevel {
+  id: number;
+  name: string;
+  image?: string;
+  minExperience?: number;
+}
+
+export interface BackendPlayerRoom {
+  id: number;
+  name: string;
+  bonus: string;
+  isActive: boolean;
+}
+
+export interface BackendPlayer {
+  id: number;
+  username: string;
+  phone: string | null;
+  isActive: boolean;
+  experience?: number;
+  levelId?: number;
+  level?: BackendPlayerLevel | null;
+  roomId?: number | null;
+  room?: BackendPlayerRoom | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GetPlayersQuery {
+  username?: string;
+  phone?: string;
+  levelId?: number;
+  minExperience?: number;
+  maxExperience?: number;
+  roomId?: number;
+  isActive?: boolean | "true" | "false";
+  orderDirection?: "ASC" | "DESC";
+  take?: number;
+  skip?: number;
+}
+
+export interface UpdatePlayerPayload {
+  phone?: string;
+  isActive?: boolean;
+  levelId?: number;
+  roomId?: number;
 }

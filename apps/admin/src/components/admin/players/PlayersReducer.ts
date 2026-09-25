@@ -4,125 +4,209 @@ import { casinoToast } from "@shared/utils/casinoToast";
 
 import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
 import type {
-  Player,
+  GetPlayersQuery,
   PlayerFilters,
+  PlayerFormValues,
   PlayersAction,
   PlayersState,
 } from "@/types/adminPlayers";
 
-/* ── Constants ── */
-
-export const PAGE_SIZE = 10;
-
-/* ── Initial State ── */
-
 export const initialFilters: PlayerFilters = {
-  search: "",
+  username: "",
+  phone: "",
   status: "all",
+  levelId: "",
+  roomId: "",
 };
 
 export const initialState: PlayersState = {
   players: [],
-  filters: initialFilters,
+  total: 0,
   page: 1,
-  totalPages: 1,
+  limit: 10,
   loading: true,
+  isSubmitting: false,
+  filters: initialFilters,
+  selectedPlayer: null,
+  isEditModalOpen: false,
 };
-
-/* ── Filter helpers ── */
-
-export function applyFilters(
-  players: Player[],
-  filters: PlayerFilters,
-): Player[] {
-  let filtered = players;
-
-  if (filters.search.trim()) {
-    const q = filters.search.trim().toLowerCase();
-    filtered = filtered.filter((p) => p.username.toLowerCase().includes(q));
-  }
-
-  if (filters.status === "active") {
-    filtered = filtered.filter((p) => p.isActive === true);
-  } else if (filters.status === "suspended") {
-    filtered = filtered.filter((p) => p.isActive === false);
-  }
-
-  return filtered;
-}
-
-/* ── Reducer ── */
 
 export function playersReducer(
   state: PlayersState,
   action: PlayersAction,
 ): PlayersState {
   switch (action.type) {
-    case "SET_PLAYERS": {
+    case "FETCH_START":
+      return { ...state, loading: true };
+    case "FETCH_SUCCESS":
       return {
         ...state,
-        players: action.payload.players,
-        totalPages: action.payload.totalPages,
         loading: false,
+        players: action.payload.players,
+        total: action.payload.total,
       };
-    }
-
-    case "SET_FILTER": {
+    case "FETCH_ERROR":
+      return { ...state, loading: false };
+    case "SET_PAGE":
+      return { ...state, page: action.payload };
+    case "SET_LIMIT":
+      return { ...state, limit: action.payload, page: 1 };
+    case "SET_FILTERS":
       return {
         ...state,
-        filters: { ...state.filters, ...action.payload.filter },
+        filters: { ...state.filters, ...action.payload },
         page: 1,
       };
-    }
-
-    case "SET_PAGE": {
-      return { ...state, page: action.payload.page };
-    }
-
-    case "SET_LOADING": {
-      return { ...state, loading: action.payload.loading };
-    }
-
+    case "RESET_FILTERS":
+      return { ...state, filters: initialFilters, page: 1 };
+    case "OPEN_EDIT_MODAL":
+      return {
+        ...state,
+        selectedPlayer: action.payload,
+        isEditModalOpen: true,
+      };
+    case "CLOSE_EDIT_MODAL":
+      return {
+        ...state,
+        selectedPlayer: null,
+        isEditModalOpen: false,
+      };
+    case "SUBMIT_START":
+      return { ...state, isSubmitting: true };
+    case "SUBMIT_SUCCESS":
+    case "SUBMIT_ERROR":
+      return { ...state, isSubmitting: false };
+    case "SET_SELECTED_PLAYER":
+      return { ...state, selectedPlayer: action.payload };
     default:
       return state;
   }
 }
 
-/* ── Helpers ── */
-
-function getMessage(msg: string | string[] | undefined): string {
-  if (!msg) return "Ocurrió un error inesperado";
-  return Array.isArray(msg) ? msg.join("; ") : msg;
-}
-
-/* ── Action dispatchers ── */
-
 export async function loadPlayers(
   dispatch: Dispatch<PlayersAction>,
   page: number,
+  limit: number,
+  filters: PlayerFilters,
 ) {
-  dispatch({ type: "SET_LOADING", payload: { loading: true } });
+  dispatch({ type: "FETCH_START" });
+  try {
+    const query: GetPlayersQuery = {
+      take: limit,
+      skip: (page - 1) * limit,
+    };
 
-  const result = await apiAdminGanaya.getPlayers({
-    take: PAGE_SIZE,
-    skip: (page - 1) * PAGE_SIZE,
-  });
+    if (filters.username.trim()) {
+      query.username = filters.username.trim();
+    }
+    if (filters.phone.trim()) {
+      query.phone = filters.phone.trim();
+    }
+    if (filters.levelId) {
+      query.levelId = Number(filters.levelId);
+    }
+    if (filters.roomId) {
+      query.roomId = Number(filters.roomId);
+    }
+    if (filters.status === "active") {
+      query.isActive = true;
+    } else if (filters.status === "suspended") {
+      query.isActive = false;
+    }
 
-  if (result.status && result.data) {
-    dispatch({
-      type: "SET_PLAYERS",
-      payload: {
-        players: result.data,
-        totalPages: result.meta?.totalPages ?? 1,
-      },
+    const res = await apiAdminGanaya.getPlayers(query);
+
+    if (res.status && res.data) {
+      dispatch({
+        type: "FETCH_SUCCESS",
+        payload: {
+          players: res.data,
+          total: res.meta?.total ?? res.data.length,
+        },
+      });
+    } else {
+      dispatch({ type: "FETCH_ERROR" });
+      casinoToast.error({
+        title: "Error al cargar jugadores",
+        description:
+          (Array.isArray(res.message) ? res.message[0] : res.message) ||
+          "No se pudieron obtener los jugadores",
+      });
+    }
+  } catch {
+    dispatch({ type: "FETCH_ERROR" });
+    casinoToast.error({
+      title: "Error de conexión",
+      description: "Ocurrió un fallo al comunicarse con el servidor",
     });
-    return;
   }
+}
 
-  // Evita dejar el spinner en loop y permite mostrar el empty state.
-  dispatch({ type: "SET_PLAYERS", payload: { players: [], totalPages: 1 } });
-  casinoToast.error({
-    title: "Error al cargar jugadores",
-    description: getMessage(result.message),
-  });
+export async function updatePlayerAction(
+  dispatch: Dispatch<PlayersAction>,
+  id: number,
+  values: PlayerFormValues,
+): Promise<boolean> {
+  dispatch({ type: "SUBMIT_START" });
+  try {
+    const res = await apiAdminGanaya.updatePlayer(id, {
+      phone: values.phone.trim() || undefined,
+      isActive: values.isActive,
+    });
+
+    if (res.status) {
+      dispatch({ type: "SUBMIT_SUCCESS" });
+      casinoToast.success({
+        title: "Jugador actualizado",
+        description: `Los datos de "${values.username}" se actualizaron correctamente.`,
+      });
+      return true;
+    }
+
+    dispatch({ type: "SUBMIT_ERROR" });
+    casinoToast.error({
+      title: "Error al actualizar jugador",
+      description:
+        (Array.isArray(res.message) ? res.message[0] : res.message) ||
+        "No fue posible actualizar al jugador",
+    });
+    return false;
+  } catch {
+    dispatch({ type: "SUBMIT_ERROR" });
+    casinoToast.error({
+      title: "Error inesperado",
+      description: "Ocurrió un error al procesar la solicitud.",
+    });
+    return false;
+  }
+}
+
+export async function togglePlayerStatusAction(
+  id: number,
+  isActive: boolean,
+  username: string,
+): Promise<boolean> {
+  try {
+    const res = await apiAdminGanaya.updatePlayer(id, { isActive });
+    if (res.status) {
+      casinoToast.success({
+        title: isActive ? "Jugador activado" : "Jugador suspendido",
+        description: `La cuenta de "${username}" está ahora ${isActive ? "activa" : "suspendida"}.`,
+      });
+      return true;
+    }
+    casinoToast.error({
+      title: "Error al cambiar estado",
+      description:
+        (Array.isArray(res.message) ? res.message[0] : res.message) ||
+        "No fue posible modificar el estado del jugador.",
+    });
+    return false;
+  } catch {
+    casinoToast.error({
+      title: "Error de conexión",
+      description: "No se pudo comunicar con el servidor.",
+    });
+    return false;
+  }
 }

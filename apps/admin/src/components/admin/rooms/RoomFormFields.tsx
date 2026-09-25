@@ -4,9 +4,8 @@ import { Field } from "formik";
 
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import type {  RoomFormFieldsProps } from "@/types/adminRooms";
 import { BONUS_OPTIONS } from "@/constant";
-
+import type { RoomFormFieldsProps } from "@/types/adminRooms";
 
 export function RoomFormFields({ formik }: RoomFormFieldsProps) {
   const { values, handleChange, handleBlur, errors, touched, setFieldValue } =

@@ -1,15 +1,29 @@
 "use client";
 
-import { Pagination } from "@/components/ui/Pagination";
 import type { PlayersTableProps } from "@/types/adminPlayers";
 import { PlayerRow } from "./PlayerRow";
 
 export function PlayersTable({
   players,
-  page,
-  totalPages,
-  onPageChange,
+  loading,
+  onEdit,
+  onToggleStatus,
 }: PlayersTableProps) {
+  if (loading) {
+    return (
+      <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-low overflow-hidden">
+        <div className="p-8 space-y-4">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div
+              key={i}
+              className="h-12 w-full rounded-xl bg-surface-container-highest/30 animate-pulse"
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (players.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 px-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low/60 backdrop-blur-md text-center">
@@ -22,50 +36,37 @@ export function PlayersTable({
           No se encontraron jugadores
         </p>
         <p className="font-body-md text-sm text-on-surface-variant max-w-sm mt-1">
-          Intente con otros criterios de búsqueda o verifique que existan
-          registros en la plataforma.
+          Intente con otros criterios de búsqueda o limpie los filtros
+          seleccionados.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="w-full overflow-x-auto rounded-2xl border border-outline-variant/20 bg-surface-container-low/70 backdrop-blur-md shadow-xl">
-        <table className="w-full text-left border-collapse min-w-[540px]">
-          <thead>
-            <tr className="border-b border-outline-variant/20 bg-surface-container-high/40">
-              <th className="py-3.5 px-4 sm:pl-6 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-                Jugador
-              </th>
-              <th className="py-3.5 px-4 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-                Teléfono
-              </th>
-              <th className="py-3.5 px-4 sm:pr-6 text-right text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-                Estado
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-outline-variant/10">
-            {players.map((player) => (
-              <PlayerRow key={player.id} player={player} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {totalPages !== undefined &&
-        totalPages > 1 &&
-        onPageChange &&
-        page !== undefined && (
-          <div className="flex justify-center pt-2">
-            <Pagination
-              current={page}
-              total={totalPages}
-              onChange={onPageChange}
+    <div className="w-full overflow-x-auto rounded-2xl border border-outline-variant/20 bg-surface-container-low/70 backdrop-blur-md shadow-xl">
+      <table className="w-full text-left border-collapse min-w-[720px]">
+        <thead>
+          <tr className="border-b border-outline-variant/20 bg-surface-container-high/40 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
+            <th className="py-3.5 px-4 sm:pl-6">Jugador</th>
+            <th className="py-3.5 px-4">Teléfono</th>
+            <th className="py-3.5 px-4">Nivel / XP</th>
+            <th className="py-3.5 px-4">Sala Asignada</th>
+            <th className="py-3.5 px-4">Estado</th>
+            <th className="py-3.5 px-4 sm:pr-6 text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-outline-variant/10">
+          {players.map((player) => (
+            <PlayerRow
+              key={player.id}
+              player={player}
+              onEdit={onEdit}
+              onToggleStatus={onToggleStatus}
             />
-          </div>
-        )}
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

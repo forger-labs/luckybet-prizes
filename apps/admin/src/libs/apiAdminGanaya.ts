@@ -9,7 +9,9 @@ import type {
   BackendRoom,
   CreateRoomPayload,
   GetLevelsQuery,
+  GetPlayersQuery,
   GetRoomsQuery,
+  UpdatePlayerPayload,
   UpdateRoomPayload,
 } from "@shared/types/admin";
 import type {
@@ -332,10 +334,9 @@ export default class ApiAdminGanaya {
 
   // ── Admin Players API ──
 
-  async getPlayers(params?: {
-    take?: number;
-    skip?: number;
-  }): Promise<PaginatedApiResponse<Player[]>> {
+  async getPlayers(
+    params?: GetPlayersQuery,
+  ): Promise<PaginatedApiResponse<Player[]>> {
     const result: PaginatedApiResponse<Player[]> = {
       data: null,
       status: false,
@@ -344,13 +345,42 @@ export default class ApiAdminGanaya {
     };
     try {
       let url = "/players";
-      if (params?.take !== undefined || params?.skip !== undefined) {
+      if (params) {
         const searchParams = new URLSearchParams();
-        if (params.take !== undefined)
+        if (params.take !== undefined && params.take !== null)
           searchParams.append("take", params.take.toString());
-        if (params.skip !== undefined)
+        if (params.skip !== undefined && params.skip !== null)
           searchParams.append("skip", params.skip.toString());
-        if (searchParams.toString()) url += `?${searchParams.toString()}`;
+        if (
+          params.username !== undefined &&
+          params.username !== null &&
+          params.username.trim() !== ""
+        )
+          searchParams.append("username", params.username.trim());
+        if (
+          params.phone !== undefined &&
+          params.phone !== null &&
+          params.phone.trim() !== ""
+        )
+          searchParams.append("phone", params.phone.trim());
+        if (params.levelId !== undefined && params.levelId !== null)
+          searchParams.append("levelId", params.levelId.toString());
+        if (params.roomId !== undefined && params.roomId !== null)
+          searchParams.append("roomId", params.roomId.toString());
+        if (params.minExperience !== undefined && params.minExperience !== null)
+          searchParams.append("minExperience", params.minExperience.toString());
+        if (params.maxExperience !== undefined && params.maxExperience !== null)
+          searchParams.append("maxExperience", params.maxExperience.toString());
+        if (params.isActive !== undefined && params.isActive !== null)
+          searchParams.append("isActive", params.isActive.toString());
+        if (
+          params.orderDirection !== undefined &&
+          params.orderDirection !== null
+        )
+          searchParams.append("orderDirection", params.orderDirection);
+
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
       }
       const { data } = await this.httpClient.get({ url });
       const response = data as PaginatedApiResponse<Player[]>;
@@ -375,6 +405,30 @@ export default class ApiAdminGanaya {
     try {
       const { data } = await this.httpClient.get({
         url: `/players/${id}`,
+      });
+      const response = data as ApiResponse<Player>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async updatePlayer(
+    id: number,
+    payload: UpdatePlayerPayload,
+  ): Promise<ApiResponse<Player>> {
+    const result: ApiResponse<Player> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.patch({
+        url: `/players/${id}`,
+        body: payload,
       });
       const response = data as ApiResponse<Player>;
       if (response?.status) result.status = true;
@@ -514,8 +568,8 @@ export default class ApiAdminGanaya {
           params.name.trim() !== ""
         )
           searchParams.append("name", params.name.trim());
-        if (params.bonus !== undefined && params.bonus !== null)
-          searchParams.append("bonus", params.bonus.toString());
+        if (params.roomId !== undefined && params.roomId !== null)
+          searchParams.append("roomId", params.roomId.toString());
         if (
           params.minCoins !== undefined &&
           params.minCoins !== null &&
