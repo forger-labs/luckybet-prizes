@@ -21,6 +21,7 @@ export const ADMIN_ROUTES = {
   USUARIOS: "/panel/usuarios",
   JUGADORES: "/panel/jugadores",
   NIVELES: "/panel/niveles",
+  SALAS: "/panel/salas",
 };
 
 export const ADMIN_LINKS: AdminSidebarLink[] = [
@@ -48,6 +49,11 @@ export const ADMIN_LINKS: AdminSidebarLink[] = [
     path: ADMIN_ROUTES.NIVELES,
     icon: "military_tech",
     text: "Niveles",
+  },
+  {
+    path: ADMIN_ROUTES.SALAS,
+    icon: "meeting_room",
+    text: "Salas",
   },
 ];
 

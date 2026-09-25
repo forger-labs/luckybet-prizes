@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 
 import { DEFAULT_FEATURED_GAMES } from "@/constant";
 import { webApi } from "@/libs/apiWebGanaya";
-import { luckybetClient } from "@/libs/luckybetClient";
 import type { GameItem, UserRankStatus } from "@/types/dashboard";
+import type { LuckyBetGameItem } from "@/types/luckybet";
 import type { PlayedGameItem } from "@/types/player";
 
 const DEFAULT_RANK: UserRankStatus = {
@@ -30,7 +30,7 @@ export function useDashboardData() {
       const meRes = await webApi.getMe();
       if (meRes.status && meRes.data) {
         const player = meRes.data;
-        const currentXp = player.level?.minExperience ?? 0;
+        const currentXp = player.experience ?? 0;
         const currentLevel = player.level;
         const currentTier = currentLevel?.name ?? "Nivel 1";
         const currentLevelImage = currentLevel?.image;
@@ -38,7 +38,9 @@ export function useDashboardData() {
           ? `+${currentLevel.bonus}%`
           : "1.0x";
 
-        const nextLevel = await webApi.getNextLevel(currentXp);
+        const nextLevel = await webApi.getNextLevel(
+          player.level?.minExperience ?? currentXp,
+        );
         const nextTier = nextLevel?.name ?? "Nivel Máximo";
         const targetXp =
           nextLevel?.minExperience ?? (currentXp > 0 ? currentXp : 1000);
@@ -95,26 +97,26 @@ export function useDashboardData() {
       } else {
         // Fallback to client API or featured list
         try {
-          const catalogRes = await luckybetClient.getGameList();
+          const catalogRes = await webApi.getGameList();
           if (
-            catalogRes.status === "success" &&
-            Array.isArray(catalogRes.content) &&
-            catalogRes.content.length >= 5
+            catalogRes.status &&
+            Array.isArray(catalogRes.data) &&
+            catalogRes.data.length >= 5
           ) {
-            const catalogGames: GameItem[] = catalogRes.content
+            const catalogGames: GameItem[] = catalogRes.data
               .slice(0, 5)
-              .map((g: Record<string, unknown>, i: number) => ({
+              .map((g: LuckyBetGameItem, i: number) => ({
                 id: String(g.id || g.game || i),
                 title: String(g.name || g.title || "Juego Destacado"),
-                category: String(g.provider || "Tragamonedas"),
+                category: String(g.provider || g.category || "Tragamonedas"),
                 imageUrl: String(
                   g.img ||
                     g.imageUrl ||
                     DEFAULT_FEATURED_GAMES[i % DEFAULT_FEATURED_GAMES.length]
                       .imageUrl,
                 ),
-                alt: String(g.name || "Juego recomendado"),
-                activePlayers: 120 + i * 35,
+                alt: String(g.name || g.title || "Juego recomendado"),
+                activePlayers: g.activePlayers ?? 120 + i * 35,
                 tag: "DESTACADO",
                 tagColor: "gold",
               }));

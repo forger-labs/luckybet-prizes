@@ -1,222 +1,477 @@
 "use client";
 
-import Image from "next/image";
+import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { TopAppBar } from "@/components/TopAppBar/TopAppBar";
+import { MissionDetailHero } from "@/components/mission/molecules/MissionDetailHero";
+import { MissionStepChecklist } from "@/components/mission/molecules/MissionStepChecklist";
+import { BoltIcon, ChevronLeftIcon, SparklesIcon } from "@/icons";
+import type { MissionDetailData } from "@/types/missions";
 
-const missionData: Record<
-  string,
-  {
-    id: string;
-    name: string;
-    reward: string;
-    icon: string;
-    color: string;
-    steps: string[];
-    description: string;
-    image: string;
-  }
-> = {
+const MISSIONS_MAP: Record<string, MissionDetailData> = {
   instagram: {
-    id: "i-1",
-    name: "Instagram Explorer",
-    reward: "6.000 fichas",
-    icon: "camera",
-    color: "#E1306C",
-    description: "Completá los pasos para reclamar tu botín real.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDtDQiDEy5gi2rPeLo-4jVny7N8PBMHtLtqF74vQIdq9JGmBlPUbynFVgN0fHX9cUc-ubavyBqrgDM1em2v0H1yM5N_bnVQr6DESWw02I37iuTUKQes2a91m7TwO2w8UR9cHpvv_AiVW9SJ_wTMAE0CKL0EoMWFUgeHQ5tOTm4GNQUVMZghDRqvg_MTOhP3H87ijPtz88fGpHq1wAcnsXCD1NmSKEMAgZQl53LoJXHnRySax6fBznu5_G-Ny8e-xh20YCIyUZmJyKJ4",
+    id: "instagram",
+    key: "instagram",
+    name: "Seguir en Instagram",
+    category: "daily",
+    platform: "instagram",
+    rewardCoins: 500,
+    rewardXp: 150,
+    rewardFormatted: "500 Fichas",
+    xpFormatted: "+150 XP",
+    icon: "photo_camera",
+    color: "#e11d48",
+    description:
+      "Sigue la cuenta oficial de LuckyBet en Instagram para mantenerte al día con las promociones exclusivas y sorteos.",
+    longDescription:
+      "Conviértete en un seguidor destacado de LuckyBet en Instagram. Entérate de todos los eventos, sorteos relámpago de fichas, nuevos lanzamientos de tragamonedas y torneos exclusivos de la comunidad.",
+    status: "completed",
+    expiresIn: "Expira en 18h",
+    actionUrl: "https://instagram.com/luckybet",
+    actionLabel: "Abrir Instagram",
+    verificationNote:
+      "La verificación de seguimiento se sincroniza automáticamente con tu perfil social enlazado.",
     steps: [
-      "Seguir la cuenta",
-      "Comentar algo positivo",
-      "Activar notificaciones",
+      {
+        id: "s1",
+        number: "01",
+        label: "Seguir a @LuckyBetOficial",
+        description: "Abre la aplicación de Instagram y presiona Seguir",
+        completed: true,
+      },
+      {
+        id: "s2",
+        number: "02",
+        label: "Dar 'Me gusta' a la publicación fijada",
+        description: "Interactúa con la última publicación del feed",
+        completed: true,
+      },
+      {
+        id: "s3",
+        number: "03",
+        label: "Activar notificaciones de publicaciones",
+        description: "No te pierdas los códigos de regalo sorpresa",
+        completed: true,
+      },
     ],
   },
   telegram: {
-    id: "t-1",
-
-    name: "Telegram Explorer",
-    reward: "4.500 fichas",
+    id: "telegram",
+    key: "telegram",
+    name: "Unirse al canal de Telegram",
+    category: "daily",
+    platform: "telegram",
+    rewardCoins: 750,
+    rewardXp: 200,
+    rewardFormatted: "750 Fichas",
+    xpFormatted: "+200 XP",
     icon: "send",
-    color: "#0088cc",
+    color: "#0284c7",
     description:
-      "Unite al canal y activá las notificaciones para recibir tu recompensa.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCkSkzErHPVB2v-2XLuFWNEj2muBqY1r_epJ1FKc4l2ZDpMJQA8pC4zICxBBnmYhUohPpwhGaupOxgAehubgFLsf1DjAtmefs4XikobHbJNahMG0gT6VHUTZVJcatpXVgivZxFb7TK3W4qyz6jwDntOBZ6unIhQGsDR7lXwfovJSVixPI9uiOJed9x5pdShz-7ZpxXWW5lWveFHr89yRhiJK3jk4x8WeAa-mAtTsVVLLvf8mvJglJPUhu_WoXW82CCUtyVSabZlS480",
-    steps: ["Unirse al canal", "Activar notificaciones", "Escribir un saludo"],
+      "Únete al canal oficial de Telegram y recibe alertas inmediatas de torneos, códigos de bono y eventos especiales.",
+    longDescription:
+      "El canal VIP de Telegram es donde se publican primero los bonos especiales, multiplicadores de depósito y tiradas gratis. Únete ahora y reclama tu bono inicial.",
+    status: "available",
+    expiresIn: "Expira en 22h",
+    actionUrl: "https://t.me/luckybet_oficial",
+    actionLabel: "Unirse a Telegram",
+    verificationNote:
+      "Una vez dentro del canal, el bot de LuckyBet acreditará tus fichas automáticamente en menos de 2 minutos.",
+    steps: [
+      {
+        id: "t1",
+        number: "01",
+        label: "Unirse al canal oficial de Telegram",
+        description: "Haz clic en el enlace y pulsa 'Unirme'",
+        completed: false,
+      },
+      {
+        id: "t2",
+        number: "02",
+        label: "Activar notificaciones del canal",
+        description: "Mantén el canal sin silenciar para recibir códigos",
+        completed: false,
+      },
+      {
+        id: "t3",
+        number: "03",
+        label: "Enviar /claim en el bot de bienvenida",
+        description: "Verifica tu nombre de usuario para reclamar el botín",
+        completed: false,
+      },
+    ],
   },
   whatsapp: {
-    id: "w-1",
-
-    name: "WhatsApp Challenge",
-    reward: "3.000 fichas",
+    id: "whatsapp",
+    key: "whatsapp",
+    name: "Compartir en WhatsApp",
+    category: "daily",
+    platform: "whatsapp",
+    rewardCoins: 300,
+    rewardXp: 100,
+    rewardFormatted: "300 Fichas",
+    xpFormatted: "+100 XP",
     icon: "chat",
-    color: "#25D366",
-    description: "Compartí y ayudanos a crecer en WhatsApp.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCkSkzErHPVB2v-2XLuFWNEj2muBqY1r_epJ1FKc4l2ZDpMJQA8pC4zICxBBnmYhUohPpwhGaupOxgAehubgFLsf1DjAtmefs4XikobHbJNahMG0gT6VHUTZVJcatpXVgivZxFb7TK3W4qyz6jwDntOBZ6unIhQGsDR7lXwfovJSVixPI9uiOJed9x5pdShz-7ZpxXWW5lWveFHr89yRhiJK3jk4x8WeAa-mAtTsVVLLvf8mvJglJPUhu_WoXW82CCUtyVSabZlS480",
-    steps: ["Compartir el link", "Enviar a 3 contactos", "Capturar pantalla"],
+    color: "#16a34a",
+    description:
+      "Comparte LuckyBet con tus amigos de WhatsApp y ambos recibirán un paquete de bienvenida en fichas.",
+    longDescription:
+      "Envía tu enlace de recomendación a tus grupos o contactos de confianza en WhatsApp. Por cada amigo que ingrese, se desbloquearán tiradas y fichas extras.",
+    status: "available",
+    expiresIn: "Expira en 14h",
+    actionUrl: "https://wa.me/?text=Unete%20a%20LuckyBet",
+    actionLabel: "Compartir en WhatsApp",
+    verificationNote:
+      "Las recompensas se acreditan tan pronto como se comparta el enlace con al menos un contacto.",
+    steps: [
+      {
+        id: "w1",
+        number: "01",
+        label: "Generar enlace de invitación",
+        description: "Copia tu enlace personal con código de regalo",
+        completed: true,
+      },
+      {
+        id: "w2",
+        number: "02",
+        label: "Enviar a 3 amigos o un grupo de juego",
+        description: "Comparte la emoción del casino en vivo",
+        completed: false,
+      },
+      {
+        id: "w3",
+        number: "03",
+        label: "Confirmar envío",
+        description: "Regresa a esta ventana para reclamar",
+        completed: false,
+      },
+    ],
   },
   twitter: {
-    id: "tw-1",
-
-    name: "Twitter/X Explorer",
-    reward: "2.500 fichas",
-    icon: "x",
-    color: "#1da1f2",
-    description: "Seguinos en X y participá de la conversación.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCkSkzErHPVB2v-2XLuFWNEj2muBqY1r_epJ1FKc4l2ZDpMJQA8pC4zICxBBnmYhUohPpwhGaupOxgAehubgFLsf1DjAtmefs4XikobHbJNahMG0gT6VHUTZVJcatpXVgivZxFb7TK3W4qyz6jwDntOBZ6unIhQGsDR7lXwfovJSVixPI9uiOJed9x5pdShz-7ZpxXWW5lWveFHr89yRhiJK3jk4x8WeAa-mAtTsVVLLvf8mvJglJPUhu_WoXW82CCUtyVSabZlS480",
-    steps: ["Seguir la cuenta", "Retuitear un post", "Comentar"],
+    id: "twitter",
+    key: "twitter",
+    name: "Seguir en Twitter / X",
+    category: "daily",
+    platform: "twitter",
+    rewardCoins: 400,
+    rewardXp: 120,
+    rewardFormatted: "400 Fichas",
+    xpFormatted: "+120 XP",
+    icon: "flutter_dash",
+    color: "#0284c7",
+    description:
+      "Sigue a LuckyBet en Twitter/X y retuitea el post fijado para participar en los sorteos semanales de saldo.",
+    longDescription:
+      "Participa en la comunidad global de Twitter/X. Interactúa con las encuestas de nuevos juegos y sorteos de giros gratis semanales.",
+    status: "available",
+    expiresIn: "Expira en 20h",
+    actionUrl: "https://x.com/luckybet",
+    actionLabel: "Abrir Twitter / X",
+    verificationNote:
+      "Sincroniza tu @handle para verificar la acción de forma instantánea.",
+    steps: [
+      {
+        id: "x1",
+        number: "01",
+        label: "Seguir a @LuckyBetCasino",
+        description: "Presiona el botón de seguir en el perfil",
+        completed: false,
+      },
+      {
+        id: "x2",
+        number: "02",
+        label: "Retuitear el post del torneo actual",
+        description: "Comparte con tus seguidores la tabla de clasificación",
+        completed: false,
+      },
+    ],
+  },
+  profile: {
+    id: "profile",
+    key: "profile",
+    name: "Completar Perfil y Teléfono",
+    category: "fixed",
+    platform: "profile",
+    rewardCoins: 1200,
+    rewardXp: 300,
+    rewardFormatted: "1.200 Fichas",
+    xpFormatted: "+300 XP",
+    icon: "badge",
+    color: "#7c3aed",
+    description:
+      "Asegura tu cuenta verificando tu número telefónico y completando tus preferencias de juego.",
+    longDescription:
+      "Un perfil completamente verificado protege tus ganancias, acelera las solicitudes de retiro en el cajero y desbloquea el estatus VIP Harbor.",
+    status: "in_progress",
+    actionUrl: "/dashboard",
+    actionLabel: "Ir a Mi Perfil",
+    verificationNote:
+      "Tu número de teléfono se validará a través de un código SMS de 6 dígitos.",
+    steps: [
+      {
+        id: "p1",
+        number: "01",
+        label: "Ingresar número de WhatsApp / Teléfono",
+        description: "Formato internacional válido (+54, +56, etc.)",
+        completed: true,
+      },
+      {
+        id: "p2",
+        number: "02",
+        label: "Verificar código de seguridad SMS",
+        description: "Ingresa los 6 dígitos recibidos",
+        completed: true,
+      },
+      {
+        id: "p3",
+        number: "03",
+        label: "Establecer avatar y apodo de juego",
+        description: "Personaliza cómo te ven en el ranking",
+        completed: false,
+      },
+    ],
+  },
+  referral: {
+    id: "referral",
+    key: "referral",
+    name: "Invitar a un Amigo",
+    category: "fixed",
+    platform: "referral",
+    rewardCoins: 2500,
+    rewardXp: 500,
+    rewardFormatted: "2.500 Fichas",
+    xpFormatted: "+500 XP",
+    icon: "group_add",
+    color: "#ea580c",
+    description:
+      "Invita a un amigo a registrarse con tu código y recibe recompensas automáticas por sus primeras partidas.",
+    longDescription:
+      "El programa de afiliados de LuckyBet te premia con un 5% de comisión continua en fichas por cada partida jugada por tus invitados.",
+    status: "in_progress",
+    actionUrl: "/dashboard",
+    actionLabel: "Copiar Enlace de Referido",
+    verificationNote:
+      "La recompensa se liberará cuando tu amigo complete su primera sesión de juego.",
+    steps: [
+      {
+        id: "r1",
+        number: "01",
+        label: "Compartir tu código de referido",
+        description: "Envía tu enlace personalizado a un contacto",
+        completed: true,
+      },
+      {
+        id: "r2",
+        number: "02",
+        label: "El amigo completa su registro",
+        description: "Debe crear una cuenta con tu código de invitado",
+        completed: false,
+      },
+      {
+        id: "r3",
+        number: "03",
+        label: "Primera partida jugada",
+        description: "Gana 2.500 fichas al instante de su primera apuesta",
+        completed: false,
+      },
+    ],
+  },
+  "first-deposit": {
+    id: "first-deposit",
+    key: "first-deposit",
+    name: "Primer Depósito en Cajero",
+    category: "fixed",
+    platform: "deposit",
+    rewardCoins: 5000,
+    rewardXp: 1000,
+    rewardFormatted: "5.000 Fichas",
+    xpFormatted: "+1000 XP",
+    icon: "account_balance_wallet",
+    color: "#059669",
+    description:
+      "Realiza tu primer depósito en el cajero oficial y activa el multiplicador de bono de bienvenida del 100%.",
+    longDescription:
+      "Duplica tu saldo inicial con el paquete de bienvenida para nuevos jugadores. Recibe 5.000 fichas de bonificación y una insignia de jugador fundador.",
+    status: "completed",
+    actionUrl: "/dashboard",
+    actionLabel: "Abrir Cajero",
+    verificationNote:
+      "Los depósitos se procesan de forma instantánea a través del cajero verificado de LuckyBet.",
+    steps: [
+      {
+        id: "d1",
+        number: "01",
+        label: "Seleccionar método de pago",
+        description: "Transferencia bancaria, tarjeta o billetera virtual",
+        completed: true,
+      },
+      {
+        id: "d2",
+        number: "02",
+        label: "Acreditar monto mínimo de bienvenida",
+        description: "Acreditación directa 1:1 en tu billetera",
+        completed: true,
+      },
+      {
+        id: "d3",
+        number: "03",
+        label: "Reclamar 5.000 fichas y bono de nivel",
+        description: "¡Bono asignado exitosamente!",
+        completed: true,
+      },
+    ],
   },
 };
 
 export default function MissionDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
-  const mission = missionData[id];
+  const id = (params?.id as string) || "";
 
-  if (!mission) {
-    return (
-      <div className="min-h-dvh bg-background flex items-center justify-center">
-        <TopAppBar />
-        <div className="text-center pt-20">
-          <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
-            Misión no encontrada
-          </h2>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            className="mt-4 bg-secondary text-on-secondary font-label-md px-6 py-3 rounded-full active-scale"
-          >
-            Volver al tablero
-          </button>
-        </div>
-      </div>
+  const mission = MISSIONS_MAP[id] || {
+    id,
+    key: id,
+    name: `Misión: ${id}`,
+    category: "daily",
+    platform: "special",
+    rewardCoins: 1000,
+    rewardXp: 200,
+    rewardFormatted: "1.000 Fichas",
+    xpFormatted: "+200 XP",
+    icon: "stars",
+    color: "#0284c7",
+    description:
+      "Completa los objetivos de este desafío para ganar tus fichas.",
+    longDescription:
+      "Esta misión especial pone a prueba tus habilidades en las mesas y tragamonedas de Midnight Harbor.",
+    status: "available",
+    actionLabel: "Iniciar Misión",
+    steps: [
+      {
+        id: "gen-1",
+        number: "01",
+        label: "Aceptar el desafío",
+        description: "Confirma tu participación",
+        completed: true,
+      },
+      {
+        id: "gen-2",
+        number: "02",
+        label: "Cumplir con el objetivo del juego",
+        description: "Juega según las reglas especificadas",
+        completed: false,
+      },
+    ],
+  };
+
+  const [steps, setSteps] = useState(mission.steps);
+
+  const handleToggleStep = (stepId: string) => {
+    setSteps((prev) =>
+      prev.map((s) =>
+        s.id === stepId ? { ...s, completed: !s.completed } : s,
+      ),
     );
-  }
+  };
 
   return (
-    <div className="min-h-dvh bg-background">
-      <TopAppBar />
-
-      {/* Ambient glows */}
-      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
-      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-secondary/5 rounded-full blur-[120px]" />
-
-      <main className="pt-20 pb-24 md:pb-16 px-container-padding-mobile md:px-container-padding-desktop">
-        <div className="max-w-5xl mx-auto">
-          {/* Desktop back button */}
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            className="hidden md:flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-6 font-label-md"
-          >
-            <span className="material-symbols-outlined">arrow_back</span>
-            Volver al tablero
-          </button>
-
-          {/* Desktop 2-column layout */}
-          <div className="md:grid md:grid-cols-5 md:gap-gutter md:items-start">
-            {/* Left column — Hero (spans 3 cols on desktop) */}
-            <div className="md:col-span-3">
-              {/* Mission Hero */}
-              <div className="relative mt-4 md:mt-0 mb-8">
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-3xl blur-2xl" />
-                <div className="relative glass-card rounded-3xl p-8 flex flex-col items-center text-center overflow-hidden md:p-10">
-                  {/* Icon */}
-                  <div
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transform rotate-3 active-scale"
-                    style={{
-                      background: `linear-gradient(135deg, #ffdf9f 0%, #ffc640 100%)`,
-                      boxShadow: `0 0 20px rgba(255, 198, 64, 0.25)`,
-                    }}
-                  >
-                    <Image
-                      alt={`${mission.name} icon`}
-                      className="w-12 h-12"
-                      src={mission.image}
-                      width={48}
-                      height={48}
-                    />
-                  </div>
-                  <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold mb-2">
-                    {mission.name}
-                  </h2>
-                  <p className="font-body-md text-on-surface-variant mb-6">
-                    {mission.description}
-                  </p>
-
-                  {/* Reward Badge */}
-                  <div className="bg-secondary-container/20 border border-secondary/30 rounded-full px-6 py-2 flex items-center gap-2 mb-2">
-                    <span
-                      className="material-symbols-outlined text-secondary"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      military_tech
-                    </span>
-                    <span className="font-title-md text-title-md text-secondary font-bold">
-                      {mission.reward}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right column — Checklist + Actions (spans 2 cols on desktop) */}
-            <div className="md:col-span-2 md:pt-4">
-              {/* Checklist */}
-              <section className="w-full space-y-4 mb-stack-lg">
-                <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest pl-2">
-                  Pasos a seguir
-                </h3>
-                <div className="space-y-3">
-                  {mission.steps.map((step) => (
-                    <ChecklistItem key={`${step}-${mission.id}`} label={step} />
-                  ))}
-                </div>
-              </section>
-
-              {/* Action Buttons */}
-              <div className="w-full flex flex-col gap-3">
-                <button
-                  type="submit"
-                  className="w-full h-14 bg-secondary text-on-secondary-container font-title-md rounded-xl flex items-center justify-center gap-2 glow-gold active:scale-[0.98] transition-all hover:brightness-110"
-                >
-                  <span className="material-symbols-outlined">open_in_new</span>
-                  Ir a la red
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard")}
-                  className="w-full h-14 bg-surface-container-high text-on-surface-variant font-label-md rounded-xl flex items-center justify-center active:scale-[0.98] transition-all hover:bg-surface-variant border border-outline-variant/30"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
+    <div className="max-w-5xl mx-auto space-y-6 sm:space-y-stack-md">
+      {/* Back to Missions Navigation */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/missions")}
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-[#dae2fd] hover:text-[#38bdf8] transition-colors cursor-pointer group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#171f33] border-2 border-[#2d3449] flex items-center justify-center group-hover:border-[#38bdf8] group-hover:bg-[#222a3d] transition-all shadow-sm">
+            <ChevronLeftIcon className="w-4 h-4 text-white group-hover:text-[#38bdf8] transition-colors" />
           </div>
-        </div>
-      </main>
-    </div>
-  );
-}
+          <span>Volver a Misiones</span>
+        </button>
 
-/* ───── Checklist Item Component ───── */
-function ChecklistItem({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      className="w-full glass-card rounded-xl p-4 flex items-center gap-4 group hover:bg-surface-container-high transition-all text-left"
-    >
-      <div className="w-6 h-6 rounded-full border-2 border-primary/40 flex items-center justify-center group-hover:border-primary transition-colors shrink-0">
-        <span className="material-symbols-outlined text-primary text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">
-          check
+        <span className="text-xs text-[#87929a] font-bold">
+          ID: #{mission.id}
         </span>
       </div>
-      <span className="font-body-md text-on-surface">{label}</span>
-    </button>
+
+      {/* Solid Casino Hero Section */}
+      <MissionDetailHero mission={mission} />
+
+      {/* Grid: Step Progression Checklist + Action CTA */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left: Step Checklist (Spans 8 cols) */}
+        <div className="lg:col-span-8 p-6 sm:p-7 rounded-3xl bg-[#171f33] border-2 border-[#2d3449] shadow-[0_4px_25px_rgba(0,0,0,0.5)] space-y-5">
+          <MissionStepChecklist
+            steps={steps}
+            onToggleStep={handleToggleStep}
+            accentColor="#38bdf8"
+            verificationNote={mission.verificationNote}
+          />
+        </div>
+
+        {/* Right: Actions CTA (Spans 4 cols) */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="p-6 rounded-3xl bg-[#171f33] border-2 border-[#ffc640]/40 shadow-[0_4px_25px_rgba(0,0,0,0.5),0_0_15px_rgba(255,198,64,0.1)] space-y-4">
+            <div className="flex items-center gap-2 text-[#ffc640]">
+              <SparklesIcon className="w-4 h-4 text-[#ffc640]" />
+              <span className="text-xs uppercase font-black tracking-wider">
+                Recompensa Garantizada
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <p className="font-(--font-plus-jakarta-sans) text-2xl sm:text-3xl font-black text-[#ffc640] tracking-tight">
+                +{mission.rewardCoins.toLocaleString("es-ES")}
+              </p>
+              <p className="text-xs text-[#bdc8d1] font-medium">
+                Fichas acreditadas inmediatamente a tu balance al completar
+                todos los pasos.
+              </p>
+            </div>
+
+            <div className="pt-2 space-y-3">
+              {mission.actionUrl && (
+                <motion.a
+                  href={mission.actionUrl}
+                  target={
+                    mission.actionUrl.startsWith("http") ? "_blank" : "_self"
+                  }
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-3.5 px-6 rounded-2xl bg-[#ffc640] hover:bg-[#ffdf9f] text-[#402d00] font-(--font-plus-jakarta-sans) text-sm sm:text-base font-black border-2 border-[#ffdf9f] shadow-lg transition-all text-center flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <BoltIcon className="w-4 h-4 text-[#402d00]" />
+                  <span>{mission.actionLabel || "Iniciar Misión"}</span>
+                </motion.a>
+              )}
+
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/missions")}
+                className="w-full py-3 px-6 rounded-2xl bg-[#222a3d] hover:bg-[#2d3449] text-[#dae2fd] font-(--font-be-vietnam-pro) text-xs sm:text-sm font-bold border-2 border-[#3e484f] transition-all text-center cursor-pointer"
+              >
+                Cerrar y volver
+              </button>
+            </div>
+          </div>
+
+          {/* Tips Box */}
+          <div className="p-5 rounded-2xl bg-[#131b2e] border-2 border-[#2d3449] text-xs text-[#bdc8d1] space-y-1.5">
+            <p className="font-bold text-white flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm text-[#38bdf8]">
+                info
+              </span>
+              Consejo de Casino
+            </p>
+            <p className="leading-relaxed">
+              Las misiones diarias se reinician a las 00:00 UTC. Asegúrate de
+              reclamar tus recompensas antes del reinicio diario.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

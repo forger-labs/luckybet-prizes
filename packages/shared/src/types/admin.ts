@@ -162,3 +162,36 @@ export interface GetLevelsQuery {
   maxExperience?: number;
   sortOrder?: "ASC" | "DESC" | "asc" | "desc";
 }
+
+/* ── Rooms types ── */
+
+export type RoomBonus = "0" | "30" | "40" | "50" | "100" | "150" | "200";
+
+export interface BackendRoom {
+  id: number;
+  name: string;
+  bonus: RoomBonus;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GetRoomsQuery {
+  name?: string;
+  bonus?: RoomBonus;
+  isActive?: boolean;
+  take?: number;
+  skip?: number;
+}
+
+export interface CreateRoomPayload {
+  name: string;
+  bonus: RoomBonus;
+  isActive?: boolean;
+}
+
+export interface UpdateRoomPayload {
+  name?: string;
+  bonus?: RoomBonus;
+  isActive?: boolean;
+}

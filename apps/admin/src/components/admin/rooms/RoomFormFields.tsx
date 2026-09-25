@@ -4,17 +4,9 @@ import { Field } from "formik";
 
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import type { RoomBonus, RoomFormFieldsProps } from "@/types/adminRooms";
+import type {  RoomFormFieldsProps } from "@/types/adminRooms";
+import { BONUS_OPTIONS } from "@/constant";
 
-const BONUS_OPTIONS: { value: RoomBonus; label: string }[] = [
-  { value: "0", label: "0% — Sin bono adicional" },
-  { value: "30", label: "+30% — Bono estándar" },
-  { value: "40", label: "+40% — Bono intermedio" },
-  { value: "50", label: "+50% — Bono preferencial" },
-  { value: "100", label: "+100% — Bono doble" },
-  { value: "150", label: "+150% — Bono super" },
-  { value: "200", label: "+200% — Bono máximo" },
-];
 
 export function RoomFormFields({ formik }: RoomFormFieldsProps) {
   const { values, handleChange, handleBlur, errors, touched, setFieldValue } =

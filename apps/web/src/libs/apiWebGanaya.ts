@@ -9,6 +9,7 @@ import type {
 } from "@shared/types/http";
 
 import { API_URL, LOCAL_STORAGE_KEYS } from "@/constant";
+import type { LuckyBetGameItem } from "@/types/luckybet";
 import type {
   PlayedGameItem,
   PlayedGamesQuery,
@@ -95,6 +96,28 @@ export class ApiWebGanaya {
       }
       const { data } = await this.httpClient.get({ url });
       const response = data as ApiResponse<PlayedGamesResponse>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Games Catalog (LuckyBet Backend) ──
+
+  async getGameList(): Promise<ApiResponse<LuckyBetGameItem[]>> {
+    const result: ApiResponse<LuckyBetGameItem[]> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: "/panel/games",
+      });
+      const response = data as ApiResponse<LuckyBetGameItem[]>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;

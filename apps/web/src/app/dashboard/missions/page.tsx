@@ -1,86 +1,119 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import type { Mission } from "@shared/types/mission";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { MissionSection } from "@/components/mission/organisms/MissionSection";
+import { MissionCard } from "@/components/mission/molecules/MissionCard";
+import { MissionFilterTabs } from "@/components/mission/molecules/MissionFilterTabs";
+import { MissionStatsBar } from "@/components/mission/molecules/MissionStatsBar";
+import { ClockIcon, SparklesIcon } from "@/icons";
+import type {
+  MissionCategory,
+  MissionCategoryTab,
+  MissionItem,
+  MissionStatsSummary,
+} from "@/types/missions";
 
-const DAILY_MISSIONS: Mission[] = [
+const ALL_MISSIONS: MissionItem[] = [
   {
     id: "instagram",
     title: "Seguir en Instagram",
     description:
-      "Sigue la cuenta oficial de LuckyBet en Instagram para mantenerte al día con las promociones exclusivas.",
-    reward: "500 fichas",
-    icon: "camera",
-    color: "#E1306C",
-    href: "/dashboard/missions/instagram",
+      "Sigue la cuenta oficial de LuckyBet en Instagram para enterarte de códigos de bono exclusivos y sorteos semanales.",
+    reward: "500 Fichas",
+    rewardCoins: 500,
+    rewardXp: 150,
+    icon: "photo_camera",
+    color: "#e11d48",
+    category: "daily",
+    platform: "instagram",
     completed: true,
   },
   {
     id: "telegram",
     title: "Unirse al canal de Telegram",
     description:
-      "Únete al canal oficial de Telegram y recibe alertas inmediatas de torneos y eventos especiales.",
-    reward: "750 fichas",
+      "Únete al canal oficial de Telegram y recibe alertas inmediatas de torneos de tragamonedas, giros gratis y eventos.",
+    reward: "750 Fichas",
+    rewardCoins: 750,
+    rewardXp: 200,
     icon: "send",
-    color: "#0088cc",
-    href: "/dashboard/missions/telegram",
+    color: "#0284c7",
+    category: "daily",
+    platform: "telegram",
+    completed: false,
   },
   {
     id: "whatsapp",
     title: "Compartir en WhatsApp",
     description:
-      "Comparte LuckyBet con tus amigos de WhatsApp y ambos recibirán un paquete de bienvenida.",
-    reward: "300 fichas",
+      "Comparte LuckyBet con tus amigos de WhatsApp y ambos recibirán un paquete de bienvenida con fichas de juego.",
+    reward: "300 Fichas",
+    rewardCoins: 300,
+    rewardXp: 100,
     icon: "chat",
-    color: "#25D366",
-    href: "/dashboard/missions/whatsapp",
+    color: "#16a34a",
+    category: "daily",
+    platform: "whatsapp",
+    completed: false,
   },
   {
     id: "twitter",
     title: "Seguir en Twitter / X",
     description:
-      "Sigue a LuckyBet en Twitter/X para participar en sorteos semanales de fichas de juego.",
-    reward: "400 fichas",
-    icon: "x",
-    color: "#1da1f2",
-    href: "/dashboard/missions/twitter",
+      "Sigue a LuckyBet en Twitter/X y retuitea la publicación del torneo para participar en sorteos relámpago.",
+    reward: "400 Fichas",
+    rewardCoins: 400,
+    rewardXp: 120,
+    icon: "flutter_dash",
+    color: "#0284c7",
+    category: "daily",
+    platform: "twitter",
+    completed: false,
   },
-];
-
-const FIXED_MISSIONS: Mission[] = [
   {
     id: "profile",
-    title: "Completar perfil",
+    title: "Completar Perfil y Teléfono",
     description:
-      "Asegura tu cuenta verificando tu correo electrónico y completando tus datos personales.",
-    reward: "200 fichas",
-    icon: "person",
-    color: "#a78bfa",
+      "Asegura tu cuenta de casino verificando tu teléfono para depósitos rápidos y retiros sin demoras.",
+    reward: "1.200 Fichas",
+    rewardCoins: 1200,
+    rewardXp: 300,
+    icon: "badge",
+    color: "#7c3aed",
+    category: "fixed",
+    platform: "profile",
     completed: false,
     progress: 65,
   },
   {
     id: "referral",
-    title: "Invitar a un amigo",
+    title: "Invitar a un Amigo",
     description:
-      "Invita a un amigo a registrarse con tu código y recibe recompensas adicionales por sus partidas.",
-    reward: "1000 fichas",
-    icon: "share",
-    color: "#f97316",
+      "Invita a un amigo a registrarse con tu enlace y gana fichas automáticas cada vez que juegue en el casino.",
+    reward: "2.500 Fichas",
+    rewardCoins: 2500,
+    rewardXp: 500,
+    icon: "group_add",
+    color: "#ea580c",
+    category: "fixed",
+    platform: "referral",
+    completed: false,
     progress: 30,
   },
   {
     id: "first-deposit",
-    title: "Primer depósito",
+    title: "Primer Depósito en Cajero",
     description:
-      "Realiza tu primer depósito en el cajero y recibe un bono del 100% de inmediato.",
-    reward: "5000 fichas",
-    icon: "account_balance",
-    color: "#22c55e",
+      "Realiza tu primera carga de saldo y duplica tu balance con el bono de bienvenida exclusivo del 100%.",
+    reward: "5.000 Fichas",
+    rewardCoins: 5000,
+    rewardXp: 1000,
+    icon: "account_balance_wallet",
+    color: "#059669",
+    category: "fixed",
+    platform: "deposit",
     completed: true,
   },
 ];
@@ -98,6 +131,8 @@ const formatTime = (hour: number, minute: number, second: number) => {
 };
 
 export default function MissionsPage() {
+  const [selectedCategory, setSelectedCategory] =
+    useState<MissionCategory>("all");
   const [hour, setHour] = useState(24);
   const [minute, setMinute] = useState(0);
   const [second, setSecond] = useState(0);
@@ -119,33 +154,109 @@ export default function MissionsPage() {
     return () => clearInterval(timer);
   }, []);
 
+  const stats: MissionStatsSummary = useMemo(() => {
+    const claimable = ALL_MISSIONS.filter((m) => !m.completed).reduce(
+      (acc, m) => acc + (m.rewardCoins || 0),
+      0,
+    );
+    const completed = ALL_MISSIONS.filter((m) => m.completed).length;
+
+    return {
+      claimableCoins: claimable,
+      completedCount: completed,
+      totalCount: ALL_MISSIONS.length,
+      xpMultiplier: "+25% VIP",
+    };
+  }, []);
+
+  const categoryTabs: MissionCategoryTab[] = useMemo(() => {
+    return [
+      { id: "all", label: "Todas", count: ALL_MISSIONS.length },
+      {
+        id: "daily",
+        label: "Diarias",
+        count: ALL_MISSIONS.filter((m) => m.category === "daily").length,
+      },
+      {
+        id: "fixed",
+        label: "Permanentes",
+        count: ALL_MISSIONS.filter((m) => m.category === "fixed").length,
+      },
+      {
+        id: "special",
+        label: "Especiales",
+        count: ALL_MISSIONS.filter((m) => m.category === "special").length,
+      },
+    ];
+  }, []);
+
+  const filteredMissions = useMemo(() => {
+    if (selectedCategory === "all") return ALL_MISSIONS;
+    return ALL_MISSIONS.filter((m) => m.category === selectedCategory);
+  }, [selectedCategory]);
+
   return (
     <div className="max-w-[1280px] mx-auto space-y-6 sm:space-y-stack-md">
+      {/* Header Banner */}
       <DashboardHeader />
 
-      {/* Bento grid for Missions */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Daily Missions */}
-        <div className="lg:col-span-8">
-          <MissionSection
-            title="Misiones Diarias"
-            titleColor="#8ed5ff"
-            timer={`Se renueva en ${formatTime(hour, minute, second)}`}
-            missions={DAILY_MISSIONS}
-            columns={2}
-          />
-        </div>
+      {/* Solid Casino Stats Bar */}
+      <MissionStatsBar stats={stats} />
 
-        {/* Fixed Missions */}
-        <div className="lg:col-span-4">
-          <MissionSection
-            title="Misiones Permanentes"
-            titleColor="#ffc640"
-            missions={FIXED_MISSIONS}
-            columns={1}
-          />
+      {/* Filter and Countdown Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+        <MissionFilterTabs
+          categories={categoryTabs}
+          activeCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
+
+        {/* Casino Countdown Timer Pill */}
+        <div className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2 rounded-xl bg-[#171f33] border-2 border-[#38bdf8]/40 shadow-md">
+          <ClockIcon className="w-4 h-4 text-[#38bdf8]" />
+          <span className="text-xs text-[#bdc8d1] font-bold">Reinicio en:</span>
+          <span className="font-(--font-plus-jakarta-sans) text-xs sm:text-sm font-black text-[#8ed5ff] tracking-wider font-mono">
+            {formatTime(hour, minute, second)}
+          </span>
         </div>
       </div>
+
+      {/* Missions Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <AnimatePresence mode="popLayout">
+          {filteredMissions.map((mission, idx) => (
+            <motion.div
+              key={mission.id}
+              layout
+              initial={{ opacity: 0, scale: 0.96, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -10 }}
+              transition={{
+                duration: 0.2,
+                delay: idx * 0.03,
+              }}
+              className="h-full"
+            >
+              <MissionCard mission={mission} />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {filteredMissions.length === 0 && (
+        <div className="text-center py-16 px-4 rounded-2xl bg-[#171f33] border-2 border-[#2d3449]">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#222a3d] flex items-center justify-center text-[#87929a]">
+            <SparklesIcon className="w-8 h-8 opacity-40" />
+          </div>
+          <h3 className="font-(--font-plus-jakarta-sans) text-lg font-black text-white mb-1">
+            No hay misiones disponibles
+          </h3>
+          <p className="text-xs sm:text-sm text-[#87929a]">
+            Actualmente no hay misiones en esta categoría. Vuelve a consultar
+            más tarde.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

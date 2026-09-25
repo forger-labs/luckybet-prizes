@@ -39,6 +39,7 @@ export interface UserRankStatus {
   streakDays: number;
   multiplier: string;
   currentLevelImage?: string;
+  levelMinExperience?: number;
   nextLevelImage?: string;
   currentLevelId?: number;
   nextLevelId?: number;
