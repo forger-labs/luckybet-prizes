@@ -1,29 +1,42 @@
 "use client";
 
-import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
-import type { LevelFormFieldsProps } from "@/types/adminLevels";
-import type { SelectOption } from "@/types/Select";
-import { LevelImageUpload } from "./LevelImageUpload";
+import { useCallback } from "react";
 
-const BONUS_OPTIONS: SelectOption[] = [
-  { value: "", label: "Sin bonus adicional" },
-  { value: "0", label: "0%" },
-  { value: "30", label: "30%" },
-  { value: "40", label: "40%" },
-  { value: "50", label: "50%" },
-  { value: "100", label: "100%" },
-  { value: "150", label: "150%" },
-  { value: "200", label: "200%" },
-];
+import { Input } from "@/components/ui/Input";
+import { SearchSelect } from "@/components/ui/SearchSelect";
+import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
+import type { LevelFormFieldsProps } from "@/types/adminLevels";
+import type { SearchSelectOption } from "@/types/SearchSelect";
+import { LevelImageUpload } from "./LevelImageUpload";
 
 export function LevelFormFields({
   formik,
-  isCreate: _isCreate,
   currentImageUrl,
 }: LevelFormFieldsProps) {
   const { values, handleChange, handleBlur, errors, touched, setFieldValue } =
     formik;
+
+  const searchRooms = useCallback(
+    async (query: string): Promise<SearchSelectOption[]> => {
+      const res = await apiAdminGanaya.getRooms({
+        name: query || undefined,
+        take: 7,
+      });
+
+      if (res.status && res.data) {
+        return res.data.map((room) => {
+          const bonusLabel =
+            room.bonus === "0" ? "Sin bono" : `+${room.bonus}%`;
+          return {
+            value: room.id.toString(),
+            label: `${room.name} - ${bonusLabel}`,
+          };
+        });
+      }
+      return [];
+    },
+    [],
+  );
 
   return (
     <div className="flex flex-col gap-4 pt-1">
@@ -115,26 +128,28 @@ export function LevelFormFields({
         </div>
       </div>
 
-      {/* Bonus Select */}
+      {/* Sala Promocional Asociada (SearchSelect) */}
       <div className="flex flex-col gap-1.5">
         <label
-          htmlFor="level-bonus"
+          htmlFor="level-roomId"
           className="text-label-sm font-semibold text-on-surface-variant cursor-pointer"
         >
-          Bonus adicional de recompensa
+          Sala Promocional Asignada (opcional)
         </label>
-        <Select
-          id="level-bonus"
-          name="bonus"
-          icon="percent"
-          options={BONUS_OPTIONS}
-          value={values.bonus}
-          onChange={(val) => setFieldValue("bonus", val)}
-          placeholder="Seleccionar porcentaje de bonus..."
-          error={
-            touched.bonus && errors.bonus ? (errors.bonus as string) : undefined
-          }
+        <SearchSelect
+          id="level-roomId"
+          name="roomId"
+          icon="meeting_room"
+          placeholder="Sin sala promocional (conserva sala base)"
+          searchPlaceholder="Buscar sala por nombre..."
+          value={values.roomId}
+          onChange={(val) => setFieldValue("roomId", val)}
+          onSearch={searchRooms}
         />
+        <p className="text-[11px] text-outline mt-0.5">
+          Al ascender a este nivel, los premios se transferirán temporalmente a
+          esta sala en LuckyBet.
+        </p>
       </div>
     </div>
   );

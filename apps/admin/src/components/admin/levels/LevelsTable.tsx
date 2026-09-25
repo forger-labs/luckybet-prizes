@@ -25,7 +25,7 @@ export function LevelsTable({ levels, isLoading, onEdit }: LevelsTableProps) {
                 Monedas
               </th>
               <th className="py-3.5 px-4 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-                Bonus
+                Sala Asignada
               </th>
               <th className="py-3.5 px-4 sm:pr-6 text-right text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
                 Acciones
@@ -49,7 +49,7 @@ export function LevelsTable({ levels, isLoading, onEdit }: LevelsTableProps) {
                   <div className="h-6 w-20 bg-surface-container-highest/60 rounded-full" />
                 </td>
                 <td className="py-4 px-4">
-                  <div className="h-6 w-16 bg-surface-container-highest/60 rounded-full" />
+                  <div className="h-6 w-20 bg-surface-container-highest/60 rounded-full" />
                 </td>
                 <td className="py-4 px-4 sm:pr-6 text-right">
                   <div className="inline-block h-8 w-8 bg-surface-container-highest/60 rounded-xl" />
@@ -98,7 +98,7 @@ export function LevelsTable({ levels, isLoading, onEdit }: LevelsTableProps) {
               Monedas
             </th>
             <th className="py-3.5 px-4 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-              Bonus
+              Sala Asignada
             </th>
             <th className="py-3.5 px-4 sm:pr-6 text-right text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
               Acciones

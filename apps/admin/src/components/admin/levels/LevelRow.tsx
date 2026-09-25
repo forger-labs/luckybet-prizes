@@ -2,20 +2,10 @@
 
 import Image from "next/image";
 
-import { DropdownMenu } from "@/components/ui/DropdownMenu";
 import type { LevelRowProps } from "@/types/adminLevels";
-import type { DropdownItem } from "@/types/DropdownMenu";
 
 export function LevelRow({ level, onEdit }: LevelRowProps) {
-  const bonusValue = level.bonus && level.bonus !== "0" ? level.bonus : null;
-
-  const dropdownItems: DropdownItem[] = [
-    {
-      label: "Editar nivel",
-      icon: "edit",
-      onClick: () => onEdit(level),
-    },
-  ];
+  const bonusNum = level.room ? Number(level.room.bonus) || 0 : 0;
 
   return (
     <tr className="border-b border-outline-variant/15 last:border-b-0 hover:bg-surface-container-high/40 transition-colors duration-150 group">
@@ -71,18 +61,20 @@ export function LevelRow({ level, onEdit }: LevelRowProps) {
         </div>
       </td>
 
-      {/* Bonus */}
+      {/* Sala Promocional Asociada */}
       <td className="py-4 px-4">
-        {bonusValue ? (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-label-sm font-bold bg-[#22c55e]/15 text-[#4ade80] border border-[#22c55e]/30">
-            <span className="material-symbols-outlined text-xs">
-              trending_up
+        {level.room ? (
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-on-surface">
+              {level.room.name}
             </span>
-            <span>+{bonusValue}%</span>
-          </span>
+            <span className="text-[11px] text-secondary font-mono">
+              {bonusNum > 0 ? `+${level.room.bonus}% Bono` : "0% Bono"}
+            </span>
+          </div>
         ) : (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm text-outline border border-outline-variant/20 bg-surface-container-lowest/60">
-            0%
+            Sin sala
           </span>
         )}
       </td>
@@ -93,21 +85,12 @@ export function LevelRow({ level, onEdit }: LevelRowProps) {
           <button
             type="button"
             onClick={() => onEdit(level)}
-            className="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-xl text-outline hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all cursor-pointer"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-xl text-outline hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all cursor-pointer"
             aria-label={`Editar nivel ${level.name}`}
             title="Editar nivel"
           >
             <span className="material-symbols-outlined text-lg">edit</span>
           </button>
-
-          <DropdownMenu
-            trigger={
-              <span className="material-symbols-outlined text-on-surface-variant hover:text-on-surface transition-colors p-1.5 rounded-lg hover:bg-surface-container-high">
-                more_vert
-              </span>
-            }
-            items={dropdownItems}
-          />
         </div>
       </td>
     </tr>

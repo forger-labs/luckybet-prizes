@@ -262,8 +262,8 @@ export class ApiWebGanaya {
         if (params.name?.trim()) {
           searchParams.append("name", params.name.trim());
         }
-        if (params.bonus) {
-          searchParams.append("bonus", params.bonus.toString());
+        if (params.roomId) {
+          searchParams.append("roomId", params.roomId.toString());
         }
         if (
           params.minCoins !== undefined &&

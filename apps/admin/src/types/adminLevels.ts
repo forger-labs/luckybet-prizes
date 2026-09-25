@@ -1,8 +1,13 @@
 import type { FormikProps } from "formik";
 
-import type { BackendLevel, GetLevelsQuery, LevelBonus } from "@shared/types";
+import type {
+  BackendLevel,
+  BackendLevelRoom,
+  GetLevelsQuery,
+  LevelBonus,
+} from "@shared/types";
 
-export type { BackendLevel, GetLevelsQuery, LevelBonus };
+export type { BackendLevel, BackendLevelRoom, GetLevelsQuery, LevelBonus };
 
 /** AdminLevel alias of BackendLevel for domain consistency */
 export type AdminLevel = BackendLevel;
@@ -12,14 +17,14 @@ export interface LevelFormValues {
   name: string;
   minExperience: number | "";
   coins: number | "";
-  bonus: LevelBonus | "";
+  roomId: string; // ID de sala seleccionada ("" para sin sala)
   image: File | null;
 }
 
 /** Filter criteria for searching and paginating levels */
 export interface LevelFilters {
   name: string;
-  bonus: string;
+  roomId: string;
   minCoins: string;
   maxCoins: string;
   minExperience: string;
@@ -95,7 +100,9 @@ export interface LevelsStatsCardsProps {
 /** Props for level filter bar */
 export interface LevelsFilterBarProps {
   filters: LevelFilters;
+  limit: number;
   onFilterChange: (filters: Partial<LevelFilters>) => void;
+  onLimitChange: (limit: number) => void;
   onResetFilters: () => void;
 }
 

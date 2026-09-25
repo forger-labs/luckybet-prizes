@@ -10,8 +10,6 @@ import { Modal } from "@/components/ui/Modal";
 import type { LevelFormModalProps, LevelFormValues } from "@/types/adminLevels";
 import { LevelFormFields } from "./LevelFormFields";
 
-const BONUS_ALLOWED = ["0", "30", "40", "50", "100", "150", "200"] as const;
-
 const CreateLevelSchema = Yup.object().shape({
   name: Yup.string()
     .trim()
@@ -28,9 +26,7 @@ const CreateLevelSchema = Yup.object().shape({
     .integer("Debe ser un número entero")
     .min(0, "Las monedas no pueden ser negativas")
     .required("La cantidad de monedas es obligatoria"),
-  bonus: Yup.string()
-    .oneOf(["", ...BONUS_ALLOWED], "Seleccione un porcentaje de bonus válido")
-    .optional(),
+  roomId: Yup.string().optional(),
   image: Yup.mixed<File>()
     .required("La medalla del nivel es obligatoria")
     .test(
@@ -56,9 +52,7 @@ const EditLevelSchema = Yup.object().shape({
     .integer("Debe ser un número entero")
     .min(0, "Las monedas no pueden ser negativas")
     .required("La cantidad de monedas es obligatoria"),
-  bonus: Yup.string()
-    .oneOf(["", ...BONUS_ALLOWED], "Seleccione un porcentaje de bonus válido")
-    .optional(),
+  roomId: Yup.string().optional(),
   image: Yup.mixed<File>()
     .nullable()
     .optional()
@@ -100,7 +94,7 @@ export function LevelFormModal({
     name: level?.name ?? "",
     minExperience: level?.minExperience ?? "",
     coins: level?.coins ?? "",
-    bonus: (level?.bonus as LevelFormValues["bonus"]) ?? "",
+    roomId: level?.roomId ? String(level.roomId) : "",
     image: null,
   };
 

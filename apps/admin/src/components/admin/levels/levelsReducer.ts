@@ -1,6 +1,5 @@
 import type { Dispatch } from "react";
 
-import type { LevelBonus } from "@shared/types";
 import { casinoToast } from "@shared/utils/casinoToast";
 
 import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
@@ -15,7 +14,7 @@ import type {
 
 export const initialFilters: LevelFilters = {
   name: "",
-  bonus: "",
+  roomId: "",
   minCoins: "",
   maxCoins: "",
   minExperience: "",
@@ -40,14 +39,24 @@ export function levelsReducer(s: LevelsState, a: LevelsAction): LevelsState {
   const modal = (
     open: boolean,
     edit = false,
-    item: BackendLevel | null = null,
-  ) => ({ ...s, isModalOpen: open, isEditMode: edit, selectedLevel: item });
+    level: BackendLevel | null = null,
+  ) => ({
+    ...s,
+    isModalOpen: open,
+    isEditMode: edit,
+    selectedLevel: level,
+  });
 
   switch (a.type) {
     case "FETCH_START":
       return { ...s, isLoading: true };
     case "FETCH_SUCCESS":
-      return { ...s, isLoading: false, ...a.payload };
+      return {
+        ...s,
+        isLoading: false,
+        levels: a.payload.levels,
+        total: a.payload.total,
+      };
     case "FETCH_ERROR":
       return { ...s, isLoading: false };
     case "SET_PAGE":
@@ -59,7 +68,7 @@ export function levelsReducer(s: LevelsState, a: LevelsAction): LevelsState {
     case "RESET_FILTERS":
       return { ...s, filters: initialFilters, page: 1 };
     case "OPEN_CREATE_MODAL":
-      return modal(true);
+      return modal(true, false, null);
     case "OPEN_EDIT_MODAL":
       return modal(true, true, a.payload);
     case "CLOSE_MODAL":
@@ -67,7 +76,6 @@ export function levelsReducer(s: LevelsState, a: LevelsAction): LevelsState {
     case "SUBMIT_START":
       return { ...s, isSubmitting: true };
     case "SUBMIT_SUCCESS":
-      return { ...modal(false), isSubmitting: false };
     case "SUBMIT_ERROR":
       return { ...s, isSubmitting: false };
     case "SET_SELECTED_LEVEL":
@@ -87,7 +95,7 @@ function parseQuery(
     take: limit,
     skip: (page - 1) * limit,
     name: f.name.trim() || undefined,
-    bonus: (f.bonus as LevelBonus) || undefined,
+    roomId: num(f.roomId),
     minCoins: num(f.minCoins),
     maxCoins: num(f.maxCoins),
     minExperience: num(f.minExperience),
@@ -98,14 +106,16 @@ function parseQuery(
 
 export async function loadLevels(
   dispatch: Dispatch<LevelsAction>,
-  page = 1,
-  limit = 10,
-  f: LevelFilters = initialFilters,
-): Promise<void> {
+  page: number,
+  limit: number,
+  filters: LevelFilters,
+) {
   dispatch({ type: "FETCH_START" });
   try {
-    const res = await apiAdminGanaya.getLevels(parseQuery(page, limit, f));
-    if (res.status && res.data) {
+    const res = await apiAdminGanaya.getLevels(
+      parseQuery(page, limit, filters),
+    );
+    if (res?.status && Array.isArray(res.data)) {
       dispatch({
         type: "FETCH_SUCCESS",
         payload: {
@@ -113,18 +123,20 @@ export async function loadLevels(
           total: res.meta?.total ?? res.data.length,
         },
       });
-    } else {
-      dispatch({ type: "FETCH_ERROR" });
-      const desc = Array.isArray(res.message)
-        ? res.message.join(", ")
-        : res.message || "Error al cargar niveles.";
-      casinoToast.error({ title: "Error", description: desc });
+      return;
     }
+    dispatch({ type: "FETCH_ERROR" });
+    casinoToast.error({
+      title: "Error al cargar niveles",
+      description:
+        (Array.isArray(res?.message) ? res.message[0] : res?.message) ||
+        "No se pudieron obtener los niveles",
+    });
   } catch {
     dispatch({ type: "FETCH_ERROR" });
     casinoToast.error({
-      title: "Error de conexión",
-      description: "No se pudo conectar con el servidor.",
+      title: "Error de red",
+      description: "No se pudo conectar con el servidor",
     });
   }
 }
@@ -134,37 +146,40 @@ function buildFormData(d: LevelFormValues): FormData {
   fd.append("name", d.name.trim());
   fd.append("minExperience", String(d.minExperience));
   fd.append("coins", String(d.coins));
-  if (d.bonus) fd.append("bonus", d.bonus);
+  if (d.roomId) fd.append("roomId", d.roomId);
   if (d.image) fd.append("image", d.image);
   return fd;
 }
 
 async function mutate(
   dispatch: Dispatch<LevelsAction>,
-  apiCall: () => Promise<{ status: boolean; message?: string | string[] }>,
-  title: string,
+  fn: () => Promise<{ status: boolean; message?: string | string[] }>,
+  successMsg: string,
 ): Promise<boolean> {
   dispatch({ type: "SUBMIT_START" });
   try {
-    const res = await apiCall();
-    dispatch({ type: res.status ? "SUBMIT_SUCCESS" : "SUBMIT_ERROR" });
-    if (res.status) {
+    const res = await fn();
+    if (res?.status) {
+      dispatch({ type: "SUBMIT_SUCCESS" });
       casinoToast.success({
-        title,
-        description: "Operación completada exitosamente.",
+        title: "Éxito",
+        description: successMsg,
       });
       return true;
     }
-    const desc = Array.isArray(res.message)
-      ? res.message.join(", ")
-      : res.message || "Error en la solicitud.";
-    casinoToast.error({ title: "Error", description: desc });
+    dispatch({ type: "SUBMIT_ERROR" });
+    casinoToast.error({
+      title: "Error",
+      description:
+        (Array.isArray(res?.message) ? res.message[0] : res?.message) ||
+        "No se pudo completar la operación",
+    });
     return false;
   } catch {
     dispatch({ type: "SUBMIT_ERROR" });
     casinoToast.error({
-      title: "Error de conexión",
-      description: "No se pudo conectar con el servidor.",
+      title: "Error de red",
+      description: "No se pudo conectar con el servidor",
     });
     return false;
   }

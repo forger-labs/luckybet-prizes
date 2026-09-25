@@ -1,4 +1,4 @@
-import type { BackendLevel } from "@shared/types";
+import type { BackendLevel, BackendPlayerRoom } from "@shared/types";
 
 export interface PlayedGameItem {
   gameId: string;
@@ -35,6 +35,8 @@ export interface PlayerMeResponse {
   experience: number;
   levelId?: number | null;
   level?: BackendLevel | null;
+  roomId?: number | null;
+  room?: BackendPlayerRoom | null;
 }
 
 export interface UserMissionBasic {

@@ -3,66 +3,45 @@
 import { useCallback } from "react";
 
 import { Input } from "@/components/ui/Input";
+import { SearchSelect } from "@/components/ui/SearchSelect";
 import { Select } from "@/components/ui/Select";
+import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
 import type { LevelsFilterBarProps } from "@/types/adminLevels";
-import type { SelectOption } from "@/types/Select";
+import type { SearchSelectOption } from "@/types/SearchSelect";
 
-const BONUS_OPTIONS: SelectOption[] = [
-  { value: "", label: "Todos los bonus" },
-  { value: "0", label: "0%" },
-  { value: "30", label: "30%" },
-  { value: "40", label: "40%" },
-  { value: "50", label: "50%" },
-  { value: "100", label: "100%" },
-  { value: "150", label: "150%" },
-  { value: "200", label: "200%" },
+const LIMIT_OPTIONS = [
+  { value: "10", label: "10 por página" },
+  { value: "20", label: "20 por página" },
+  { value: "50", label: "50 por página" },
 ];
 
 export function LevelsFilterBar({
   filters,
+  limit,
   onFilterChange,
+  onLimitChange,
   onResetFilters,
 }: LevelsFilterBarProps) {
-  const handleNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onFilterChange({ name: e.target.value });
-    },
-    [onFilterChange],
-  );
+  const searchRooms = useCallback(
+    async (query: string): Promise<SearchSelectOption[]> => {
+      const res = await apiAdminGanaya.getRooms({
+        name: query || undefined,
+        take: 7,
+      });
 
-  const handleBonusChange = useCallback(
-    (bonus: string) => {
-      onFilterChange({ bonus });
+      if (res.status && res.data) {
+        return res.data.map((room) => {
+          const bonusLabel =
+            room.bonus === "0" ? "Sin bono" : `+${room.bonus}%`;
+          return {
+            value: room.id.toString(),
+            label: `${room.name} - ${bonusLabel}`,
+          };
+        });
+      }
+      return [];
     },
-    [onFilterChange],
-  );
-
-  const handleMinXpChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onFilterChange({ minExperience: e.target.value });
-    },
-    [onFilterChange],
-  );
-
-  const handleMaxXpChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onFilterChange({ maxExperience: e.target.value });
-    },
-    [onFilterChange],
-  );
-
-  const handleMinCoinsChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onFilterChange({ minCoins: e.target.value });
-    },
-    [onFilterChange],
-  );
-
-  const handleMaxCoinsChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      onFilterChange({ maxCoins: e.target.value });
-    },
-    [onFilterChange],
+    [],
   );
 
   const toggleSortOrder = useCallback(() => {
@@ -73,7 +52,7 @@ export function LevelsFilterBar({
 
   const hasActiveFilters =
     Boolean(filters.name) ||
-    Boolean(filters.bonus) ||
+    Boolean(filters.roomId) ||
     Boolean(filters.minExperience) ||
     Boolean(filters.maxExperience) ||
     Boolean(filters.minCoins) ||
@@ -81,7 +60,7 @@ export function LevelsFilterBar({
     filters.sortOrder !== "ASC";
 
   return (
-    <div className="flex flex-col gap-3 p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md">
+    <div className="flex flex-col gap-3 p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20">
       {/* Primary search row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-center">
         <Input
@@ -89,19 +68,19 @@ export function LevelsFilterBar({
           icon="search"
           placeholder="Buscar por nombre de nivel..."
           value={filters.name}
-          onChange={handleNameChange}
+          onChange={(e) => onFilterChange({ name: e.target.value })}
           wrapperClassName="w-full"
           className="bg-surface-container-lowest/80 border-outline-variant/30 focus:border-primary"
         />
 
-        <Select
-          id="filter-bonus"
-          icon="percent"
-          options={BONUS_OPTIONS}
-          value={filters.bonus}
-          onChange={handleBonusChange}
-          placeholder="Filtrar por bonus..."
-          className="w-full"
+        <SearchSelect
+          id="filter-room"
+          icon="meeting_room"
+          placeholder="Todas las salas con bono"
+          searchPlaceholder="Buscar sala..."
+          value={filters.roomId}
+          onChange={(val) => onFilterChange({ roomId: val })}
+          onSearch={searchRooms}
         />
 
         <div className="flex items-center gap-2">
@@ -137,15 +116,15 @@ export function LevelsFilterBar({
         </div>
       </div>
 
-      {/* Advanced range filters */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-outline-variant/10">
+      {/* Advanced range filters & Limit */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2 border-t border-outline-variant/10">
         <Input
           id="filter-minExperience"
           type="number"
           icon="speed"
           placeholder="Min XP"
           value={filters.minExperience}
-          onChange={handleMinXpChange}
+          onChange={(e) => onFilterChange({ minExperience: e.target.value })}
           wrapperClassName="w-full"
           className="bg-surface-container-lowest/80 text-sm"
         />
@@ -156,7 +135,7 @@ export function LevelsFilterBar({
           icon="speed"
           placeholder="Max XP"
           value={filters.maxExperience}
-          onChange={handleMaxXpChange}
+          onChange={(e) => onFilterChange({ maxExperience: e.target.value })}
           wrapperClassName="w-full"
           className="bg-surface-container-lowest/80 text-sm"
         />
@@ -167,7 +146,7 @@ export function LevelsFilterBar({
           icon="toll"
           placeholder="Min Monedas"
           value={filters.minCoins}
-          onChange={handleMinCoinsChange}
+          onChange={(e) => onFilterChange({ minCoins: e.target.value })}
           wrapperClassName="w-full"
           className="bg-surface-container-lowest/80 text-sm"
         />
@@ -178,10 +157,21 @@ export function LevelsFilterBar({
           icon="toll"
           placeholder="Max Monedas"
           value={filters.maxCoins}
-          onChange={handleMaxCoinsChange}
+          onChange={(e) => onFilterChange({ maxCoins: e.target.value })}
           wrapperClassName="w-full"
           className="bg-surface-container-lowest/80 text-sm"
         />
+
+        <div className="col-span-2 sm:col-span-1">
+          <Select
+            id="filter-limit"
+            name="limit"
+            icon="format_list_numbered"
+            options={LIMIT_OPTIONS}
+            value={limit.toString()}
+            onChange={(val) => onLimitChange(Number(val) || 10)}
+          />
+        </div>
       </div>
     </div>
   );

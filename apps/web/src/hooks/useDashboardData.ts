@@ -34,9 +34,10 @@ export function useDashboardData() {
         const currentLevel = player.level;
         const currentTier = currentLevel?.name ?? "Nivel 1";
         const currentLevelImage = currentLevel?.image;
-        const multiplier = currentLevel?.bonus
-          ? `+${currentLevel.bonus}%`
-          : "1.0x";
+        const multiplier =
+          player.room?.bonus && player.room.bonus !== "0"
+            ? `+${player.room.bonus}%`
+            : "1.0x";
 
         const nextLevel = await webApi.getNextLevel(
           player.level?.minExperience ?? currentXp,

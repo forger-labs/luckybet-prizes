@@ -32,6 +32,10 @@ export function LevelsList() {
     dispatch({ type: "SET_FILTERS", payload: filters });
   }, []);
 
+  const handleLimitChange = useCallback((limit: number) => {
+    dispatch({ type: "SET_LIMIT", payload: limit });
+  }, []);
+
   const handleResetFilters = useCallback(() => {
     dispatch({ type: "RESET_FILTERS" });
   }, []);
@@ -120,7 +124,9 @@ export function LevelsList() {
       {/* ── Filter Bar ── */}
       <LevelsFilterBar
         filters={state.filters}
+        limit={state.limit}
         onFilterChange={handleFilterChange}
+        onLimitChange={handleLimitChange}
         onResetFilters={handleResetFilters}
       />
 
