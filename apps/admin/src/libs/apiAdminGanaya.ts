@@ -6,7 +6,11 @@ import type {
   BackendLevel,
   BackendMission,
   BackendMissionStatus,
+  BackendRoom,
+  CreateRoomPayload,
   GetLevelsQuery,
+  GetRoomsQuery,
+  UpdateRoomPayload,
 } from "@shared/types/admin";
 import type {
   ApiResponse,
@@ -615,6 +619,144 @@ export default class ApiAdminGanaya {
       if (responseData?.status) result.status = true;
       result.data = responseData.data;
       result.message = responseData.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Admin Rooms API ──
+
+  async getRooms(
+    params?: GetRoomsQuery,
+  ): Promise<PaginatedApiResponse<BackendRoom[]>> {
+    const result: PaginatedApiResponse<BackendRoom[]> = {
+      data: null,
+      status: false,
+      message: "",
+      meta: null,
+    };
+    try {
+      let url = "/rooms";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.take !== undefined && params.take !== null)
+          searchParams.append("take", params.take.toString());
+        if (params.skip !== undefined && params.skip !== null)
+          searchParams.append("skip", params.skip.toString());
+        if (
+          params.name !== undefined &&
+          params.name !== null &&
+          params.name.trim() !== ""
+        )
+          searchParams.append("name", params.name.trim());
+        if (params.bonus !== undefined && params.bonus !== null)
+          searchParams.append("bonus", params.bonus.toString());
+        if (params.isActive !== undefined && params.isActive !== null)
+          searchParams.append("isActive", params.isActive.toString());
+
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as PaginatedApiResponse<BackendRoom[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      result.meta = response.meta ?? null;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result) as unknown as PaginatedApiResponse<
+        BackendRoom[]
+      >;
+    }
+  }
+
+  async getRoomById(id: number): Promise<ApiResponse<BackendRoom>> {
+    const result: ApiResponse<BackendRoom> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: `/rooms/${id}`,
+      });
+      const response = data as ApiResponse<BackendRoom>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async createRoom(
+    payload: CreateRoomPayload,
+  ): Promise<ApiResponse<BackendRoom>> {
+    const result: ApiResponse<BackendRoom> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: "/rooms",
+        body: payload,
+      });
+      const response = data as ApiResponse<BackendRoom>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async updateRoom(
+    id: number,
+    payload: UpdateRoomPayload,
+  ): Promise<ApiResponse<BackendRoom>> {
+    const result: ApiResponse<BackendRoom> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.patch({
+        url: `/rooms/${id}`,
+        body: payload,
+      });
+      const response = data as ApiResponse<BackendRoom>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async updateRoomStatus(
+    id: number,
+    isActive: boolean,
+  ): Promise<ApiResponse<BackendRoom>> {
+    const result: ApiResponse<BackendRoom> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.patch({
+        url: `/rooms/${id}/status`,
+        body: { isActive },
+      });
+      const response = data as ApiResponse<BackendRoom>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
       return result;
     } catch (error) {
       return handleApiError(error, result);

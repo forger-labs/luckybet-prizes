@@ -11,5 +11,6 @@ export const ROUTES = {
   panel: {
     index: "/panel",
     revision: "/panel/revision",
+    salas: "/panel/salas",
   },
 };

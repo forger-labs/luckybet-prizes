@@ -88,7 +88,7 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
     }, [open]);
 
     return (
-      <div ref={containerRef} className={`relative ${className}`}>
+      <div ref={containerRef} className={` ${className}`}>
         {/* Trigger */}
         <button
           type="button"
@@ -97,7 +97,7 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
           disabled={disabled}
           onClick={handleToggle}
           className={`
-            w-full flex items-center gap-2
+            w-full flex items-center gap-2 relative
             bg-surface-container-lowest border
             rounded-lg py-3.5 px-4 text-left
             transition-all duration-300
@@ -139,7 +139,7 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
         {/* Dropdown panel */}
         {open && (
           <div
-            className="absolute z-50 mt-1 w-full bg-surface-container/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto"
+            className="absolute z-50 mt-1 w-3/4 bg-surface-container/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto"
             role="listbox"
           >
             {options.length === 0 ? (
