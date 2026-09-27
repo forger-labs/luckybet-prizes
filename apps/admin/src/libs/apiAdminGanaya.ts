@@ -2,13 +2,16 @@ import axios from "axios";
 
 import HttpClient, { handleApiError } from "@shared/libs/httpClient";
 import type {
-  BackendCreateMissionPayload,
+  BackendUpdateMissionPayload,
+  BackendGameItem,
   BackendLevel,
   BackendMission,
   BackendMissionStatus,
+  BackendProviderItem,
   BackendRoom,
   CreateRoomPayload,
   GetLevelsQuery,
+  GetMissionsQuery,
   GetPlayersQuery,
   GetRoomsQuery,
   UpdatePlayerPayload,
@@ -147,10 +150,9 @@ export default class ApiAdminGanaya {
     }
   }
 
-  async getMissions(params?: {
-    take?: number;
-    skip?: number;
-  }): Promise<PaginatedApiResponse<BackendMission[]>> {
+  async getMissions(
+    params?: GetMissionsQuery,
+  ): Promise<PaginatedApiResponse<BackendMission[]>> {
     const result: PaginatedApiResponse<BackendMission[]> = {
       data: null,
       status: false,
@@ -159,13 +161,21 @@ export default class ApiAdminGanaya {
     };
     try {
       let url = "/missions";
-      if (params?.take !== undefined || params?.skip !== undefined) {
+      if (params) {
         const searchParams = new URLSearchParams();
-        if (params.take !== undefined)
+        if (params.take !== undefined && params.take !== null)
           searchParams.append("take", params.take.toString());
-        if (params.skip !== undefined)
+        if (params.skip !== undefined && params.skip !== null)
           searchParams.append("skip", params.skip.toString());
-        if (searchParams.toString()) url += `?${searchParams.toString()}`;
+        if (params.status !== undefined && params.status !== null)
+          searchParams.append("status", params.status);
+        if (params.type !== undefined && params.type !== null)
+          searchParams.append("type", params.type);
+        if (params.roomId !== undefined && params.roomId !== null)
+          searchParams.append("roomId", params.roomId.toString());
+
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
       }
       const { data } = await this.httpClient.get({ url });
       const response = data as PaginatedApiResponse<BackendMission[]>;
@@ -203,7 +213,7 @@ export default class ApiAdminGanaya {
 
   async updateMission(
     id: number,
-    payload: Partial<BackendCreateMissionPayload>,
+    payload: Partial<BackendUpdateMissionPayload>,
   ): Promise<ApiResponse<BackendMission>> {
     const result: ApiResponse<BackendMission> = {
       data: null,
@@ -808,6 +818,48 @@ export default class ApiAdminGanaya {
         body: { isActive },
       });
       const response = data as ApiResponse<BackendRoom>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Panel Catalog API (Games & Providers) ──
+
+  async getGames(): Promise<ApiResponse<BackendGameItem[]>> {
+    const result: ApiResponse<BackendGameItem[]> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: "/panel/games",
+      });
+      const response = data as ApiResponse<BackendGameItem[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getProviders(): Promise<ApiResponse<BackendProviderItem[]>> {
+    const result: ApiResponse<BackendProviderItem[]> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: "/panel/providers",
+      });
+      const response = data as ApiResponse<BackendProviderItem[]>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;

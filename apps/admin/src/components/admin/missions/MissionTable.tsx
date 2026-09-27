@@ -3,14 +3,12 @@
 import type { MissionTableProps } from "@/types/missions/MissionTable";
 import { MissionRow } from "./MissionRow";
 
-function MissionTable({
+export function MissionTable({
   missions,
+  onPreview,
   onEdit,
   onActivate,
   onCancel,
-  onDelete,
-  onView,
-  onDuplicate,
 }: MissionTableProps) {
   if (missions.length === 0) {
     return (
@@ -24,8 +22,8 @@ function MissionTable({
           No se encontraron misiones
         </p>
         <p className="font-body-md text-sm text-on-surface-variant max-w-sm mt-1">
-          No hay misiones que coincidan con el filtro seleccionado o el criterio
-          de búsqueda.
+          No hay misiones que coincidan con los filtros seleccionados o el
+          criterio de búsqueda.
         </p>
       </div>
     );
@@ -37,13 +35,13 @@ function MissionTable({
         <thead>
           <tr className="border-b border-outline-variant/20 bg-surface-container-high/40">
             <th className="py-3.5 px-4 sm:pl-6 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-              Misión y Recompensas
+              Misión y Tipo
             </th>
             <th className="py-3.5 px-4 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-              Estado
+              Recompensas y Sala
             </th>
             <th className="py-3.5 px-4 text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-              Métricas
+              Estado / Tiempo
             </th>
             <th className="py-3.5 px-4 sm:pr-6 text-right text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
               Acciones
@@ -55,12 +53,10 @@ function MissionTable({
             <MissionRow
               key={mission.id}
               mission={mission}
+              onPreview={onPreview}
               onEdit={onEdit}
               onActivate={onActivate}
               onCancel={onCancel}
-              onDelete={onDelete}
-              onView={onView}
-              onDuplicate={onDuplicate}
             />
           ))}
         </tbody>
@@ -70,5 +66,3 @@ function MissionTable({
 }
 
 MissionTable.displayName = "MissionTable";
-
-export { MissionTable };

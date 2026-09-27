@@ -1,28 +1,32 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 
-import type { AdminMission } from "@shared/types";
+import type {
+  AdminMission,
+  BackendGameItem,
+  BackendProviderItem,
+} from "@shared/types";
 import { casinoToast } from "@shared/utils/casinoToast";
 
-import { MissionFormModal } from "@/components/admin/mission-form/MissionFormModal";
 import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Pagination } from "@/components/ui/Pagination";
-import type { FilterValue } from "@/types/missions/FilterTabs";
-import { FilterTabs } from "./FilterTabs";
-import { MissionIntegrityBanner } from "./MissionIntegrityBanner";
+import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
+import type { MissionFilters } from "@/types/missions/FilterTabs";
+import type { PartialAdminMission } from "@/types/missions/MissionFormModalTypes";
+import { MissionFormModal } from "../mission-form/MissionFormModal";
+import { MissionPreviewModal } from "./MissionPreviewModal";
 import { MissionStatsCards } from "./MissionStatsCards";
+import { MissionsFilterBar } from "./MissionsFilterBar";
 import {
-  activateMission,
-  applyFilters,
-  cancelMission,
-  createMission,
-  deleteMission,
+  activateMissionAction,
+  applyClientSearch,
+  cancelMissionAction,
+  createMissionAction,
   initialState,
   loadMissions,
   missionsReducer,
-  updateMission,
+  updateMissionAction,
 } from "./MissionsReducer";
 import { MissionTable } from "./MissionTable";
 
@@ -31,155 +35,165 @@ export function MissionsList() {
   const [editingMission, setEditingMission] = useState<AdminMission | null>(
     null,
   );
+  const [previewMission, setPreviewMission] = useState<AdminMission | null>(
+    null,
+  );
   const [showFormModal, setShowFormModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+
+  // In-memory catalog of games & providers (fetched once at page mount)
+  const [games, setGames] = useState<BackendGameItem[]>([]);
+  const [providers, setProviders] = useState<BackendProviderItem[]>([]);
 
   useEffect(() => {
-    loadMissions(dispatch, state.page);
-  }, [state.page]);
+    loadMissions(dispatch, state.page, state.limit, state.filters);
+  }, [state.page, state.limit, state.filters]);
 
-  const pageMissions = applyFilters(state.missions, state.filter, state.search);
-
-  const handleFilterChange = useCallback((filter: FilterValue) => {
-    dispatch({ type: "SET_FILTER", payload: { filter } });
+  // Initial catalog load
+  useEffect(() => {
+    async function loadCatalog() {
+      try {
+        const [gamesRes, providersRes] = await Promise.all([
+          apiAdminGanaya.getGames(),
+          apiAdminGanaya.getProviders(),
+        ]);
+        if (gamesRes.status && gamesRes.data) setGames(gamesRes.data);
+        if (providersRes.status && providersRes.data)
+          setProviders(providersRes.data);
+      } catch {
+        // best effort catalog load
+      }
+    }
+    loadCatalog();
   }, []);
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      dispatch({ type: "SET_SEARCH", payload: { search: e.target.value } });
-    },
+  const handleFilterChange = useCallback((f: Partial<MissionFilters>) => {
+    dispatch({ type: "SET_FILTERS", payload: f });
+  }, []);
+
+  const handleLimitChange = useCallback((limit: number) => {
+    dispatch({ type: "SET_LIMIT", payload: { limit } });
+  }, []);
+
+  const handleResetFilters = useCallback(
+    () => dispatch({ type: "RESET_FILTERS" }),
     [],
   );
-
-  const handlePageChange = useCallback((page: number) => {
-    dispatch({ type: "SET_PAGE", payload: { page } });
-  }, []);
+  const handlePageChange = useCallback(
+    (page: number) => dispatch({ type: "SET_PAGE", payload: { page } }),
+    [],
+  );
 
   const handleCreate = useCallback(() => {
     setEditingMission(null);
     setShowFormModal(true);
   }, []);
 
+  const handlePreview = useCallback((mission: AdminMission) => {
+    setPreviewMission(mission);
+    setShowPreviewModal(true);
+  }, []);
+
   const handleEdit = useCallback(
     (id: string) => {
-      const mission = state.missions.find((m) => m.id === id);
-      if (!mission) return;
-      setEditingMission(mission);
-      setShowFormModal(true);
+      const m = state.missions.find((x) => x.id === id);
+      if (m) {
+        setEditingMission(m);
+        setShowFormModal(true);
+      }
     },
     [state.missions],
   );
 
-  const handleView = useCallback(
+  const handleActivate = useCallback(
     (id: string) => {
-      const mission = state.missions.find((m) => m.id === id);
-      if (!mission) return;
-      setEditingMission(mission);
-      setShowFormModal(true);
-    },
-    [state.missions],
-  );
-
-  const handleDuplicate = useCallback(
-    (id: string) => {
-      const mission = state.missions.find((m) => m.id === id);
-      if (!mission) return;
-      setEditingMission(null);
-      setShowFormModal(true);
-    },
-    [state.missions],
-  );
-
-  const handleActivate = useCallback(async (id: string) => {
-    casinoToast.action({
-      title: "¿Activar misión?",
-      description:
-        "Al activar la misión su contenido quedará bloqueado para edición.",
-      button: {
-        title: "Activar",
-        onClick: async () => {
-          await activateMission(dispatch, id);
+      const m = state.missions.find((x) => x.id === id);
+      if (!m) return;
+      casinoToast.action({
+        title: "¿Activar misión?",
+        description: `¿Desea activar "${m.title}"? Quedará protegida contra edición.`,
+        button: {
+          title: "Activar",
+          onClick: async () => {
+            const ok = await activateMissionAction(id);
+            if (ok)
+              loadMissions(dispatch, state.page, state.limit, state.filters);
+          },
         },
-      },
-    });
-  }, []);
+      });
+    },
+    [state.missions, state.page, state.limit, state.filters],
+  );
 
-  const handleCancel = useCallback(async (id: string) => {
-    const reason = window.prompt("Motivo de cancelación:");
-    if (!reason?.trim()) return;
-    await cancelMission(dispatch, id, reason.trim());
-  }, []);
-
-  const handleDelete = useCallback(async (id: string) => {
-    const confirmed = window.confirm("¿Desea eliminar la misión?");
-    if (!confirmed) return;
-    await deleteMission(dispatch, id);
-  }, []);
+  const handleCancel = useCallback(
+    (id: string) => {
+      const m = state.missions.find((x) => x.id === id);
+      if (!m) return;
+      casinoToast.action({
+        title: "¿Cancelar misión?",
+        description: `¿Desea cancelar la misión "${m.title}"?`,
+        button: {
+          title: "Cancelar",
+          onClick: async () => {
+            const ok = await cancelMissionAction(id);
+            if (ok)
+              loadMissions(dispatch, state.page, state.limit, state.filters);
+          },
+        },
+      });
+    },
+    [state.missions, state.page, state.limit, state.filters],
+  );
 
   const handleSave = useCallback(
-    async (
-      data: Omit<AdminMission, "id" | "createdAt" | "participants">,
-      isCreate: boolean,
-    ) => {
+    async (data: PartialAdminMission, isCreate: boolean): Promise<boolean> => {
       const ok = isCreate
-        ? await createMission(dispatch, data)
+        ? await createMissionAction(dispatch, data)
         : editingMission
-          ? await updateMission(dispatch, editingMission.id, data)
+          ? await updateMissionAction(dispatch, editingMission.id, data)
           : false;
 
       if (ok) {
         setShowFormModal(false);
         setEditingMission(null);
+        loadMissions(dispatch, state.page, state.limit, state.filters);
       }
+      return ok;
     },
-    [editingMission],
+    [editingMission, state.page, state.limit, state.filters],
   );
 
-  const activeCount = state.missions.filter(
-    (m) => m.status === "active",
-  ).length;
-  const totalParticipants = state.missions.reduce(
-    (acc, m) => acc + (m.participants || 0),
-    0,
+  const filteredMissions = useMemo(
+    () => applyClientSearch(state.missions, state.filters.search),
+    [state.missions, state.filters.search],
   );
 
-  if (state.loading) {
-    return (
-      <div className="flex items-center justify-center py-28">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(56,189,248,0.2)]">
-            <span className="material-symbols-outlined text-3xl animate-spin">
-              sync
-            </span>
-          </div>
-          <p className="text-body-md text-on-surface-variant font-medium">
-            Cargando catálogo de misiones...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const stats = useMemo(() => {
+    const activeCount = state.missions.filter(
+      (m) => m.status === "active",
+    ).length;
+    const dailyCount = state.missions.filter(
+      (m) => m.category === "daily",
+    ).length;
+    const weeklyCount = state.missions.filter(
+      (m) => m.category === "weekly",
+    ).length;
+    return { totalMissions: state.total, activeCount, dailyCount, weeklyCount };
+  }, [state.missions, state.total]);
+
+  const totalPages = Math.max(1, Math.ceil(state.total / state.limit));
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-      <MissionStatsCards
-        totalMissions={state.missions.length}
-        activeCount={activeCount}
-        totalParticipants={totalParticipants}
-        page={state.page}
-        totalPages={state.totalPages}
-      />
-
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="w-full sm:max-w-md">
-          <Input
-            id="search-missions"
-            icon="search"
-            placeholder="Buscar por título o recompensa..."
-            value={state.search}
-            onChange={handleSearchChange}
-            wrapperClassName="w-full"
-            className="bg-surface-container-low/90 border-outline-variant/30 focus:border-primary"
-          />
+        <div>
+          <h1 className="font-(--font-plus-jakarta-sans) text-headline-lg font-bold text-on-surface">
+            Control de Misiones
+          </h1>
+          <p className="text-body-md text-on-surface-variant mt-1">
+            Gestione y supervise las misiones diarias, semanales y retos de la
+            plataforma.
+          </p>
         </div>
         <Button
           leadingIcon="add_circle"
@@ -191,31 +205,49 @@ export function MissionsList() {
         </Button>
       </div>
 
-      <FilterTabs activeFilter={state.filter} onChange={handleFilterChange} />
+      <MissionStatsCards
+        totalMissions={stats.totalMissions}
+        activeCount={stats.activeCount}
+        dailyCount={stats.dailyCount}
+        weeklyCount={stats.weeklyCount}
+      />
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        <div className="flex-1 min-w-0">
-          <MissionTable
-            missions={pageMissions}
-            onEdit={handleEdit}
-            onActivate={handleActivate}
-            onCancel={handleCancel}
-            onDelete={handleDelete}
-            onView={handleView}
-            onDuplicate={handleDuplicate}
+      <MissionsFilterBar
+        filters={state.filters}
+        limit={state.limit}
+        onFilterChange={handleFilterChange}
+        onLimitChange={handleLimitChange}
+        onResetFilters={handleResetFilters}
+      />
+
+      <MissionTable
+        missions={filteredMissions}
+        onPreview={handlePreview}
+        onEdit={handleEdit}
+        onActivate={handleActivate}
+        onCancel={handleCancel}
+      />
+
+      {state.total > state.limit && (
+        <div className="flex justify-center pt-4 border-t border-outline-variant/15">
+          <Pagination
+            current={state.page}
+            total={totalPages}
+            onChange={handlePageChange}
           />
         </div>
+      )}
 
-        <MissionIntegrityBanner />
-      </div>
-
-      <div className="flex justify-center pt-4 border-t border-outline-variant/15">
-        <Pagination
-          current={state.page}
-          total={state.totalPages}
-          onChange={handlePageChange}
+      {showPreviewModal && (
+        <MissionPreviewModal
+          open={showPreviewModal}
+          onClose={() => {
+            setShowPreviewModal(false);
+            setPreviewMission(null);
+          }}
+          mission={previewMission}
         />
-      </div>
+      )}
 
       {showFormModal && (
         <MissionFormModal
@@ -226,6 +258,9 @@ export function MissionsList() {
           }}
           mission={editingMission}
           onSave={handleSave}
+          isSubmitting={state.isSubmitting}
+          games={games}
+          providers={providers}
         />
       )}
     </div>

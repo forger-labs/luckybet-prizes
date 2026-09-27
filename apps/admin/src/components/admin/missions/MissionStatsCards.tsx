@@ -5,9 +5,8 @@ import type { MissionStatsProps } from "@/types/missions/MissionStats";
 export function MissionStatsCards({
   totalMissions,
   activeCount,
-  totalParticipants,
-  page,
-  totalPages,
+  dailyCount,
+  weeklyCount,
 }: MissionStatsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
@@ -29,18 +28,18 @@ export function MissionStatsCards({
       </div>
       <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md">
         <span className="text-label-sm text-secondary block">
-          Participantes
+          Diarias (DAILY)
         </span>
         <span className="text-2xl font-bold text-secondary mt-1 block">
-          {totalParticipants.toLocaleString()}
+          {dailyCount}
         </span>
       </div>
       <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md">
-        <span className="text-label-sm text-on-surface-variant block">
-          Páginas
+        <span className="text-label-sm text-tertiary block">
+          Semanales (WEEKLY)
         </span>
         <span className="text-2xl font-bold text-on-surface mt-1 block">
-          {page} / {totalPages || 1}
+          {weeklyCount}
         </span>
       </div>
     </div>

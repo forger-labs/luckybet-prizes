@@ -20,9 +20,9 @@ const FIELD_LABELS: Record<string, string> = {
   title: "Título de la misión",
   description: "Descripción detallada",
   tokenReward: "Recompensa en fichas",
-  bonusPercent: "Porcentaje de bono",
   xpReward: "Experiencia XP",
   category: "Categoría",
+  roomId: "Sala asignada",
 };
 
 export function MissionFields({
@@ -46,12 +46,15 @@ export function MissionFields({
             "title",
             "description",
             "tokenReward",
-            "bonusPercent",
             "xpReward",
             "category",
+            "roomId",
           ] as const
         ).map((field) => {
-          let displayValue: string | number | undefined = mission[field];
+          let displayValue: string | number | undefined = mission[field] as
+            | string
+            | number
+            | undefined;
 
           if (field === "category" && typeof displayValue === "string") {
             displayValue = CATEGORY_OPTIONS.find(
@@ -59,11 +62,14 @@ export function MissionFields({
             )?.label;
           }
 
+          if (field === "roomId") {
+            displayValue = mission.room
+              ? `${mission.room.name} (${mission.room.bonus === "0" ? "Sin bono" : `+${mission.room.bonus}%`})`
+              : "Sin sala promocional";
+          }
+
           if (typeof displayValue === "number") {
-            displayValue =
-              field === "tokenReward" || field === "xpReward"
-                ? displayValue.toLocaleString()
-                : `${displayValue}%`;
+            displayValue = displayValue.toLocaleString();
           }
 
           return (
@@ -129,7 +135,7 @@ export function MissionFields({
       </FieldGroup>
 
       {/* Rewards Grid */}
-      <MissionRewardFields formik={formik} />
+      <MissionRewardFields formik={formik} readOnly={readOnly} />
 
       {/* Cover Image Upload */}
       <MissionCoverUpload

@@ -1,18 +1,10 @@
 /**
  * api-mappers — field mappers between frontend AdminMission and backend BackendMission.
- *
- * Handles:
- * - bonusPercent ↔ bonus (absolute chip amount)
- * - category ↔ type (lowercase ↔ UPPERCASE)
- * - tokenReward ↔ coinsAmount
- * - xpReward ↔ experiencePoints
- * - coverImage ↔ imageUrl
- * - status (lowercase ↔ UPPERCASE)
  */
 
 import type {
   AdminMission,
-  BackendCreateMissionPayload,
+  BackendUpdateMissionPayload,
   BackendMission,
   BackendMissionStatus,
   BackendMissionType,
@@ -28,7 +20,7 @@ const CATEGORY_TO_TYPE: Record<MissionCategory, BackendMissionType> = {
   daily: "DAILY",
   weekly: "WEEKLY",
   fixed: "FIXED",
-  special_event: "FIXED", // Backend has no SPECIAL_EVENT — map to FIXED
+  special_event: "FIXED",
 };
 
 const TYPE_TO_CATEGORY: Record<BackendMissionType, MissionCategory> = {
@@ -54,24 +46,45 @@ const STATUS_TO_FRONTEND: Record<BackendMissionStatus, MissionStatus> = {
 /* ── Mappers ── */
 
 /**
- * Convert frontend AdminMission/PartialAdminMission → backend BackendCreateMissionPayload.
+ * Convert frontend AdminMission/PartialAdminMission → backend BackendUpdateMissionPayload.
  */
 export function mapAdminToBackend(
   adminMission: PartialAdminMission,
-): BackendCreateMissionPayload {
-  const bonus =
-    adminMission.bonusPercent > 0 && adminMission.tokenReward > 0
-      ? Math.round((adminMission.bonusPercent / 100) * adminMission.tokenReward)
-      : undefined;
+): BackendUpdateMissionPayload {
+
+  const steps = (adminMission.steps ?? []).map((step) => {
+    let cleanConfig = null;
+    if (step.verificationType === "GAME_PLAY" && step.targetConfig) {
+      if (step.targetConfig.gameId) {
+        cleanConfig = {
+          gameId: step.targetConfig.gameId,
+          minBet: Number(step.targetConfig.minBet) || 0,
+        };
+      } else if (step.targetConfig.provider) {
+        cleanConfig = {
+          provider: step.targetConfig.provider,
+          minUniqueGames: Number(step.targetConfig.minUniqueGames) || 1,
+          minBet: Number(step.targetConfig.minBet) || 0,
+        };
+      }
+    }
+    return {
+      stepOrder: step.order,
+      type: step.verificationType,
+      content: step.title,
+      targetConfig: cleanConfig,
+    };
+  });
 
   return {
     title: adminMission.title ?? "",
     description: adminMission.description,
     type: CATEGORY_TO_TYPE[adminMission.category ?? "daily"],
     coinsAmount: adminMission.tokenReward ?? 0,
-    bonus,
     experiencePoints: adminMission.xpReward ?? 0,
+    roomId: adminMission.roomId ? Number(adminMission.roomId) : null,
     imageUrl: adminMission.coverImage,
+    steps
   };
 }
 
@@ -81,29 +94,29 @@ export function mapAdminToBackend(
 export function mapBackendToAdmin(
   backendMission: BackendMission,
 ): AdminMission {
-  const bonusPercent =
-    backendMission.bonus && backendMission.coinsAmount > 0
-      ? Math.round((backendMission.bonus / backendMission.coinsAmount) * 100)
-      : 0;
-
   return {
     id: String(backendMission.id),
     title: backendMission.title,
     description: backendMission.description ?? "",
     tokenReward: backendMission.coinsAmount,
-    bonusPercent,
     xpReward: backendMission.experiencePoints,
+    roomId: backendMission.roomId,
+    room: backendMission.room,
     category: TYPE_TO_CATEGORY[backendMission.type],
     status: STATUS_TO_FRONTEND[backendMission.status],
     steps: (backendMission?.steps ?? []).map((s) => ({
       title: s.content ?? "",
       order: s.stepOrder,
       verificationType: s.type,
+      targetConfig:
+        s.targetConfig as AdminMission["steps"][number]["targetConfig"],
       id: s.id,
-    })), // Steps are managed separately via MissionFormModal
+    })),
     coverImage: backendMission.imageUrl,
-    participants: 0, // Not provided by backend list endpoint
+    participants: 0,
     createdAt: backendMission.activatedAt ?? "",
+    activatedAt: backendMission.activatedAt,
+    expiresAt: backendMission.expiresAt,
     cancelReason:
       backendMission.status === "CANCELLED" ? "Cancelled via admin" : undefined,
   };
@@ -131,7 +144,6 @@ export function mapStatusToFrontend(
 
 /**
  * Build the multipart/form-data payload for mission creation
- * (POST /missions consumes multipart, with `image` as a required file).
  */
 export function buildCreateMissionFormData(
   partial: PartialAdminMission,
@@ -143,24 +155,38 @@ export function buildCreateMissionFormData(
   if (partial.description) formData.append("description", partial.description);
 
   formData.append("type", CATEGORY_TO_TYPE[partial.category ?? "daily"]);
-
   formData.append("coinsAmount", String(partial.tokenReward ?? 0));
-
-  const bonus =
-    partial.bonusPercent > 0 && partial.tokenReward > 0
-      ? Math.round((partial.bonusPercent / 100) * partial.tokenReward)
-      : undefined;
-  if (bonus !== undefined && bonus > 0) {
-    formData.append("bonus", String(bonus));
-  }
-
   formData.append("experiencePoints", String(partial.xpReward ?? 0));
 
-  const steps = (partial.steps ?? []).map((step) => ({
-    stepOrder: step.order,
-    type: step.verificationType,
-    content: step.title,
-  }));
+  if (partial.roomId) {
+    formData.append("roomId", String(partial.roomId));
+  }
+
+  const steps = (partial.steps ?? []).map((step) => {
+    let cleanConfig = null;
+    if (step.verificationType === "GAME_PLAY" && step.targetConfig) {
+      if (step.targetConfig.gameId) {
+        cleanConfig = {
+          gameId: step.targetConfig.gameId,
+          minBet: Number(step.targetConfig.minBet) || 0,
+        };
+      } else if (step.targetConfig.provider) {
+        cleanConfig = {
+          provider: step.targetConfig.provider,
+          minUniqueGames: Number(step.targetConfig.minUniqueGames) || 1,
+          minBet: Number(step.targetConfig.minBet) || 0,
+        };
+      }
+    }
+
+    return {
+      stepOrder: step.order,
+      type: step.verificationType,
+      content: step.title,
+      targetConfig: cleanConfig,
+    };
+  });
+
   formData.append("missionSteps", JSON.stringify(steps));
 
   if (image) formData.append("image", image);

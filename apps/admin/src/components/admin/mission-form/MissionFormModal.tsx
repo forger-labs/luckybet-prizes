@@ -6,6 +6,8 @@ import * as Yup from "yup";
 
 import type {
   AdminMission,
+  BackendGameItem,
+  BackendProviderItem,
   MissionStep,
   VerificationType,
 } from "@shared/types";
@@ -37,7 +39,7 @@ const validationSchema = Yup.object({
   tokenReward: Yup.number()
     .required("La recompensa es obligatoria")
     .min(1, "Debe ser mayor a 0"),
-  bonusPercent: Yup.number().min(0).max(100),
+  roomId: Yup.number().nullable().optional(),
   xpReward: Yup.number()
     .required("La experiencia es obligatoria")
     .min(1, "Debe ser mayor a 0"),
@@ -56,7 +58,7 @@ function createEmptyInitialValues(): PartialAdminMission {
     title: "",
     description: "",
     tokenReward: 0,
-    bonusPercent: 0,
+    roomId: null,
     xpReward: 0,
     category: "daily",
     status: "inactive",
@@ -69,7 +71,13 @@ export function MissionFormModal({
   onClose,
   mission,
   onSave,
-}: MissionFormModalProps) {
+  isSubmitting = false,
+  games = [],
+  providers = [],
+}: MissionFormModalProps & {
+  games?: BackendGameItem[];
+  providers?: BackendProviderItem[];
+}) {
   const isCreating = mission === null;
   const readOnly = !isCreating && mission.status === "active";
   const [dirty, setDirty] = useState(false);
@@ -79,7 +87,7 @@ export function MissionFormModal({
     validationSchema,
     validateOnChange: false,
     validateOnBlur: false,
-    onSubmit: (values) => {
+    onSubmit: async (values) => {
       const steps = ((values.steps as MissionStep[]) || []).map((s, i) => ({
         ...s,
         order: i + 1,
@@ -89,7 +97,7 @@ export function MissionFormModal({
         title: (values.title as string) || "",
         description: (values.description as string) || "",
         tokenReward: Number(values.tokenReward) || 0,
-        bonusPercent: Number(values.bonusPercent) || 0,
+        roomId: values.roomId ? Number(values.roomId) : null,
         xpReward: Number(values.xpReward) || 0,
         category: (values.category as AdminMission["category"]) || "daily",
         status: (values.status as AdminMission["status"]) || "inactive",
@@ -98,7 +106,8 @@ export function MissionFormModal({
         image: values.image as File | undefined,
       };
 
-      onSave(payload, isCreating);
+      const ok = await onSave(payload, isCreating);
+      if (ok) onClose();
     },
   });
 
@@ -125,9 +134,7 @@ export function MissionFormModal({
         description: "Hay modificaciones sin guardar. ¿Desea descartarlas?",
         button: {
           title: "Sí, descartar",
-          onClick: () => {
-            onClose();
-          },
+          onClick: () => onClose(),
         },
       });
       return;
@@ -148,7 +155,7 @@ export function MissionFormModal({
       }
       subtitle={
         isCreating
-          ? "Configure los parámetros de la misión y sus pasos"
+          ? "Configure los parámetros de la misión, recompensas y pasos"
           : undefined
       }
       icon="assignment"
@@ -161,7 +168,7 @@ export function MissionFormModal({
           </span>
           <p className="text-body-md text-on-surface-variant text-sm leading-relaxed">
             Misión activa — contenido protegido contra edición para salvaguardar
-            el progreso de los jugadores.
+            el progreso.
           </p>
         </div>
       )}
@@ -171,7 +178,12 @@ export function MissionFormModal({
 
         {!readOnly && (
           <div className="pt-6 border-t border-outline-variant/20">
-            <StepBuilder formik={formik} readOnly={readOnly} />
+            <StepBuilder
+              formik={formik}
+              readOnly={readOnly}
+              games={games}
+              providers={providers}
+            />
           </div>
         )}
 
@@ -187,9 +199,14 @@ export function MissionFormModal({
             <Button
               type="submit"
               variant="secondary"
+              disabled={isSubmitting || formik.isSubmitting}
               className="font-bold shadow-[0_0_15px_rgba(255,198,64,0.2)] hover:shadow-[0_0_20px_rgba(255,198,64,0.35)] cursor-pointer"
             >
-              {isCreating ? "Crear misión" : "Guardar cambios"}
+              {isSubmitting || formik.isSubmitting
+                ? "Guardando..."
+                : isCreating
+                  ? "Crear misión"
+                  : "Guardar cambios"}
             </Button>
           )}
         </div>

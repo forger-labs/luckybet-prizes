@@ -14,4 +14,5 @@ export interface SelectProps {
   error?: string;
   className?: string;
   disabled?: boolean;
+  isRelative?: boolean;
 }

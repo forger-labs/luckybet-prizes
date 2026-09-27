@@ -1,4 +1,5 @@
 import type { AdminMission } from "@shared/types";
+
 export type PartialAdminMission = Omit<
   AdminMission,
   "id" | "createdAt" | "participants"
@@ -11,14 +12,15 @@ export interface MissionFormModalProps {
   onClose: () => void;
   /** null = create mode, AdminMission = edit/view mode */
   mission: AdminMission | null;
-  onSave: (data: PartialAdminMission, isCreate: boolean) => void;
+  onSave: (data: PartialAdminMission, isCreate: boolean) => Promise<boolean>;
+  isSubmitting?: boolean;
 }
 
 export interface FormErrors {
   title?: string;
   description?: string;
   tokenReward?: string;
-  bonusPercent?: string;
+  roomId?: string;
   xpReward?: string;
   category?: string;
   steps?: string;

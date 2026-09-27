@@ -8,7 +8,12 @@ import { Button } from "@/components/ui/Button";
 import type { StepBuilderProps } from "@/types/missions/StepBuilderTypes";
 import { StepCard } from "./StepCard";
 
-export function StepBuilder({ formik, readOnly = false }: StepBuilderProps) {
+export function StepBuilder({
+  formik,
+  readOnly = false,
+  games = [],
+  providers = [],
+}: StepBuilderProps) {
   const steps = (formik.values.steps as MissionStep[]) || [];
   const onChange = (newSteps: MissionStep[]) =>
     formik.setFieldValue("steps", newSteps);
@@ -80,7 +85,7 @@ export function StepBuilder({ formik, readOnly = false }: StepBuilderProps) {
             Pasos de Verificación
           </h4>
           <p className="text-label-sm text-on-surface-variant">
-            Defina la secuencia de acciones que el jugador debe completar
+            Defina la secuencia de acciones (Captura, Texto o Juego LuckyBet)
           </p>
         </div>
 
@@ -108,6 +113,8 @@ export function StepBuilder({ formik, readOnly = false }: StepBuilderProps) {
             onMoveUp={() => handleMoveUp(index)}
             onMoveDown={() => handleMoveDown(index)}
             errors={perStepErrors[index]}
+            games={games}
+            providers={providers}
           />
         ))}
       </div>

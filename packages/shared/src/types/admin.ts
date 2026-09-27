@@ -1,6 +1,6 @@
 export type MissionStatus = "inactive" | "active" | "completed" | "cancelled";
 export type MissionCategory = "daily" | "weekly" | "fixed" | "special_event";
-export type VerificationType = "IMAGE" | "TEXT";
+export type VerificationType = "IMAGE" | "TEXT" | "GAME_PLAY";
 
 export type BackendMissionType = "DAILY" | "WEEKLY" | "FIXED";
 export type BackendMissionStatus =
@@ -13,8 +13,16 @@ export interface BackendMissionStep {
   id: number;
   missionId: number;
   stepOrder: number;
-  type: "IMAGE" | "TEXT";
+  type: "IMAGE" | "TEXT" | "GAME_PLAY";
   content?: string;
+  targetConfig?: Record<string, unknown> | null;
+}
+
+export interface BackendMissionRoom {
+  id: number;
+  name: string;
+  bonus: string;
+  isActive: boolean;
 }
 
 export interface BackendMission {
@@ -24,24 +32,57 @@ export interface BackendMission {
   type: BackendMissionType;
   status: BackendMissionStatus;
   coinsAmount: number;
-  bonus?: number;
   experiencePoints: number;
+  roomId?: number | null;
+  room?: BackendMissionRoom | null;
   imageUrl?: string;
   activatedAt?: string;
   expiresAt?: string;
   steps?: BackendMissionStep[];
 }
 
-export type BackendCreateMissionPayload = Omit<
+export interface GetMissionsQuery {
+  take?: number;
+  skip?: number;
+  status?: BackendMissionStatus;
+  type?: BackendMissionType;
+  roomId?: number;
+}
+
+export interface BackendUpdateMissionPayload extends Omit<
   BackendMission,
-  "id" | "status" | "activatedAt" | "expiresAt" | "steps"
->;
+  "id" | "status" | "activatedAt" | "expiresAt" | "room" | 'steps'
+  > { steps?: Omit<BackendMissionStep, 'id' | 'missionId'>[]; };
+
+/* ── GamePlay and Games catalog types ── */
+
+export type GamePlayStepConfig = {
+  provider?: string;
+  gameId?: string;
+  minUniqueGames?: number;
+  minBet: number;
+};
+
+export interface BackendGameItem {
+  id: string;
+  name: string;
+  title: string;
+  provider: string;
+  label?: string;
+  img?: string;
+}
+
+export interface BackendProviderItem {
+  name: string;
+  slug?: string;
+}
 
 export interface MissionStep {
   id: number;
   title: string;
   verificationType: VerificationType;
   order: number;
+  targetConfig?: GamePlayStepConfig | null;
 }
 
 export interface AdminMission {
@@ -49,7 +90,8 @@ export interface AdminMission {
   title: string;
   description: string;
   tokenReward: number;
-  bonusPercent: number;
+  roomId?: number | null;
+  room?: BackendMissionRoom | null;
   xpReward: number;
   category: MissionCategory;
   status: MissionStatus;
@@ -57,6 +99,8 @@ export interface AdminMission {
   coverImage?: string;
   participants: number;
   createdAt: string;
+  activatedAt?: string;
+  expiresAt?: string;
   startedAt?: string;
   completedAt?: string;
   cancelReason?: string;

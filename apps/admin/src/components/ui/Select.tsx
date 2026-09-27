@@ -30,6 +30,7 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
       error,
       className = "",
       disabled = false,
+      isRelative = false,
     },
     ref,
   ) => {
@@ -88,7 +89,10 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
     }, [open]);
 
     return (
-      <div ref={containerRef} className={`${className}`}>
+      <div
+        ref={containerRef}
+        className={`${isRelative ? "relative" : ""} ${className}`}
+      >
         {/* Trigger */}
         <button
           type="button"

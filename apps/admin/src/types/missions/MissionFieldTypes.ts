@@ -15,6 +15,7 @@ export interface MissionCoverUploadProps {
 
 export interface MissionRewardFieldsProps {
   formik: FormikProps<PartialAdminMission>;
+  readOnly?: boolean;
 }
 
 export interface FieldGroupProps {
