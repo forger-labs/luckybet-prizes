@@ -25,8 +25,7 @@ export function LevelFormFields({
 
       if (res.status && res.data) {
         return res.data.map((room) => {
-          const bonusLabel =
-            room.bonus === "0" ? "Sin bono" : `${room.bonus}%`;
+          const bonusLabel = room.bonus === "0" ? "Sin bono" : `${room.bonus}%`;
           return {
             value: room.id.toString(),
             label: `${room.name} - ${bonusLabel}`,

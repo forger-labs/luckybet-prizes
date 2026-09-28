@@ -1,187 +1,223 @@
 "use client";
 
+import { Form, Formik } from "formik";
 import Image from "next/image";
 import { useState } from "react";
-
-import type { MissionCategory } from "@shared/types";
+import * as Yup from "yup";
 
 import { Modal } from "@/components/ui/Modal";
 import { Textarea } from "@/components/ui/Textarea";
+import type { ReviewStepSubmission } from "@/types/review/ReviewMission";
 import type { ReviewModalProps } from "@/types/review/ReviewSubmission";
 import { ReviewStatusBadge } from "./ReviewStatusBadge";
 
-const categoryLabels: Record<MissionCategory, string> = {
-  daily: "Diaria",
-  weekly: "Semanal",
-  fixed: "Fija",
-  special_event: "Evento",
-};
-
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 60) return `hace ${mins} min`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `hace ${hrs} h`;
-  const days = Math.floor(hrs / 24);
-  return `hace ${days} d`;
-}
+const ReviewStepSchema = Yup.object().shape({
+  reviewerNotes: Yup.string().test(
+    "required-if-rejected",
+    "El motivo de rechazo es obligatorio para el jugador",
+    function testRejectNotes(value) {
+      const { action } = this.parent;
+      if (action === "REJECTED") {
+        return Boolean(value && value.trim().length > 0);
+      }
+      return true;
+    },
+  ),
+});
 
 export function ReviewModal({
-  submission,
+  item,
   open,
   onClose,
-  onApprove,
-  onReject,
+  onReviewStep,
+  isSubmitting = false,
 }: ReviewModalProps) {
-  const [notes, setNotes] = useState("");
-  const [error, setError] = useState("");
+  const [selectedStepId, setSelectedStepId] = useState<number | null>(null);
 
-  const handleReject = () => {
-    if (!notes.trim()) {
-      setError("El motivo es obligatorio para rechazar la tarea");
-      return;
-    }
-    setError("");
-    onReject(submission.id, notes.trim());
-    setNotes("");
-  };
+  if (!item) return null;
 
-  const handleApprove = () => {
-    setError("");
-    onApprove(submission.id, notes.trim() || undefined);
-    setNotes("");
-  };
-
-  const handleClose = () => {
-    setError("");
-    setNotes("");
-    onClose();
-  };
-
-  const displayName = submission.userName || "Jugador";
-  const initial = displayName ? displayName[0].toUpperCase() : "J";
+  const currentStep =
+    item.steps.find((s) => s.id === selectedStepId) || item.steps[0];
 
   return (
     <Modal
       open={open}
-      onClose={handleClose}
-      title="Revisión de Evidencia"
+      onClose={onClose}
+      title="Auditoría de Misión de Usuario"
+      subtitle={`${item.missionTitle} • Jugador: ${item.playerName || item.playerId}`}
       size="lg"
     >
       <div className="flex flex-col gap-5 pt-2">
-        {/* Header: user info + badges */}
-        <div className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-surface-container-low border border-outline-variant/20">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center font-bold text-primary shrink-0 overflow-hidden shadow-sm">
-              {submission.userAvatar ? (
-                <Image
-                  width={44}
-                  height={44}
-                  src={submission.userAvatar}
-                  alt=""
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{initial}</span>
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="font-(--font-plus-jakarta-sans) text-body-md text-on-surface font-bold truncate">
-                {displayName}
-              </p>
-              <p className="text-label-sm text-on-surface-variant font-medium truncate">
-                {submission.missionTitle}
-              </p>
-              {submission.submittedAt && (
-                <p className="text-[11px] text-on-surface-variant/70">
-                  {relativeTime(submission.submittedAt)}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            {submission.missionCategory && (
-              <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
-                {categoryLabels[submission.missionCategory]}
-              </span>
-            )}
-            <ReviewStatusBadge status={submission.status} />
-          </div>
-        </div>
-
-        {/* Evidence image display */}
-        {submission.images && submission.images.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <span className="text-label-sm font-semibold text-on-surface-variant">
-              Evidencia enviada
-            </span>
-            <div className="w-full h-64 rounded-2xl bg-surface-container-lowest border border-outline-variant/20 overflow-hidden flex items-center justify-center relative">
-              <Image
-                src={submission.images[0]}
-                fill
-                alt="Evidencia enviada por el jugador"
-                className="object-contain"
-                sizes="(max-width: 768px) 100vw, 600px"
-              />
-            </div>
+        {/* Step Navigation Tabs */}
+        {item.steps.length > 1 && (
+          <div className="flex flex-wrap gap-2 p-1.5 rounded-xl bg-surface-container border border-outline-variant/20">
+            {item.steps.map((st, idx) => {
+              const isSelected =
+                (selectedStepId ?? item.steps[0]?.id) === st.id;
+              return (
+                <button
+                  key={st.id}
+                  type="button"
+                  onClick={() => setSelectedStepId(st.id)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1.5 ${
+                    isSelected
+                      ? "bg-primary text-on-primary shadow-sm"
+                      : "text-on-surface-variant hover:bg-surface-container-high"
+                  }`}
+                >
+                  <span>Paso {idx + 1}</span>
+                  <ReviewStatusBadge status={st.status} type="step" />
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {/* Submission metadata & user note */}
-        {submission.userNote && (
-          <div className="flex flex-col gap-1.5">
-            <span className="text-label-sm font-semibold text-on-surface-variant">
-              Nota del jugador
-            </span>
-            <div className="bg-surface-container-low border border-outline-variant/20 rounded-xl p-3.5 text-body-md text-on-surface-variant">
-              {submission.userNote}
-            </div>
-          </div>
-        )}
-
-        {/* Reviewer observations */}
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="reviewer-notes"
-            className="text-label-sm font-semibold text-on-surface-variant cursor-pointer"
-          >
-            Observaciones del revisor
-          </label>
-          <Textarea
-            id="reviewer-notes"
-            placeholder="Escriba sus observaciones o motivo de resolución aquí..."
-            value={notes}
-            onChange={(e) => {
-              setNotes(e.target.value);
-              if (error) setError("");
-            }}
-            error={error}
+        {/* Step Details & Evidence */}
+        {currentStep ? (
+          <StepReviewCard
+            step={currentStep}
+            onReviewStep={onReviewStep}
+            isSubmitting={isSubmitting}
           />
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-outline-variant/15">
-          <button
-            type="button"
-            onClick={handleReject}
-            className="flex-1 sm:flex-none px-6 py-3 rounded-xl text-body-md font-bold border border-error/50 text-error hover:bg-error-container/20 active:scale-[0.98] transition-all cursor-pointer inline-flex items-center justify-center gap-2"
-          >
-            <span className="material-symbols-outlined text-lg">close</span>
-            <span>Rechazar</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleApprove}
-            className="flex-1 sm:flex-none px-6 py-3 rounded-xl text-body-md font-bold bg-secondary text-on-secondary hover:bg-secondary-fixed-dim active:scale-[0.98] shadow-[0_0_15px_rgba(255,198,64,0.25)] transition-all cursor-pointer inline-flex items-center justify-center gap-2"
-          >
-            <span className="material-symbols-outlined text-lg">check</span>
-            <span>Aprobar</span>
-          </button>
-        </div>
+        ) : (
+          <div className="p-8 text-center text-on-surface-variant">
+            Esta misión no tiene pasos asociados para revisar.
+          </div>
+        )}
       </div>
     </Modal>
+  );
+}
+
+function StepReviewCard({
+  step,
+  onReviewStep,
+  isSubmitting,
+}: {
+  step: ReviewStepSubmission;
+  onReviewStep: ReviewModalProps["onReviewStep"];
+  isSubmitting: boolean;
+}) {
+  const [actionType, setActionType] = useState<"APPROVED" | "REJECTED">(
+    "APPROVED",
+  );
+
+  return (
+    <div className="flex flex-col gap-4 p-4 rounded-2xl bg-surface-container-low border border-outline-variant/20">
+      <div className="flex items-center justify-between">
+        <span className="text-label-md font-bold text-on-surface">
+          Evidencia enviada (Paso #{step.missionStepId})
+        </span>
+        <ReviewStatusBadge status={step.status} type="step" />
+      </div>
+
+      {/* Image Preview */}
+      {step.submissionImageUrl && (
+        <div className="w-full h-64 rounded-xl bg-surface-container-lowest border border-outline-variant/20 overflow-hidden relative flex items-center justify-center">
+          <Image
+            src={step.submissionImageUrl}
+            alt="Evidencia"
+            fill
+            className="object-contain"
+          />
+        </div>
+      )}
+
+      {/* Text Submission */}
+      {step.submissionText && (
+        <div className="p-3.5 rounded-xl bg-surface-container border border-outline-variant/20 text-sm text-on-surface">
+          <span className="text-xs text-on-surface-variant font-bold block mb-1">
+            Texto del usuario:
+          </span>
+          <p className="whitespace-pre-wrap">{step.submissionText}</p>
+        </div>
+      )}
+
+      {/* Evaluation Form */}
+      <Formik
+        initialValues={{
+          action: "APPROVED" as "APPROVED" | "REJECTED",
+          reviewerNotes: step.reviewerNotes || "",
+        }}
+        validationSchema={ReviewStepSchema}
+        onSubmit={async (values) => {
+          await onReviewStep(step.id, {
+            status: actionType,
+            reviewerNotes: values.reviewerNotes.trim() || undefined,
+          });
+        }}
+      >
+        {({
+          values,
+          errors,
+          touched,
+          handleChange,
+          handleBlur,
+          setFieldValue,
+        }) => (
+          <Form className="flex flex-col gap-3 pt-2 border-t border-outline-variant/15">
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor={`reviewerNotes-${step.id}`}
+                className="text-xs font-semibold text-on-surface-variant"
+              >
+                Notas del revisor {actionType === "REJECTED" && "*"}
+              </label>
+              <Textarea
+                id={`reviewerNotes-${step.id}`}
+                name="reviewerNotes"
+                placeholder={
+                  actionType === "REJECTED"
+                    ? "Indique la razón por la cual rechaza la evidencia..."
+                    : "Comentarios opcionales para el registro..."
+                }
+                value={values.reviewerNotes}
+                onChange={handleChange}
+                onBlur={handleBlur}
+              />
+              {touched.reviewerNotes && errors.reviewerNotes && (
+                <span className="text-xs text-error">
+                  {errors.reviewerNotes}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                onClick={() => {
+                  setActionType("REJECTED");
+                  setFieldValue("action", "REJECTED");
+                }}
+                className="px-4 py-2 rounded-xl bg-error/15 text-error border border-error/30 hover:bg-error/25 font-bold text-xs transition-all cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-sm">
+                  cancel
+                </span>
+                <span>Rechazar Paso</span>
+              </button>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                onClick={() => {
+                  setActionType("APPROVED");
+                  setFieldValue("action", "APPROVED");
+                }}
+                className="px-4 py-2 rounded-xl bg-[#22c55e]/20 text-[#4ade80] border border-[#22c55e]/40 hover:bg-[#22c55e]/30 font-bold text-xs transition-all cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <span className="material-symbols-outlined text-sm">
+                  check_circle
+                </span>
+                <span>Aprobar Paso</span>
+              </button>
+            </div>
+          </Form>
+        )}
+      </Formik>
+    </div>
   );
 }
 

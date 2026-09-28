@@ -1,33 +1,64 @@
 import type {
-  ReviewStatus,
-  ReviewSubmission,
-  VerificationCriterion,
-} from "@shared/types";
+  ReviewMissionType,
+  ReviewStepSubmission,
+  UserMissionReviewItem,
+  UserMissionStatus,
+} from "./ReviewMission";
 
-import type { ReviewMissionType } from "./ReviewQueueByPlayer";
-
-export type { ReviewStatus, VerificationCriterion };
-export type { ReviewSubmission };
+export type {
+  ReviewMissionType,
+  ReviewStepSubmission,
+  UserMissionReviewItem,
+  UserMissionStatus,
+};
 
 export type ReviewViewMode = "list" | "grid";
 
-export interface ReviewableCardProps {
-  submission: ReviewSubmission;
-  onClick: (id: string) => void;
+export type ReviewFilterStatus = "all" | UserMissionStatus;
+
+export interface ReviewFilters {
+  status: ReviewFilterStatus;
+  playerId: string;
+  type: ReviewMissionType | "all";
+  minCoinsAmount?: string;
+  maxCoinsAmount?: string;
+  minExperience?: string;
+  maxExperience?: string;
+}
+
+export interface ReviewFilterBarProps {
+  filters: ReviewFilters;
+  viewMode: ReviewViewMode;
+  onFilterChange: (filters: Partial<ReviewFilters>) => void;
+  onResetFilters: () => void;
+  onViewModeChange: (mode: ReviewViewMode) => void;
+}
+
+export interface ReviewStatsProps {
+  totalMissions: number;
+  inProgressCount: number;
+  completedCount: number;
+  pendingStepsCount: number;
 }
 
 export interface ReviewTableRowProps {
-  submission: ReviewSubmission;
-  onSelect: (id: string) => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
+  item: UserMissionReviewItem;
+  onReview: (item: UserMissionReviewItem) => void;
+  onQuickApproveStep?: (stepId: number) => void;
+  onQuickRejectStep?: (stepId: number) => void;
 }
 
 export interface ReviewTableProps {
-  submissions: ReviewSubmission[];
-  onSelect: (id: string) => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
+  items: UserMissionReviewItem[];
+  isLoading: boolean;
+  onReview: (item: UserMissionReviewItem) => void;
+  onQuickApproveStep?: (stepId: number) => void;
+  onQuickRejectStep?: (stepId: number) => void;
+}
+
+export interface ReviewableCardProps {
+  item: UserMissionReviewItem;
+  onReview: (item: UserMissionReviewItem) => void;
 }
 
 export interface ReviewViewToggleProps {
@@ -36,34 +67,12 @@ export interface ReviewViewToggleProps {
 }
 
 export interface ReviewModalProps {
-  submission: ReviewSubmission & {
-    verificationCriteria?: VerificationCriterion[];
-  };
+  item: UserMissionReviewItem | null;
   open: boolean;
   onClose: () => void;
-  onApprove: (id: string, notes?: string) => void;
-  onReject: (id: string, notes: string) => void;
+  onReviewStep: (
+    stepId: number,
+    body: { status: "APPROVED" | "REJECTED"; reviewerNotes?: string },
+  ) => Promise<boolean>;
+  isSubmitting?: boolean;
 }
-
-export interface ReviewStatusBadgeProps {
-  status: ReviewStatus;
-}
-
-export interface ReviewFilterBarProps {
-  activeTab: ReviewFilter;
-  activeType: ReviewMissionType | "all";
-  viewMode: ReviewViewMode;
-  onTabChange: (tab: ReviewFilter) => void;
-  onTypeChange: (type: ReviewMissionType | "all") => void;
-  onViewModeChange: (mode: ReviewViewMode) => void;
-}
-
-export interface ReviewStatsProps {
-  totalPending: number;
-  totalApproved: number;
-  totalRejected: number;
-  page: number;
-  totalPages: number;
-}
-
-export type ReviewFilter = "pending" | "approved" | "rejected";

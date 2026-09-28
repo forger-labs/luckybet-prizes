@@ -39,10 +39,15 @@ import type {
 } from "@/types/adminUsers";
 import type { AdminUser } from "@/types/auth";
 import type {
-  ReviewQueueByPlayer,
+  BackendMissionReward,
+  GetAdminMissionRewardsQuery,
+  ResolveMissionRewardPayload,
+} from "@/types/review/AdminMissionRewards";
+import type {
   ReviewQueueParams,
-} from "@/types/review/ReviewQueueByPlayer";
-import type { StepSubmission } from "@/types/review/StepSubmission";
+  ReviewStepSubmission,
+  UserMissionReviewItem,
+} from "@/types/review/ReviewMission";
 
 const httpClient = new HttpClient(API_URL, axios, LOCAL_STORAGE_KEYS);
 
@@ -289,20 +294,42 @@ export default class ApiAdminGanaya {
 
   async getReviewQueue(
     params?: ReviewQueueParams,
-  ): Promise<PaginatedApiResponse<ReviewQueueByPlayer[]>> {
-    const result: PaginatedApiResponse<ReviewQueueByPlayer[]> = {
+  ): Promise<PaginatedApiResponse<UserMissionReviewItem[]>> {
+    const result: PaginatedApiResponse<UserMissionReviewItem[]> = {
       data: null,
       status: false,
       message: "",
       meta: null,
     };
     try {
-      let url = "/admin/missions/review-queue";
+      let url = "/missions/admin/review-queue";
 
       if (params) {
         const searchParams = new URLSearchParams();
         if (params.status) searchParams.append("status", params.status);
+        if (params.playerId !== undefined && params.playerId !== null)
+          searchParams.append("playerId", params.playerId.toString());
         if (params.type) searchParams.append("type", params.type);
+        if (params.minExperience !== undefined && params.minExperience !== null)
+          searchParams.append("minExperience", params.minExperience.toString());
+        if (params.maxExperience !== undefined && params.maxExperience !== null)
+          searchParams.append("maxExperience", params.maxExperience.toString());
+        if (
+          params.minCoinsAmount !== undefined &&
+          params.minCoinsAmount !== null
+        )
+          searchParams.append(
+            "minCoinsAmount",
+            params.minCoinsAmount.toString(),
+          );
+        if (
+          params.maxCoinsAmount !== undefined &&
+          params.maxCoinsAmount !== null
+        )
+          searchParams.append(
+            "maxCoinsAmount",
+            params.maxCoinsAmount.toString(),
+          );
         if (params.take !== undefined)
           searchParams.append("take", params.take.toString());
         if (params.skip !== undefined)
@@ -311,7 +338,7 @@ export default class ApiAdminGanaya {
       }
 
       const { data } = await this.httpClient.get({ url });
-      const response = data as PaginatedApiResponse<ReviewQueueByPlayer[]>;
+      const response = data as PaginatedApiResponse<UserMissionReviewItem[]>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;
@@ -319,7 +346,7 @@ export default class ApiAdminGanaya {
       return result;
     } catch (error) {
       return handleApiError(error, result) as unknown as PaginatedApiResponse<
-        ReviewQueueByPlayer[]
+        UserMissionReviewItem[]
       >;
     }
   }
@@ -327,18 +354,130 @@ export default class ApiAdminGanaya {
   async reviewStep(
     stepId: number,
     body: { status: "APPROVED" | "REJECTED"; reviewerNotes?: string },
-  ): Promise<ApiResponse<StepSubmission>> {
-    const result: ApiResponse<StepSubmission> = {
+  ): Promise<ApiResponse<ReviewStepSubmission>> {
+    const result: ApiResponse<ReviewStepSubmission> = {
       data: null,
       status: false,
       message: "",
     };
     try {
       const { data } = await this.httpClient.post({
-        url: `/admin/missions/steps/${stepId}/review`,
+        url: `/missions/admin/steps/${stepId}/review`,
         body,
       });
-      const response = data as ApiResponse<StepSubmission>;
+      const response = data as ApiResponse<ReviewStepSubmission>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getUserMissionById(
+    userMissionId: number,
+  ): Promise<ApiResponse<UserMissionReviewItem>> {
+    const result: ApiResponse<UserMissionReviewItem> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: `/missions/user-missions/${userMissionId}`,
+      });
+      const response = data as ApiResponse<UserMissionReviewItem>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Mission Rewards API ──
+
+  async claimUserMissionReward(
+    userMissionId: number,
+  ): Promise<ApiResponse<BackendMissionReward>> {
+    const result: ApiResponse<BackendMissionReward> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/rewards/user-missions/${userMissionId}/claim`,
+      });
+      const response = data as ApiResponse<BackendMissionReward>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getAdminMissionRewards(
+    params?: GetAdminMissionRewardsQuery,
+  ): Promise<PaginatedApiResponse<BackendMissionReward[]>> {
+    const result: PaginatedApiResponse<BackendMissionReward[]> = {
+      data: null,
+      status: false,
+      message: "",
+      meta: null,
+    };
+    try {
+      let url = "/rewards/admin";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.status) searchParams.append("status", params.status);
+        if (params.playerId !== undefined && params.playerId !== null)
+          searchParams.append("playerId", params.playerId.toString());
+        if (params.userMissionId !== undefined && params.userMissionId !== null)
+          searchParams.append("userMissionId", params.userMissionId.toString());
+        if (params.orderBy) searchParams.append("orderBy", params.orderBy);
+        if (params.orderDirection)
+          searchParams.append("orderDirection", params.orderDirection);
+        if (params.take !== undefined)
+          searchParams.append("take", params.take.toString());
+        if (params.skip !== undefined)
+          searchParams.append("skip", params.skip.toString());
+        if (searchParams.toString()) url += `?${searchParams.toString()}`;
+      }
+
+      const { data } = await this.httpClient.get({ url });
+      const response = data as PaginatedApiResponse<BackendMissionReward[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      result.meta = response.meta ?? null;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result) as unknown as PaginatedApiResponse<
+        BackendMissionReward[]
+      >;
+    }
+  }
+
+  async resolveMissionReward(
+    rewardId: number,
+    payload: ResolveMissionRewardPayload,
+  ): Promise<ApiResponse<BackendMissionReward>> {
+    const result: ApiResponse<BackendMissionReward> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/rewards/admin/${rewardId}/resolve`,
+        body: payload,
+      });
+      const response = data as ApiResponse<BackendMissionReward>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;
