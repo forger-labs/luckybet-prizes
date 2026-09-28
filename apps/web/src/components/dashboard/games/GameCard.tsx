@@ -46,17 +46,17 @@ export const GameCard = ({
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
         {tag ? (
           <span
-            className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border backdrop-blur-md ${tagColorClasses[tagColor]}`}
+            className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border  ${tagColorClasses[tagColor]}`}
           >
             {tag}
           </span>
         ) : (
-          <span className="text-[10px] text-on-surface-variant/80 uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-lowest/60 backdrop-blur-md">
+          <span className="text-[10px] text-on-surface-variant/80 uppercase tracking-wider px-2 py-0.5 rounded bg-surface-container-lowest/60 ">
             {category}
           </span>
         )}
 
-        <span className="inline-flex items-center gap-1 text-[11px] text-on-surface bg-surface-container-lowest/80 border border-white/10 px-2 py-0.5 rounded-full backdrop-blur-md font-medium">
+        <span className="inline-flex items-center gap-1 text-[11px] text-on-surface bg-surface-container-lowest/80 border border-white/10 px-2 py-0.5 rounded-full  font-medium">
           <UsersIcon className="w-3 h-3 text-primary" />
           {activePlayers}
         </span>

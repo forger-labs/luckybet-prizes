@@ -3,16 +3,14 @@
 import { useMemo } from "react";
 
 import { Input } from "@/components/ui/Input";
-import {
-  type LocalOption,
-  LocalSearchSelect,
-} from "@/components/ui/LocalSearchSelect";
+import { SearchSelect } from "@/components/ui/SearchSelect";
 import { Select } from "@/components/ui/Select";
 import type {
   MissionCategoryFilter,
   MissionStatusFilter,
   MissionsFilterBarProps,
 } from "@/types/missions/FilterTabs";
+import type { SearchSelectOption } from "@/types/SearchSelect";
 
 const STATUS_OPTIONS: { value: MissionStatusFilter; label: string }[] = [
   { value: "all", label: "Todos los estados" },
@@ -43,7 +41,7 @@ export function MissionsFilterBar({
   onLimitChange,
   onResetFilters,
 }: MissionsFilterBarProps) {
-  const roomOptions: LocalOption[] = useMemo(() => {
+  const roomOptions: SearchSelectOption[] = useMemo(() => {
     return rooms.map((room) => {
       const bonusLabel = room.bonus === "0" ? "Sin bono" : `+${room.bonus}%`;
       return {
@@ -103,9 +101,9 @@ export function MissionsFilterBar({
           />
         </div>
 
-        {/* Sala Promocional Asociada (Memoria Local) */}
+        {/* Sala Promocional Asociada */}
         <div className="w-full">
-          <LocalSearchSelect
+          <SearchSelect
             id="filter-mission-room"
             name="roomId"
             icon="meeting_room"

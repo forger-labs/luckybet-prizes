@@ -5,9 +5,9 @@ import { useMemo, useState } from "react";
 import type { VerificationType } from "@shared/types";
 
 import { Input } from "@/components/ui/Input";
-import type { LocalOption } from "@/components/ui/LocalSearchSelect";
 import { Select } from "@/components/ui/Select";
 import type { StepCardProps } from "@/types/missions/StepBuilderTypes";
+import type { SearchSelectOption } from "@/types/SearchSelect";
 import { StepCardConfig } from "./StepCardConfig";
 
 const VERIFICATION_OPTIONS = [
@@ -36,7 +36,7 @@ export function StepCard({
     step.targetConfig?.provider ? "provider" : "game",
   );
 
-  const gameOptions: LocalOption[] = useMemo(() => {
+  const gameOptions: SearchSelectOption[] = useMemo(() => {
     return games.map((g) => ({
       value: String(g.name || g.id),
       label: g.title || g.name,
@@ -44,7 +44,7 @@ export function StepCard({
     }));
   }, [games]);
 
-  const providerOptions: LocalOption[] = useMemo(() => {
+  const providerOptions: SearchSelectOption[] = useMemo(() => {
     return providers.map((p) => ({
       value: p.name,
       label: p.name,

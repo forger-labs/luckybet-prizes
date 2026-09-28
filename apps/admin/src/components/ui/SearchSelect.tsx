@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type {
   SearchSelectOption,
@@ -16,28 +16,46 @@ export function SearchSelect({
   value = "",
   onChange,
   onSearch,
+  options: syncOptions,
   initialOptions = [],
   className = "",
   disabled = false,
   error,
+  maxItems = 30,
 }: SearchSelectProps) {
+  const isAsync = typeof onSearch === "function";
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState<SearchSelectOption[]>(initialOptions);
+  const [asyncOptions, setAsyncOptions] =
+    useState<SearchSelectOption[]>(initialOptions);
   const [loading, setLoading] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-  const selectedOption = options.find((o) => o.value === value);
+  // Filtrado local en memoria cuando se provee options sincrónico
+  const localFilteredOptions = useMemo(() => {
+    if (!syncOptions) return [];
+    if (!query.trim()) return syncOptions.slice(0, maxItems);
+    const q = query.trim().toLowerCase();
+    return syncOptions
+      .filter(
+        (o) =>
+          o.label.toLowerCase().includes(q) ||
+          o.sublabel?.toLowerCase().includes(q),
+      )
+      .slice(0, maxItems);
+  }, [syncOptions, query, maxItems]);
 
-  const fetchOptions = useCallback(
+  // Ejecución remota cuando es asíncrono
+  const fetchAsyncOptions = useCallback(
     async (searchTerm: string) => {
+      if (!onSearch) return;
       setLoading(true);
       try {
         const results = await onSearch(searchTerm);
-        setOptions(results);
+        setAsyncOptions(results);
       } catch {
-        setOptions([]);
+        setAsyncOptions([]);
       } finally {
         setLoading(false);
       }
@@ -47,11 +65,14 @@ export function SearchSelect({
 
   useEffect(() => {
     if (open) {
-      fetchOptions(query);
+      if (isAsync) {
+        fetchAsyncOptions(query);
+      }
       setTimeout(() => searchInputRef.current?.focus(), 50);
     }
-  }, [open, fetchOptions, query]);
+  }, [open, isAsync, fetchAsyncOptions, query]);
 
+  // Cierre en click outside o Escape
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: MouseEvent) => {
@@ -72,6 +93,11 @@ export function SearchSelect({
       document.removeEventListener("keydown", handleEscape);
     };
   }, [open]);
+
+  const activeOptions = isAsync ? asyncOptions : localFilteredOptions;
+  const selectedOption = (syncOptions || asyncOptions).find(
+    (o) => o.value === value,
+  );
 
   const handleSelect = (val: string) => {
     onChange?.(val);
@@ -112,9 +138,20 @@ export function SearchSelect({
           </span>
         )}
         <span
-          className={`flex-1 truncate ${!selectedOption?.label ? "text-outline" : ""}`}
+          className={`flex-1 truncate ${!selectedOption?.label ? "text-outline text-xs sm:text-sm" : "text-xs sm:text-sm"}`}
         >
-          {selectedOption?.label || placeholder}
+          {selectedOption ? (
+            <span>
+              {selectedOption.label}
+              {selectedOption.sublabel && (
+                <span className="text-outline text-xs ml-1.5 font-normal">
+                  ({selectedOption.sublabel})
+                </span>
+              )}
+            </span>
+          ) : (
+            placeholder
+          )}
         </span>
         <span className="material-symbols-outlined text-outline transition-transform duration-200 text-sm absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
           {open ? "expand_less" : "expand_more"}
@@ -137,7 +174,7 @@ export function SearchSelect({
 
       {open && (
         <div
-          className="absolute top-full left-0 z-50 mt-1 w-full bg-surface-container/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-72 animate-in fade-in zoom-in-95 duration-150"
+          className="absolute top-full left-0 z-50 mt-1 w-full bg-surface-container/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-64 animate-in fade-in zoom-in-95 duration-150"
           role="listbox"
         >
           <div className="p-2 border-b border-outline-variant/20 bg-surface-container-high/40">
@@ -151,40 +188,49 @@ export function SearchSelect({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={searchPlaceholder}
-                className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2 pl-9 pr-3 text-label-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition-all"
+                className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg py-2 pl-9 pr-3 text-xs sm:text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition-all"
               />
             </div>
           </div>
 
           <div className="overflow-y-auto flex-1 divide-y divide-white/5">
             {loading ? (
-              <div className="flex items-center justify-center py-6 gap-2 text-outline text-label-md">
+              <div className="flex items-center justify-center py-6 gap-2 text-outline text-xs sm:text-sm">
                 <span className="material-symbols-outlined text-lg animate-spin">
                   sync
                 </span>
                 <span>Buscando...</span>
               </div>
-            ) : options.length === 0 ? (
-              <div className="py-6 px-4 text-center text-outline text-label-md">
+            ) : activeOptions.length === 0 ? (
+              <div className="py-6 px-4 text-center text-outline text-xs sm:text-sm">
                 No se encontraron resultados
               </div>
             ) : (
-              options.map((option) => (
+              activeOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   role="option"
                   aria-selected={option.value === value}
                   onClick={() => handleSelect(option.value)}
-                  className={`w-full text-left px-4 py-2.5 text-label-md transition-colors flex items-center justify-between cursor-pointer ${
+                  className={`w-full text-left px-4 py-2.5 text-xs sm:text-sm transition-colors flex items-center justify-between cursor-pointer ${
                     option.value === value
                       ? "bg-primary/15 text-primary font-semibold"
                       : "text-on-surface hover:bg-white/5"
                   }`}
                 >
-                  <span className="truncate">{option.label}</span>
+                  <div className="truncate">
+                    <span className="truncate block font-medium">
+                      {option.label}
+                    </span>
+                    {option.sublabel && (
+                      <span className="text-[11px] text-outline block truncate">
+                        {option.sublabel}
+                      </span>
+                    )}
+                  </div>
                   {option.value === value && (
-                    <span className="material-symbols-outlined text-sm text-primary">
+                    <span className="material-symbols-outlined text-sm text-primary shrink-0 ml-2">
                       check
                     </span>
                   )}

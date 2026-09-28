@@ -33,7 +33,7 @@ export function ReviewableCard({ submission, onClick }: ReviewableCardProps) {
     <button
       type="button"
       onClick={() => onClick(submission.id)}
-      className="w-full text-left bg-surface-container-low/80 backdrop-blur-md border border-outline-variant/20 rounded-2xl p-5 flex flex-col gap-4 transition-all duration-300 hover:bg-surface-container-high/60 hover:border-primary/40 hover:shadow-[0_0_25px_rgba(56,189,248,0.15)] group cursor-pointer text-on-surface"
+      className="w-full text-left bg-surface-container-low/80  border border-outline-variant/20 rounded-2xl p-5 flex flex-col gap-4 transition-all duration-300 hover:bg-surface-container-high/60 hover:border-primary/40 hover:shadow-[0_0_25px_rgba(56,189,248,0.15)] group cursor-pointer text-on-surface"
     >
       {/* Player header */}
       <div className="flex items-center justify-between gap-3">

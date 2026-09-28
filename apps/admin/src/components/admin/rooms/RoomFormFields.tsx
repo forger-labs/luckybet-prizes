@@ -19,7 +19,7 @@ export function RoomFormFields({ formik }: RoomFormFieldsProps) {
           htmlFor="room-name"
           className="text-label-sm font-semibold text-on-surface-variant cursor-pointer"
         >
-          Nombre de la Sala / Senior LuckyBet
+          Nombre de la Sala
         </label>
         <Input
           id="room-name"
@@ -27,7 +27,7 @@ export function RoomFormFields({ formik }: RoomFormFieldsProps) {
           value={values.name}
           onChange={handleChange}
           onBlur={handleBlur}
-          placeholder="ej: SeniorSuperPromocional"
+          placeholder="ej: Tigree1"
           icon="meeting_room"
           wrapperClassName="w-full"
         />

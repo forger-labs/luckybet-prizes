@@ -3,20 +3,18 @@
 import type { GamePlayStepConfig } from "@shared/types";
 
 import { Input } from "@/components/ui/Input";
-import {
-  type LocalOption,
-  LocalSearchSelect,
-} from "@/components/ui/LocalSearchSelect";
+import { SearchSelect } from "@/components/ui/SearchSelect";
+import type { SearchSelectOption } from "@/types/SearchSelect";
 import type { StepCardMode } from "./StepCard";
 
 interface StepCardConfigProps {
   index: number;
   mode: StepCardMode;
   gameConfig: GamePlayStepConfig;
-  gameOptions: LocalOption[];
-  providerOptions: LocalOption[];
+  gameOptions: SearchSelectOption[];
+  providerOptions: SearchSelectOption[];
   onConfigChange: (config: GamePlayStepConfig) => void;
-  onModeToggle: (mode: "game" | "provider") => void;
+  onModeToggle: (mode: StepCardMode) => void;
 }
 
 export function StepCardConfig({
@@ -28,7 +26,6 @@ export function StepCardConfig({
   onConfigChange,
   onModeToggle,
 }: StepCardConfigProps) {
-  console.log(gameConfig);
   return (
     <div className="p-3.5 rounded-xl bg-surface-container-lowest border border-primary/25 flex flex-col gap-3 animate-in fade-in duration-200">
       <div className="flex items-center justify-between">
@@ -74,8 +71,7 @@ export function StepCardConfig({
             >
               Juego de LuckyBet
             </label>
-            <LocalSearchSelect
-              maxItems={1000}
+            <SearchSelect
               id={`step-${index}-gameId`}
               icon="casino"
               placeholder="Seleccionar juego..."
@@ -128,8 +124,7 @@ export function StepCardConfig({
             >
               Proveedor
             </label>
-            <LocalSearchSelect
-              maxItems={100}
+            <SearchSelect
               id={`step-${index}-provider`}
               icon="business"
               placeholder="Seleccionar proveedor..."

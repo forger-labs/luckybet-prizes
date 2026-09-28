@@ -42,7 +42,7 @@ export function MissionCoverUpload({
           <button
             type="button"
             onClick={handleRemove}
-            className="absolute top-3 right-3 p-2 bg-surface-container/90 backdrop-blur-md rounded-xl text-error hover:bg-error-container/80 transition-all shadow-md cursor-pointer"
+            className="absolute top-3 right-3 p-2 bg-surface-container/90  rounded-xl text-error hover:bg-error-container/80 transition-all shadow-md cursor-pointer"
             aria-label="Eliminar imagen"
           >
             <span className="material-symbols-outlined text-lg">delete</span>

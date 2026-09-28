@@ -33,7 +33,7 @@ export const DashboardWelcomeHeader = () => {
 
       {/* Quick stats badges */}
       <div className="flex items-center gap-3">
-        <div className="bg-surface-container-high/80 border border-white/10 rounded-xl px-3.5 py-2 flex items-center gap-2.5 backdrop-blur-md">
+        <div className="bg-surface-container-high/80 border border-white/10 rounded-xl px-3.5 py-2 flex items-center gap-2.5 ">
           <div className="p-1.5 rounded-lg bg-secondary/20 text-secondary">
             <CoinsIcon className="w-4 h-4" />
           </div>

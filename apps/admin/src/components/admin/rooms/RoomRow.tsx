@@ -42,7 +42,6 @@ export function RoomRow({ room, onEdit, onToggleStatus }: RoomRowProps) {
             <p className="font-(--font-plus-jakarta-sans) font-semibold text-on-surface text-body-md group-hover:text-primary transition-colors">
               {room.name}
             </p>
-            <p className="text-[11px] text-outline">Senior LuckyBet</p>
           </div>
         </div>
       </td>

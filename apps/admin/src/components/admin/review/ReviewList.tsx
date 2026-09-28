@@ -136,7 +136,7 @@ export function ReviewList() {
           ))}
         </div>
       ) : state.submissions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 px-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low/60 backdrop-blur-md text-center">
+        <div className="flex flex-col items-center justify-center py-24 px-4 rounded-2xl border border-outline-variant/20 bg-surface-container-low/60  text-center">
           <div className="w-16 h-16 rounded-2xl bg-surface-container-high/60 border border-outline-variant/30 flex items-center justify-center text-outline/60 mb-4 shadow-inner">
             <span className="material-symbols-outlined text-3xl">
               {empty.icon}

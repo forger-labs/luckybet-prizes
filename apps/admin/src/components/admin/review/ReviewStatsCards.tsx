@@ -11,7 +11,7 @@ export function ReviewStatsCards({
 }: ReviewStatsProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-      <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md">
+      <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 ">
         <span className="text-label-sm text-secondary block">
           Pendientes de Revisión
         </span>
@@ -19,7 +19,7 @@ export function ReviewStatsCards({
           {totalPending}
         </span>
       </div>
-      <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md">
+      <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 ">
         <span className="text-label-sm text-[#4ade80] block">
           Tareas Aprobadas
         </span>
@@ -27,7 +27,7 @@ export function ReviewStatsCards({
           {totalApproved}
         </span>
       </div>
-      <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md">
+      <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 ">
         <span className="text-label-sm text-error block">
           Tareas Rechazadas
         </span>
@@ -35,7 +35,7 @@ export function ReviewStatsCards({
           {totalRejected}
         </span>
       </div>
-      <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md">
+      <div className="p-4 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 ">
         <span className="text-label-sm text-on-surface-variant block">
           Páginas
         </span>

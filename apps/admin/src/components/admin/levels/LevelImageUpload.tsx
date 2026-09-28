@@ -98,7 +98,7 @@ export function LevelImageUpload({
       </span>
 
       {previewUrl ? (
-        <div className="relative flex flex-col items-center justify-center p-6 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/80 backdrop-blur-md">
+        <div className="relative flex flex-col items-center justify-center p-6 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest/80 ">
           <div className="relative w-24 h-24 rounded-2xl overflow-hidden border-2 border-primary/40 bg-surface-container-high/50 p-2 shadow-[0_0_20px_rgba(56,189,248,0.2)]">
             <Image
               src={previewUrl}

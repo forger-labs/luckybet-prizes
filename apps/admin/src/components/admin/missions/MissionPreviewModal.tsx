@@ -42,7 +42,7 @@ export function MissionPreviewModal({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-transparent to-black/40" />
               <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-3 z-10">
-                <span className="px-3.5 py-1.5 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md border border-white/20 text-white font-mono text-xs font-bold uppercase tracking-wider shadow-lg">
+                <span className="px-3.5 py-1.5 rounded-xl bg-surface-container-lowest/90  border border-white/20 text-white font-mono text-xs font-bold uppercase tracking-wider shadow-lg">
                   {mission.category}
                 </span>
                 {mission.status === "active" ? (
@@ -50,10 +50,10 @@ export function MissionPreviewModal({
                     expiresAt={mission.expiresAt}
                     activatedAt={mission.activatedAt}
                     type={mission.category}
-                    className="backdrop-blur-md shadow-lg"
+                    className=" shadow-lg"
                   />
                 ) : (
-                  <span className="px-3 py-1 rounded-xl text-xs font-semibold bg-surface-container-lowest/90 backdrop-blur-md text-on-surface border border-white/10 shadow-lg">
+                  <span className="px-3 py-1 rounded-xl text-xs font-semibold bg-surface-container-lowest/90  text-on-surface border border-white/10 shadow-lg">
                     {mission.status === "inactive"
                       ? "Próximamente"
                       : mission.status}

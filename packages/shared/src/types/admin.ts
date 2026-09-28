@@ -300,3 +300,113 @@ export interface UpdatePlayerPayload {
   levelId?: number;
   roomId?: number;
 }
+
+/* ── Chests and PlayerChests types ── */
+
+export type ChestPeriodType = "WEEKLY" | "MONTHLY";
+
+export type ClaimStatus =
+  | "PENDING"
+  | "PROCESSING"
+  | "CLAIMED"
+  | "TIMEOUT_UNCERTAIN";
+
+export interface BackendChestRoom {
+  id: number;
+  name: string;
+  bonus: string;
+  isActive: boolean;
+}
+
+export interface BackendChest {
+  id: number;
+  title: string;
+  description?: string | null;
+  periodType: ChestPeriodType;
+  requiredMissions: number;
+  coinsAmount: number;
+  experiencePoints: number;
+  roomId?: number | null;
+  room?: BackendChestRoom | null;
+  imageUrl?: string | null;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GetChestsQuery {
+  take?: number;
+  skip?: number;
+  title?: string;
+  periodType?: ChestPeriodType;
+  isActive?: boolean;
+  minCoins?: number;
+  maxCoins?: number;
+  minRequiredMissions?: number;
+  maxRequiredMissions?: number;
+  roomId?: number;
+}
+
+export interface UpdateChestPayload {
+  title?: string;
+  description?: string;
+  periodType?: ChestPeriodType;
+  requiredMissions?: number;
+  coinsAmount?: number;
+  roomId?: number | null;
+  experiencePoints?: number;
+  isActive?: boolean;
+}
+
+export interface UserMissionChestAdmin {
+  id: number;
+  playerId: number;
+  chestId: number;
+  periodKey: string;
+  completedMissionsCount: number;
+  coinsAmount: number;
+  roomId?: number | null;
+  status: ClaimStatus;
+  externalOperationId?: string | null;
+  errorMessage?: string | null;
+  resolvedByAdminId?: number | null;
+  claimedAt?: string | null;
+  created_at: string;
+  player: {
+    id: number;
+    username: string;
+  };
+  resolvedByAdmin?: {
+    id: number;
+    username: string;
+  } | null;
+  room?: {
+    id: number;
+    name: string;
+    bonus: string;
+  } | null;
+  chest: {
+    id: number;
+    title: string;
+    description?: string | null;
+    imageUrl?: string | null;
+    requiredMissions: number;
+  };
+}
+
+export interface GetAdminPlayerChestsQuery {
+  take?: number;
+  skip?: number;
+  playerId?: number;
+  chestId?: number;
+  status?: ClaimStatus;
+  periodKey?: string;
+  orderBy?: "created_at" | "periodKey" | "id";
+  orderDirection?: "ASC" | "DESC";
+}
+
+export interface ResolveChestClaimPayload {
+  action: "RESOLVE_CLAIMED" | "FORCE_RETRY";
+  externalOperationId?: string;
+  adminNotes?: string;
+}

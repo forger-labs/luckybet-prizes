@@ -2,6 +2,7 @@ import axios from "axios";
 
 import HttpClient, { handleApiError } from "@shared/libs/httpClient";
 import type {
+  BackendChest,
   BackendGameItem,
   BackendLevel,
   BackendMission,
@@ -10,12 +11,17 @@ import type {
   BackendRoom,
   BackendUpdateMissionPayload,
   CreateRoomPayload,
+  GetAdminPlayerChestsQuery,
+  GetChestsQuery,
   GetLevelsQuery,
   GetMissionsQuery,
   GetPlayersQuery,
   GetRoomsQuery,
+  ResolveChestClaimPayload,
+  UpdateChestPayload,
   UpdatePlayerPayload,
   UpdateRoomPayload,
+  UserMissionChestAdmin,
 } from "@shared/types/admin";
 import type {
   ApiResponse,
@@ -860,6 +866,298 @@ export default class ApiAdminGanaya {
         url: "/panel/providers",
       });
       const response = data as ApiResponse<BackendProviderItem[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Admin Chests API ──
+
+  async getChests(
+    params?: GetChestsQuery,
+  ): Promise<PaginatedApiResponse<BackendChest[]>> {
+    const result: PaginatedApiResponse<BackendChest[]> = {
+      data: null,
+      status: false,
+      message: "",
+      meta: null,
+    };
+    try {
+      let url = "/chests";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.take !== undefined && params.take !== null)
+          searchParams.append("take", params.take.toString());
+        if (params.skip !== undefined && params.skip !== null)
+          searchParams.append("skip", params.skip.toString());
+        if (
+          params.title !== undefined &&
+          params.title !== null &&
+          params.title.trim() !== ""
+        )
+          searchParams.append("title", params.title.trim());
+        if (params.periodType !== undefined && params.periodType !== null)
+          searchParams.append("periodType", params.periodType);
+        if (params.isActive !== undefined && params.isActive !== null)
+          searchParams.append("isActive", params.isActive.toString());
+        if (
+          params.minCoins !== undefined &&
+          params.minCoins !== null &&
+          !Number.isNaN(Number(params.minCoins))
+        )
+          searchParams.append("minCoins", params.minCoins.toString());
+        if (
+          params.maxCoins !== undefined &&
+          params.maxCoins !== null &&
+          !Number.isNaN(Number(params.maxCoins))
+        )
+          searchParams.append("maxCoins", params.maxCoins.toString());
+        if (
+          params.minRequiredMissions !== undefined &&
+          params.minRequiredMissions !== null &&
+          !Number.isNaN(Number(params.minRequiredMissions))
+        )
+          searchParams.append(
+            "minRequiredMissions",
+            params.minRequiredMissions.toString(),
+          );
+        if (
+          params.maxRequiredMissions !== undefined &&
+          params.maxRequiredMissions !== null &&
+          !Number.isNaN(Number(params.maxRequiredMissions))
+        )
+          searchParams.append(
+            "maxRequiredMissions",
+            params.maxRequiredMissions.toString(),
+          );
+        if (params.roomId !== undefined && params.roomId !== null)
+          searchParams.append("roomId", params.roomId.toString());
+
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as PaginatedApiResponse<BackendChest[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      result.meta = response.meta ?? null;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result) as unknown as PaginatedApiResponse<
+        BackendChest[]
+      >;
+    }
+  }
+
+  async getChestById(id: number): Promise<ApiResponse<BackendChest>> {
+    const result: ApiResponse<BackendChest> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: `/chests/${id}`,
+      });
+      const response = data as ApiResponse<BackendChest>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async createChest(formData: FormData): Promise<ApiResponse<BackendChest>> {
+    const result: ApiResponse<BackendChest> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data: response } = await this.httpClient.post({
+        url: "/chests",
+        body: formData,
+      });
+      const responseData = response as ApiResponse<BackendChest>;
+      if (responseData?.status) result.status = true;
+      result.data = responseData.data;
+      result.message = responseData.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async updateChest(
+    id: number,
+    payload: UpdateChestPayload,
+  ): Promise<ApiResponse<BackendChest>> {
+    const result: ApiResponse<BackendChest> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.patch({
+        url: `/chests/${id}`,
+        body: payload,
+      });
+      const response = data as ApiResponse<BackendChest>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async updateChestStatus(
+    id: number,
+    isActive: boolean,
+  ): Promise<ApiResponse<BackendChest>> {
+    const result: ApiResponse<BackendChest> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.patch({
+        url: `/chests/${id}/status`,
+        body: { isActive },
+      });
+      const response = data as ApiResponse<BackendChest>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async updateChestImage(
+    id: number,
+    formData: FormData,
+  ): Promise<ApiResponse<BackendChest>> {
+    const result: ApiResponse<BackendChest> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data: response } = await this.httpClient.post({
+        url: `/chests/${id}/image`,
+        body: formData,
+      });
+      const responseData = response as ApiResponse<BackendChest>;
+      if (responseData?.status) result.status = true;
+      result.data = responseData.data;
+      result.message = responseData.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async deleteChestImage(id: number): Promise<ApiResponse<BackendChest>> {
+    const result: ApiResponse<BackendChest> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.delete({
+        url: `/chests/${id}/image`,
+      });
+      const response = data as ApiResponse<BackendChest>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Admin Player Chests & Prizes API ──
+
+  async getAdminPlayerChests(
+    params?: GetAdminPlayerChestsQuery,
+  ): Promise<PaginatedApiResponse<UserMissionChestAdmin[]>> {
+    const result: PaginatedApiResponse<UserMissionChestAdmin[]> = {
+      data: null,
+      status: false,
+      message: "",
+      meta: null,
+    };
+    try {
+      let url = "/player-chests/admin";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.take !== undefined && params.take !== null)
+          searchParams.append("take", params.take.toString());
+        if (params.skip !== undefined && params.skip !== null)
+          searchParams.append("skip", params.skip.toString());
+        if (params.playerId !== undefined && params.playerId !== null)
+          searchParams.append("playerId", params.playerId.toString());
+        if (params.chestId !== undefined && params.chestId !== null)
+          searchParams.append("chestId", params.chestId.toString());
+        if (params.status !== undefined && params.status !== null)
+          searchParams.append("status", params.status);
+        if (
+          params.periodKey !== undefined &&
+          params.periodKey !== null &&
+          params.periodKey.trim() !== ""
+        )
+          searchParams.append("periodKey", params.periodKey.trim());
+        if (params.orderBy !== undefined && params.orderBy !== null)
+          searchParams.append("orderBy", params.orderBy);
+        if (
+          params.orderDirection !== undefined &&
+          params.orderDirection !== null
+        )
+          searchParams.append("orderDirection", params.orderDirection);
+
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as PaginatedApiResponse<UserMissionChestAdmin[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      result.meta = response.meta ?? null;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result) as unknown as PaginatedApiResponse<
+        UserMissionChestAdmin[]
+      >;
+    }
+  }
+
+  async resolvePlayerChestClaim(
+    claimId: number,
+    payload: ResolveChestClaimPayload,
+  ): Promise<ApiResponse<UserMissionChestAdmin>> {
+    const result: ApiResponse<UserMissionChestAdmin> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/player-chests/admin/${claimId}/resolve`,
+        body: payload,
+      });
+      const response = data as ApiResponse<UserMissionChestAdmin>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;

@@ -3,11 +3,9 @@
 import { useMemo } from "react";
 
 import { Input } from "@/components/ui/Input";
-import {
-  type LocalOption,
-  LocalSearchSelect,
-} from "@/components/ui/LocalSearchSelect";
+import { SearchSelect } from "@/components/ui/SearchSelect";
 import type { MissionRewardFieldsProps } from "@/types/missions/MissionFieldTypes";
+import type { SearchSelectOption } from "@/types/SearchSelect";
 import { FieldGroup } from "./FieldGroup";
 
 export function MissionRewardFields({
@@ -21,9 +19,9 @@ export function MissionRewardFields({
       setFieldValue(field, Number(e.target.value));
     };
 
-  const roomOptions: LocalOption[] = useMemo(() => {
+  const roomOptions: SearchSelectOption[] = useMemo(() => {
     return rooms.map((room) => {
-      const bonusLabel = room.bonus === "0" ? "Sin bono" : `${room.bonus}%`;
+      const bonusLabel = room.bonus === "0" ? "Sin bono" : `+${room.bonus}%`;
       return {
         value: room.id.toString(),
         label: `${room.name} - ${bonusLabel}`,
@@ -77,7 +75,7 @@ export function MissionRewardFields({
         label="Sala Promocional (opcional)"
         error={errors.roomId as string}
       >
-        <LocalSearchSelect
+        <SearchSelect
           id="mission-roomId"
           name="roomId"
           icon="meeting_room"

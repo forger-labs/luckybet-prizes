@@ -63,7 +63,7 @@ export const GamesSection = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="p-4 rounded-2xl bg-gradient-to-r from-primary/15 via-primary-container/10 to-secondary/10 border border-primary/25 flex items-center gap-3.5 shadow-lg backdrop-blur-md"
+          className="p-4 rounded-2xl bg-gradient-to-r from-primary/15 via-primary-container/10 to-secondary/10 border border-primary/25 flex items-center gap-3.5 shadow-lg "
         >
           <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary shrink-0">
             <SparklesIcon className="w-5 h-5 text-primary" />

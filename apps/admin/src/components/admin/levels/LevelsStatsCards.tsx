@@ -10,7 +10,7 @@ export function LevelsStatsCards({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       {/* Total Levels */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md flex items-center gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20  flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center text-primary shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.15)]">
           <span className="material-symbols-outlined text-2xl">
             military_tech
@@ -27,7 +27,7 @@ export function LevelsStatsCards({
       </div>
 
       {/* Max Experience Required */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md flex items-center gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20  flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl bg-tertiary/10 border border-tertiary/25 flex items-center justify-center text-tertiary shrink-0 shadow-[0_0_15px_rgba(163,171,255,0.15)]">
           <span className="material-symbols-outlined text-2xl">
             trending_up
@@ -44,7 +44,7 @@ export function LevelsStatsCards({
       </div>
 
       {/* Total Coins / Rewards */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20 backdrop-blur-md flex items-center gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low/70 border border-outline-variant/20  flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl bg-secondary/10 border border-secondary/25 flex items-center justify-center text-secondary shrink-0 shadow-[0_0_15px_rgba(255,198,64,0.15)]">
           <span className="material-symbols-outlined text-2xl">
             monetization_on

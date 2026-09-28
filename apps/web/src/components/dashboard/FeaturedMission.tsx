@@ -34,14 +34,14 @@ export const FeaturedMission = () => {
       <div className="relative z-10 p-6 md:p-8 flex flex-col justify-between h-full">
         {/* Top Badges */}
         <div className="flex flex-wrap items-center gap-2.5 mb-3">
-          <div className="inline-flex items-center gap-1.5 bg-secondary/20 text-secondary border border-secondary/50 px-3 py-1 rounded-full backdrop-blur-md shadow-sm">
+          <div className="inline-flex items-center gap-1.5 bg-secondary/20 text-secondary border border-secondary/50 px-3 py-1 rounded-full  shadow-sm">
             <BoltIcon className="w-3.5 h-3.5 text-secondary" />
             <span className="font-label-sm text-xs uppercase tracking-wider font-bold">
               Misión del Día
             </span>
           </div>
 
-          <div className="inline-flex items-center gap-1.5 bg-surface-container-highest/80 text-on-surface-variant border border-white/10 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-md">
+          <div className="inline-flex items-center gap-1.5 bg-surface-container-highest/80 text-on-surface-variant border border-white/10 px-3 py-1 rounded-full text-xs font-medium ">
             <ClockIcon className="w-3.5 h-3.5 text-primary" />
             <span>Expira en 05h 24m</span>
           </div>

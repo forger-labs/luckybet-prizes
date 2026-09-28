@@ -69,7 +69,7 @@ export function Modal({
         type="button"
         aria-label="Cerrar modal"
         className={`
-          fixed inset-0 bg-black/70 backdrop-blur-md cursor-default transition-opacity duration-300
+          fixed inset-0 bg-black/70  cursor-default transition-opacity duration-300
           ${animating ? "opacity-100" : "opacity-0"}
         `}
         onClick={onClose}
