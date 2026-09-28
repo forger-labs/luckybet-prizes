@@ -1,7 +1,5 @@
-"use client";
-
-import { LevelsList } from "@/components/admin/levels/LevelsList";
+import { LevelsOrchestrator } from "@/components/admin/levels/LevelsOrchestrator";
 
 export default function NivelesPage() {
-  return <LevelsList />;
+  return <LevelsOrchestrator />;
 }

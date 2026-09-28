@@ -32,6 +32,11 @@ import type {
 import { casinoToast } from "@shared/utils/casinoToast";
 
 import { API_URL, LOCAL_STORAGE_KEYS, ROUTES } from "@/constant";
+import type {
+  BackendLevelReward,
+  GetAdminLevelRewardsQuery,
+  ResolveLevelRewardPayload,
+} from "@/types/adminLevels";
 import type { Player } from "@/types/adminPlayers";
 import type {
   AdminUser as AdminPanelUser,
@@ -780,6 +785,96 @@ export default class ApiAdminGanaya {
         url: `/levels/${id}`,
       });
       const response = data as ApiResponse<BackendLevel>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Admin Level Rewards API ──
+
+  async claimLevelReward(
+    levelId: number,
+  ): Promise<ApiResponse<BackendLevelReward>> {
+    const result: ApiResponse<BackendLevelReward> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/level-rewards/${levelId}/claim`,
+      });
+      const response = data as ApiResponse<BackendLevelReward>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getAdminLevelRewards(
+    params?: GetAdminLevelRewardsQuery,
+  ): Promise<PaginatedApiResponse<BackendLevelReward[]>> {
+    const result: PaginatedApiResponse<BackendLevelReward[]> = {
+      data: null,
+      status: false,
+      message: "",
+      meta: null,
+    };
+    try {
+      let url = "/level-rewards/admin";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.status) searchParams.append("status", params.status);
+        if (params.playerId !== undefined && params.playerId !== null)
+          searchParams.append("playerId", params.playerId.toString());
+        if (params.levelId !== undefined && params.levelId !== null)
+          searchParams.append("levelId", params.levelId.toString());
+        if (params.orderBy) searchParams.append("orderBy", params.orderBy);
+        if (params.orderDirection)
+          searchParams.append("orderDirection", params.orderDirection);
+        if (params.take !== undefined)
+          searchParams.append("take", params.take.toString());
+        if (params.skip !== undefined)
+          searchParams.append("skip", params.skip.toString());
+        if (searchParams.toString()) url += `?${searchParams.toString()}`;
+      }
+
+      const { data } = await this.httpClient.get({ url });
+      const response = data as PaginatedApiResponse<BackendLevelReward[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      result.meta = response.meta ?? null;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result) as unknown as PaginatedApiResponse<
+        BackendLevelReward[]
+      >;
+    }
+  }
+
+  async resolveLevelReward(
+    claimId: number,
+    payload: ResolveLevelRewardPayload,
+  ): Promise<ApiResponse<BackendLevelReward>> {
+    const result: ApiResponse<BackendLevelReward> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/level-rewards/admin/${claimId}/resolve`,
+        body: payload,
+      });
+      const response = data as ApiResponse<BackendLevelReward>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;
