@@ -6,4 +6,5 @@ export interface RowActionsProps {
   onEdit?: (id: string) => void;
   onActivate?: (id: string) => void;
   onCancel?: (id: string) => void;
+  onComplete?: (id: string) => void;
 }

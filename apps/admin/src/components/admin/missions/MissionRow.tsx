@@ -13,6 +13,7 @@ export function MissionRow({
   onEdit,
   onActivate,
   onCancel,
+  onComplete,
 }: MissionRowProps) {
   const bonusNum = mission.room ? Number(mission.room.bonus) || 0 : 0;
 
@@ -21,7 +22,6 @@ export function MissionRow({
       {/* Column 1: Cover Image + Title + Type */}
       <td className="py-4 px-4 sm:pl-6">
         <div className="flex items-center gap-3.5">
-          {/* Visual Cover Thumbnail */}
           <div className="relative w-12 h-12 rounded-xl bg-surface-container-highest border border-outline-variant/30 overflow-hidden shrink-0 shadow-sm flex items-center justify-center">
             {mission.coverImage ? (
               <Image
@@ -38,7 +38,6 @@ export function MissionRow({
             )}
           </div>
 
-          {/* Title & Info */}
           <div className="flex flex-col gap-1 min-w-0">
             <p className="font-(--font-plus-jakarta-sans) text-body-md font-semibold text-on-surface group-hover:text-primary transition-colors truncate">
               {mission.title}
@@ -106,6 +105,7 @@ export function MissionRow({
           onEdit={onEdit}
           onActivate={onActivate}
           onCancel={onCancel}
+          onComplete={onComplete}
         />
       </td>
     </tr>

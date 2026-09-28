@@ -12,6 +12,7 @@ export function RowActions({
   onEdit,
   onActivate,
   onCancel,
+  onComplete,
 }: RowActionsProps) {
   return (
     <div className="flex items-center justify-end gap-1.5 flex-wrap">
@@ -54,7 +55,22 @@ export function RowActions({
         </button>
       )}
 
-      {/* 4. Cancelar (Misiones activas) */}
+      {/* 4. Finalizar / Completar (Misiones activas) */}
+      {mission.status === "active" && onComplete && (
+        <button
+          type="button"
+          onClick={() => onComplete(mission.id)}
+          className="w-8 h-8 rounded-lg bg-[#22c55e]/15 hover:bg-[#22c55e]/30 text-[#4ade80] border border-[#22c55e]/40 hover:border-[#22c55e]/60 flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-sm"
+          title="Finalizar misión (Marcar como completada)"
+          aria-label="Finalizar misión"
+        >
+          <span className="material-symbols-outlined text-base">
+            check_circle
+          </span>
+        </button>
+      )}
+
+      {/* 5. Cancelar (Misiones activas) */}
       {mission.status === "active" && onCancel && (
         <button
           type="button"

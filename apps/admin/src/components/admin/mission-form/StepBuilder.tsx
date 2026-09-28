@@ -10,7 +10,6 @@ import { StepCard } from "./StepCard";
 
 export function StepBuilder({
   formik,
-  readOnly = false,
   games = [],
   providers = [],
 }: StepBuilderProps) {
@@ -74,8 +73,6 @@ export function StepBuilder({
     };
     onChange([...steps, newStep]);
   };
-
-  if (readOnly) return null;
 
   return (
     <div className="flex flex-col gap-4">

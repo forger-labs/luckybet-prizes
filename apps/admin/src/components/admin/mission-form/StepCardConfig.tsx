@@ -28,7 +28,7 @@ export function StepCardConfig({
   onConfigChange,
   onModeToggle,
 }: StepCardConfigProps) {
-  console.log(gameConfig)
+  console.log(gameConfig);
   return (
     <div className="p-3.5 rounded-xl bg-surface-container-lowest border border-primary/25 flex flex-col gap-3 animate-in fade-in duration-200">
       <div className="flex items-center justify-between">
@@ -128,7 +128,7 @@ export function StepCardConfig({
             >
               Proveedor
             </label>
-              <LocalSearchSelect
+            <LocalSearchSelect
               maxItems={100}
               id={`step-${index}-provider`}
               icon="business"

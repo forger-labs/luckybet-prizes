@@ -1,17 +1,18 @@
 "use client";
 
-import { useCallback } from "react";
+import { useMemo } from "react";
 
 import { Input } from "@/components/ui/Input";
-import { SearchSelect } from "@/components/ui/SearchSelect";
+import {
+  type LocalOption,
+  LocalSearchSelect,
+} from "@/components/ui/LocalSearchSelect";
 import { Select } from "@/components/ui/Select";
-import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
 import type {
   MissionCategoryFilter,
   MissionStatusFilter,
   MissionsFilterBarProps,
 } from "@/types/missions/FilterTabs";
-import type { SearchSelectOption } from "@/types/SearchSelect";
 
 const STATUS_OPTIONS: { value: MissionStatusFilter; label: string }[] = [
   { value: "all", label: "Todos los estados" },
@@ -37,31 +38,20 @@ const LIMIT_OPTIONS = [
 export function MissionsFilterBar({
   filters,
   limit,
+  rooms = [],
   onFilterChange,
   onLimitChange,
   onResetFilters,
 }: MissionsFilterBarProps) {
-  const searchRooms = useCallback(
-    async (query: string): Promise<SearchSelectOption[]> => {
-      const res = await apiAdminGanaya.getRooms({
-        name: query || undefined,
-        take: 7,
-      });
-
-      if (res.status && res.data) {
-        return res.data.map((room) => {
-          const bonusLabel =
-            room.bonus === "0" ? "Sin bono" : `+${room.bonus}%`;
-          return {
-            value: room.id.toString(),
-            label: `${room.name} - ${bonusLabel}`,
-          };
-        });
-      }
-      return [];
-    },
-    [],
-  );
+  const roomOptions: LocalOption[] = useMemo(() => {
+    return rooms.map((room) => {
+      const bonusLabel = room.bonus === "0" ? "Sin bono" : `+${room.bonus}%`;
+      return {
+        value: room.id.toString(),
+        label: `${room.name} - ${bonusLabel}`,
+      };
+    });
+  }, [rooms]);
 
   const hasActiveFilters =
     filters.search.trim() !== "" ||
@@ -113,17 +103,17 @@ export function MissionsFilterBar({
           />
         </div>
 
-        {/* Sala Promocional Asociada */}
+        {/* Sala Promocional Asociada (Memoria Local) */}
         <div className="w-full">
-          <SearchSelect
+          <LocalSearchSelect
             id="filter-mission-room"
             name="roomId"
             icon="meeting_room"
             placeholder="Todas las salas"
             searchPlaceholder="Buscar sala..."
+            options={roomOptions}
             value={filters.roomId}
             onChange={(val) => onFilterChange({ roomId: val })}
-            onSearch={searchRooms}
           />
         </div>
       </div>

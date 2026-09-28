@@ -49,10 +49,13 @@ export interface GetMissionsQuery {
   roomId?: number;
 }
 
-export interface BackendUpdateMissionPayload extends Omit<
-  BackendMission,
-  "id" | "status" | "activatedAt" | "expiresAt" | "room" | 'steps'
-  > { steps?: Omit<BackendMissionStep, 'id' | 'missionId'>[]; };
+export interface BackendUpdateMissionPayload
+  extends Omit<
+    BackendMission,
+    "id" | "status" | "activatedAt" | "expiresAt" | "room" | "steps"
+  > {
+  steps?: Omit<BackendMissionStep, "id" | "missionId">[];
+}
 
 /* ── GamePlay and Games catalog types ── */
 

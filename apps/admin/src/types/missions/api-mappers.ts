@@ -4,10 +4,10 @@
 
 import type {
   AdminMission,
-  BackendUpdateMissionPayload,
   BackendMission,
   BackendMissionStatus,
   BackendMissionType,
+  BackendUpdateMissionPayload,
   MissionCategory,
   MissionStatus,
 } from "@shared/types";
@@ -51,7 +51,6 @@ const STATUS_TO_FRONTEND: Record<BackendMissionStatus, MissionStatus> = {
 export function mapAdminToBackend(
   adminMission: PartialAdminMission,
 ): BackendUpdateMissionPayload {
-
   const steps = (adminMission.steps ?? []).map((step) => {
     let cleanConfig = null;
     if (step.verificationType === "GAME_PLAY" && step.targetConfig) {
@@ -84,7 +83,7 @@ export function mapAdminToBackend(
     experiencePoints: adminMission.xpReward ?? 0,
     roomId: adminMission.roomId ? Number(adminMission.roomId) : null,
     imageUrl: adminMission.coverImage,
-    steps
+    steps,
   };
 }
 

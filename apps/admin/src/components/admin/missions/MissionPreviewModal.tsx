@@ -32,7 +32,7 @@ export function MissionPreviewModal({
 
           {/* Hero Banner Image */}
           {mission.coverImage ? (
-            <div className="relative w-full h-48 sm:h-56 bg-surface-container-lowest overflow-hidden border-b border-outline-variant/30">
+            <div className="relative w-full h-44 sm:h-52 bg-surface-container-lowest overflow-hidden border-b border-outline-variant/30">
               <Image
                 src={mission.coverImage}
                 alt={mission.title}
@@ -95,7 +95,7 @@ export function MissionPreviewModal({
               )}
             </div>
 
-            {/* Rewards Pill Bar (Cálculo Total de Fichas) */}
+            {/* Rewards Pill Bar (Fichas Totales + XP) */}
             <div className="flex flex-wrap items-center gap-3 p-3.5 rounded-2xl bg-surface-container-lowest/90 border border-outline-variant/25 mb-6">
               <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-secondary/15 border border-secondary/30 text-secondary shadow-[0_0_12px_rgba(255,198,64,0.2)]">
                 <span className="material-symbols-outlined text-xl">token</span>
@@ -110,22 +110,13 @@ export function MissionPreviewModal({
                   +{mission.xpReward.toLocaleString()} XP
                 </span>
               </div>
-
-              {mission.room && (
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-high border border-outline-variant/30 text-on-surface-variant text-xs font-semibold">
-                  <span className="material-symbols-outlined text-base text-primary">
-                    meeting_room
-                  </span>
-                  <span>{mission.room.name}</span>
-                </div>
-              )}
             </div>
 
             {/* Verification Steps List */}
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-between">
                 <span className="text-label-sm font-bold text-on-surface uppercase tracking-wider">
-                  Pasos para completar ({mission.steps?.length || 0})
+                  Objetivos de la Misión ({mission.steps?.length || 0})
                 </span>
                 <span className="text-xs text-outline font-mono">
                   0% Completado
@@ -136,52 +127,118 @@ export function MissionPreviewModal({
                 <div className="w-0 h-full bg-primary rounded-full shadow-[0_0_8px_#38bdf8]" />
               </div>
 
-              <div className="space-y-2 mt-3">
+              <div className="space-y-3 mt-4">
                 {(mission.steps ?? []).map((step, idx) => {
                   const cfg = step.targetConfig;
                   const isGp = step.verificationType === "GAME_PLAY";
+                  const isImage = step.verificationType === "IMAGE";
+                  const stepNumber = idx + 1;
 
                   return (
                     <div
-                      key={step.id || idx}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-surface-container-lowest/70 border border-outline-variant/20 gap-2.5 text-sm"
+                      key={step.id || stepNumber}
+                      className="p-4 rounded-2xl bg-surface-container-lowest/80 border border-outline-variant/20 flex flex-col gap-3 transition-all"
                     >
-                      <div className="flex items-start sm:items-center gap-3 min-w-0">
-                        <span className="w-6 h-6 rounded-full bg-surface-container-high border border-outline-variant/30 flex items-center justify-center font-bold text-xs text-primary shrink-0 mt-0.5 sm:mt-0">
-                          {step.order}
+                      {/* Step Header */}
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-(--font-plus-jakarta-sans) font-bold text-on-surface text-sm">
+                          Paso {stepNumber}
                         </span>
-                        <div className="min-w-0">
-                          <span className="text-on-surface font-medium block truncate">
-                            {step.title}
+
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg shrink-0 ${
+                            isGp
+                              ? "bg-primary/15 text-primary border border-primary/30"
+                              : isImage
+                                ? "bg-secondary/15 text-secondary border border-secondary/30"
+                                : "bg-tertiary/15 text-tertiary border border-tertiary/30"
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-sm">
+                            {isGp
+                              ? "sports_esports"
+                              : isImage
+                                ? "image"
+                                : "edit_note"}
                           </span>
-                          {isGp && cfg && (
-                            <span className="text-[11px] text-primary font-mono block truncate">
-                              {cfg.gameId
-                                ? `Juego: ${cfg.gameId} · Min bet: $${cfg.minBet}`
-                                : `Proveedor: ${cfg.provider} (${cfg.minUniqueGames || 1} juego(s)) · Min bet: $${cfg.minBet}`}
+                          <span>
+                            {isGp
+                              ? "Juego LuckyBet"
+                              : isImage
+                                ? "Captura"
+                                : "Texto"}
+                          </span>
+                        </span>
+                      </div>
+
+                      {/* Step Content / Descripción orientativa */}
+                      {step.title && (
+                        <p className="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                          {step.title}
+                        </p>
+                      )}
+
+                      {/* 1. GAME_PLAY: Formato limpio y claro */}
+                      {isGp && (
+                        <div className="p-3 rounded-xl bg-surface-container/60 border border-primary/20">
+                          {cfg?.gameId ? (
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm font-semibold text-on-surface">
+                              <span className="text-primary">
+                                Juego: {cfg.gameId}
+                              </span>
+                              <span className="text-outline">·</span>
+                              <span className="text-secondary">
+                                Apuesta mínima: ${cfg.minBet} USD
+                              </span>
+                            </div>
+                          ) : cfg?.provider ? (
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm font-semibold text-on-surface">
+                              <span className="text-primary">
+                                Proveedor: {cfg.provider}
+                              </span>
+                              <span className="text-outline">·</span>
+                              <span className="text-tertiary">
+                                {cfg.minUniqueGames || 1} juegos requeridos
+                              </span>
+                              <span className="text-outline">·</span>
+                              <span className="text-secondary">
+                                Apuesta mínima: ${cfg.minBet} USD
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-outline">
+                              Juego no configurado
                             </span>
                           )}
                         </div>
-                      </div>
+                      )}
 
-                      <span
-                        className={`inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-md shrink-0 self-start sm:self-auto ${
-                          isGp
-                            ? "bg-primary/15 text-primary border border-primary/30"
-                            : "bg-surface-container text-outline"
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-xs">
-                          {isGp
-                            ? "sports_esports"
-                            : step.verificationType === "IMAGE"
-                              ? "image"
-                              : "notes"}
-                        </span>
-                        <span>
-                          {isGp ? "GAME_PLAY" : step.verificationType}
-                        </span>
-                      </span>
+                      {/* 2. IMAGE: Mockup Dropzone de Subida */}
+                      {isImage && (
+                        <div className="p-4 rounded-xl border-2 border-dashed border-outline-variant/30 bg-surface-container/40 flex flex-col items-center justify-center gap-1.5 text-center cursor-default">
+                          <span className="material-symbols-outlined text-2xl text-primary">
+                            upload_file
+                          </span>
+                          <span className="text-xs font-semibold text-on-surface">
+                            Arrastra o selecciona la captura de pantalla
+                          </span>
+                          <span className="text-[11px] text-outline">
+                            PNG, JPEG o WebP (Máx. 5MB)
+                          </span>
+                        </div>
+                      )}
+
+                      {/* 3. TEXT: Mockup Input de Texto */}
+                      {!isGp && !isImage && (
+                        <div className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl py-2.5 px-3.5 text-xs text-outline flex items-center gap-2">
+                          <span className="material-symbols-outlined text-sm text-outline">
+                            edit
+                          </span>
+                          <span>
+                            Ingresa el texto o respuesta requerida aquí...
+                          </span>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

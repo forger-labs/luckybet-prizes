@@ -343,3 +343,27 @@ export async function cancelMissionAction(id: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function completeMissionAction(id: string): Promise<boolean> {
+  try {
+    const result = await apiAdminGanaya.updateMissionStatus(
+      Number(id),
+      "COMPLETED",
+    );
+    if (result.status) {
+      casinoToast.success({ title: "Misión finalizada correctamente" });
+      return true;
+    }
+    casinoToast.error({
+      title: "Error al finalizar misión",
+      description: getMessage(result.message),
+    });
+    return false;
+  } catch {
+    casinoToast.error({
+      title: "Error de red",
+      description: "No se pudo comunicar con el servidor",
+    });
+    return false;
+  }
+}

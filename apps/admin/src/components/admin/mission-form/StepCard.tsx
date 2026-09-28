@@ -16,7 +16,7 @@ const VERIFICATION_OPTIONS = [
   { value: "GAME_PLAY", label: "Juego en LuckyBet (GAME_PLAY)" },
 ];
 
-export type StepCardMode = 'provider' | 'game'
+export type StepCardMode = "provider" | "game";
 
 export function StepCard({
   step,
@@ -32,7 +32,9 @@ export function StepCard({
 }: StepCardProps) {
   const isGamePlay = step.verificationType === "GAME_PLAY";
   const gameConfig = step.targetConfig ?? { minBet: 1 };
-  const [mode, setMode] = useState<StepCardMode>(step.targetConfig?.provider ? 'provider' : 'game')
+  const [mode, setMode] = useState<StepCardMode>(
+    step.targetConfig?.provider ? "provider" : "game",
+  );
 
   const gameOptions: LocalOption[] = useMemo(() => {
     return games.map((g) => ({
@@ -51,8 +53,8 @@ export function StepCard({
   }, [providers]);
 
   const handleModeToggle = (selectedMode: StepCardMode) => {
-    if (mode === selectedMode) return
-    setMode(selectedMode)
+    if (mode === selectedMode) return;
+    setMode(selectedMode);
     if (selectedMode === "game") {
       onChange({
         ...step,

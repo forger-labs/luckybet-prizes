@@ -6,6 +6,7 @@ export interface MissionTableProps {
   onEdit?: (id: string) => void;
   onActivate?: (id: string) => void;
   onCancel?: (id: string) => void;
+  onComplete?: (id: string) => void;
 }
 
 export interface MissionRowProps {
@@ -14,4 +15,5 @@ export interface MissionRowProps {
   onEdit?: (id: string) => void;
   onActivate?: (id: string) => void;
   onCancel?: (id: string) => void;
+  onComplete?: (id: string) => void;
 }

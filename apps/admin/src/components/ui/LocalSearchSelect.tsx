@@ -20,7 +20,7 @@ export interface LocalSearchSelectProps {
   className?: string;
   disabled?: boolean;
   error?: string;
-  maxItems?: number
+  maxItems?: number;
 }
 
 export function LocalSearchSelect({
@@ -35,7 +35,7 @@ export function LocalSearchSelect({
   className = "",
   disabled = false,
   error,
-  maxItems = 30
+  maxItems = 30,
 }: LocalSearchSelectProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");

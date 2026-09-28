@@ -7,7 +7,6 @@ import type { MissionFieldsProps } from "@/types/missions/MissionFieldTypes";
 import { FieldGroup } from "./FieldGroup";
 import { MissionCoverUpload } from "./MissionCoverUpload";
 import { MissionRewardFields } from "./MissionRewardFields";
-import { ReadOnlyFieldRow } from "./ReadOnlyFieldRow";
 
 const CATEGORY_OPTIONS: { value: string; label: string }[] = [
   { value: "daily", label: "Misión diaria" },
@@ -25,10 +24,7 @@ const FIELD_LABELS: Record<string, string> = {
   roomId: "Sala asignada",
 };
 
-export function MissionFields({
-  formik,
-  readOnly = false,
-}: MissionFieldsProps) {
+export function MissionFields({ formik, rooms = [] }: MissionFieldsProps) {
   const { values: mission, setFieldValue, errors } = formik;
 
   const handleInputChange =
@@ -37,54 +33,6 @@ export function MissionFields({
       setFieldValue(field, e.target.value);
     };
 
-  /* ── Read-only mode ── */
-  if (readOnly) {
-    return (
-      <div className="flex flex-col gap-3 p-4 rounded-2xl bg-surface-container-low/60 border border-outline-variant/20">
-        {(
-          [
-            "title",
-            "description",
-            "tokenReward",
-            "xpReward",
-            "category",
-            "roomId",
-          ] as const
-        ).map((field) => {
-          let displayValue: string | number | undefined = mission[field] as
-            | string
-            | number
-            | undefined;
-
-          if (field === "category" && typeof displayValue === "string") {
-            displayValue = CATEGORY_OPTIONS.find(
-              (o) => o.value === displayValue,
-            )?.label;
-          }
-
-          if (field === "roomId") {
-            displayValue = mission.room
-              ? `${mission.room.name} (${mission.room.bonus === "0" ? "Sin bono" : `+${mission.room.bonus}%`})`
-              : "Sin sala promocional";
-          }
-
-          if (typeof displayValue === "number") {
-            displayValue = displayValue.toLocaleString();
-          }
-
-          return (
-            <ReadOnlyFieldRow
-              key={field}
-              label={FIELD_LABELS[field]}
-              value={displayValue}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-
-  /* ── Editable mode ── */
   return (
     <div className="flex flex-col gap-5">
       {/* Title */}
@@ -135,7 +83,7 @@ export function MissionFields({
       </FieldGroup>
 
       {/* Rewards Grid */}
-      <MissionRewardFields formik={formik} readOnly={readOnly} />
+      <MissionRewardFields formik={formik} rooms={rooms} />
 
       {/* Cover Image Upload */}
       <MissionCoverUpload

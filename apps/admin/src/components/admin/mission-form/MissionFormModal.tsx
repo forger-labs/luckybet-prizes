@@ -6,8 +6,6 @@ import * as Yup from "yup";
 
 import type {
   AdminMission,
-  BackendGameItem,
-  BackendProviderItem,
   MissionStep,
   VerificationType,
 } from "@shared/types";
@@ -74,12 +72,9 @@ export function MissionFormModal({
   isSubmitting = false,
   games = [],
   providers = [],
-}: MissionFormModalProps & {
-  games?: BackendGameItem[];
-  providers?: BackendProviderItem[];
-}) {
+  rooms = [],
+}: MissionFormModalProps) {
   const isCreating = mission === null;
-  const readOnly = !isCreating && mission.status === "active";
   const [dirty, setDirty] = useState(false);
 
   const formik = useFormik({
@@ -146,46 +141,21 @@ export function MissionFormModal({
     <Modal
       open={open}
       onClose={handleRequestClose}
-      title={
-        isCreating
-          ? "Crear Nueva Misión"
-          : readOnly
-            ? "Detalles de Misión"
-            : "Editar Misión"
-      }
+      title={isCreating ? "Crear Nueva Misión" : "Editar Misión"}
       subtitle={
         isCreating
           ? "Configure los parámetros de la misión, recompensas y pasos"
-          : undefined
+          : "Actualice los parámetros o requisitos de la misión"
       }
-      icon="assignment"
+      icon={isCreating ? "add_circle" : "edit_square"}
       size="xl"
     >
-      {readOnly && (
-        <div className="flex items-start gap-3 p-4 rounded-2xl bg-primary/10 border border-primary/20 mb-5">
-          <span className="material-symbols-outlined text-primary shrink-0 mt-0.5">
-            lock
-          </span>
-          <p className="text-body-md text-on-surface-variant text-sm leading-relaxed">
-            Misión activa — contenido protegido contra edición para salvaguardar
-            el progreso.
-          </p>
-        </div>
-      )}
-
       <form onSubmit={formik.handleSubmit} className="space-y-6">
-        <MissionFields formik={formik} readOnly={readOnly} />
+        <MissionFields formik={formik} rooms={rooms} />
 
-        {!readOnly && (
-          <div className="pt-6 border-t border-outline-variant/20">
-            <StepBuilder
-              formik={formik}
-              readOnly={readOnly}
-              games={games}
-              providers={providers}
-            />
-          </div>
-        )}
+        <div className="pt-6 border-t border-outline-variant/20">
+          <StepBuilder formik={formik} games={games} providers={providers} />
+        </div>
 
         <div className="flex items-center justify-end gap-3 pt-5 border-t border-outline-variant/20">
           <button
@@ -193,22 +163,20 @@ export function MissionFormModal({
             onClick={handleRequestClose}
             className="px-5 py-2.5 rounded-xl text-body-md text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
           >
-            {readOnly ? "Cerrar" : "Cancelar"}
+            Cancelar
           </button>
-          {!readOnly && (
-            <Button
-              type="submit"
-              variant="secondary"
-              disabled={isSubmitting || formik.isSubmitting}
-              className="font-bold shadow-[0_0_15px_rgba(255,198,64,0.2)] hover:shadow-[0_0_20px_rgba(255,198,64,0.35)] cursor-pointer"
-            >
-              {isSubmitting || formik.isSubmitting
-                ? "Guardando..."
-                : isCreating
-                  ? "Crear misión"
-                  : "Guardar cambios"}
-            </Button>
-          )}
+          <Button
+            type="submit"
+            variant="secondary"
+            disabled={isSubmitting || formik.isSubmitting}
+            className="font-bold shadow-[0_0_15px_rgba(255,198,64,0.2)] hover:shadow-[0_0_20px_rgba(255,198,64,0.35)] cursor-pointer"
+          >
+            {isSubmitting || formik.isSubmitting
+              ? "Guardando..."
+              : isCreating
+                ? "Crear misión"
+                : "Guardar cambios"}
+          </Button>
         </div>
       </form>
     </Modal>

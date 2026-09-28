@@ -1,4 +1,4 @@
-import type { MissionStatus } from "@shared/types";
+import type { BackendRoom, MissionStatus } from "@shared/types";
 
 export type MissionStatusFilter = "all" | MissionStatus;
 export type MissionCategoryFilter = "all" | "daily" | "weekly" | "fixed";
@@ -13,6 +13,7 @@ export interface MissionFilters {
 export interface MissionsFilterBarProps {
   filters: MissionFilters;
   limit: number;
+  rooms?: BackendRoom[];
   onFilterChange: (filters: Partial<MissionFilters>) => void;
   onLimitChange: (limit: number) => void;
   onResetFilters: () => void;

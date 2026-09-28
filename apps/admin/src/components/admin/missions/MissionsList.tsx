@@ -6,6 +6,7 @@ import type {
   AdminMission,
   BackendGameItem,
   BackendProviderItem,
+  BackendRoom,
 } from "@shared/types";
 import { casinoToast } from "@shared/utils/casinoToast";
 
@@ -22,6 +23,7 @@ import {
   activateMissionAction,
   applyClientSearch,
   cancelMissionAction,
+  completeMissionAction,
   createMissionAction,
   initialState,
   loadMissions,
@@ -41,48 +43,49 @@ export function MissionsList() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
-  // In-memory catalog of games & providers (fetched once at page mount)
+  // In-memory catalogs loaded once on mount (games, providers, rooms take: 50)
   const [games, setGames] = useState<BackendGameItem[]>([]);
   const [providers, setProviders] = useState<BackendProviderItem[]>([]);
+  const [rooms, setRooms] = useState<BackendRoom[]>([]);
 
   useEffect(() => {
     loadMissions(dispatch, state.page, state.limit, state.filters);
   }, [state.page, state.limit, state.filters]);
 
-  // Initial catalog load
   useEffect(() => {
-    async function loadCatalog() {
+    async function loadCatalogs() {
       try {
-        const [gamesRes, providersRes] = await Promise.all([
+        const [gamesRes, providersRes, roomsRes] = await Promise.all([
           apiAdminGanaya.getGames(),
           apiAdminGanaya.getProviders(),
+          apiAdminGanaya.getRooms({ take: 50 }),
         ]);
         if (gamesRes.status && gamesRes.data) setGames(gamesRes.data);
         if (providersRes.status && providersRes.data)
           setProviders(providersRes.data);
+        if (roomsRes.status && roomsRes.data) setRooms(roomsRes.data);
       } catch {
         // best effort catalog load
       }
     }
-    loadCatalog();
+    loadCatalogs();
   }, []);
 
-  const handleFilterChange = useCallback((f: Partial<MissionFilters>) => {
-    dispatch({ type: "SET_FILTERS", payload: f });
+  const handleFilterChange = useCallback((filters: Partial<MissionFilters>) => {
+    dispatch({ type: "SET_FILTERS", payload: filters });
   }, []);
 
   const handleLimitChange = useCallback((limit: number) => {
     dispatch({ type: "SET_LIMIT", payload: { limit } });
   }, []);
 
-  const handleResetFilters = useCallback(
-    () => dispatch({ type: "RESET_FILTERS" }),
-    [],
-  );
-  const handlePageChange = useCallback(
-    (page: number) => dispatch({ type: "SET_PAGE", payload: { page } }),
-    [],
-  );
+  const handleResetFilters = useCallback(() => {
+    dispatch({ type: "RESET_FILTERS" });
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    dispatch({ type: "SET_PAGE", payload: { page } });
+  }, []);
 
   const handleCreate = useCallback(() => {
     setEditingMission(null);
@@ -116,6 +119,26 @@ export function MissionsList() {
           title: "Activar",
           onClick: async () => {
             const ok = await activateMissionAction(id);
+            if (ok)
+              loadMissions(dispatch, state.page, state.limit, state.filters);
+          },
+        },
+      });
+    },
+    [state.missions, state.page, state.limit, state.filters],
+  );
+
+  const handleComplete = useCallback(
+    (id: string) => {
+      const m = state.missions.find((x) => x.id === id);
+      if (!m) return;
+      casinoToast.action({
+        title: "¿Finalizar misión?",
+        description: `¿Desea marcar "${m.title}" como completada?`,
+        button: {
+          title: "Finalizar",
+          onClick: async () => {
+            const ok = await completeMissionAction(id);
             if (ok)
               loadMissions(dispatch, state.page, state.limit, state.filters);
           },
@@ -215,6 +238,7 @@ export function MissionsList() {
       <MissionsFilterBar
         filters={state.filters}
         limit={state.limit}
+        rooms={rooms}
         onFilterChange={handleFilterChange}
         onLimitChange={handleLimitChange}
         onResetFilters={handleResetFilters}
@@ -226,6 +250,7 @@ export function MissionsList() {
         onEdit={handleEdit}
         onActivate={handleActivate}
         onCancel={handleCancel}
+        onComplete={handleComplete}
       />
 
       {state.total > state.limit && (
@@ -261,6 +286,7 @@ export function MissionsList() {
           isSubmitting={state.isSubmitting}
           games={games}
           providers={providers}
+          rooms={rooms}
         />
       )}
     </div>
