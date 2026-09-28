@@ -1,5 +1,5 @@
-import { ReviewList } from "@/components/admin/review/ReviewList";
+import { RevisionOrchestrator } from "@/components/admin/review/RevisionOrchestrator";
 
 export default function RevisionPage() {
-  return <ReviewList />;
+  return <RevisionOrchestrator />;
 }
