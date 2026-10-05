@@ -87,9 +87,11 @@ export function MissionCountdown({
   if (timeLeft.isExpired) {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#ffb4ab]/15 text-[#ffb4ab] border border-[#ffb4ab]/30 ${className}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-[#400003] text-[#ffdad6] border-2 border-[#ffb4ab] shadow-[0_4px_12px_rgba(0,0,0,0.8)] ${className}`}
       >
-        <span className="material-symbols-outlined text-sm">timer_off</span>
+        <span className="material-symbols-outlined text-sm text-[#ffb4ab]">
+          timer_off
+        </span>
         <span>Expirada</span>
       </span>
     );
@@ -104,9 +106,9 @@ export function MissionCountdown({
     if (type?.toLowerCase() === "fixed") {
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-[#171f33]/90 text-[#87929a] border border-[#3e484f]/40 ${className}`}
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-[#060e20] text-[#dae2fd] border-2 border-[#3e484f] shadow-[0_4px_12px_rgba(0,0,0,0.7)] ${className}`}
         >
-          <span className="material-symbols-outlined text-sm">
+          <span className="material-symbols-outlined text-sm text-[#8ed5ff]">
             all_inclusive
           </span>
           <span>Permanente</span>
@@ -119,15 +121,16 @@ export function MissionCountdown({
   const isCritical = timeLeft.totalSeconds < 3600;
   const isWarning = timeLeft.totalSeconds < 21600;
 
+  // Solid dark background for ultra-high contrast against any bright or light image background
   let badgeStyle =
-    "bg-[#8ed5ff]/15 text-[#8ed5ff] border-[#8ed5ff]/30 shadow-[0_0_12px_rgba(56,189,248,0.15)]";
+    "bg-[#060e20] text-[#8ed5ff] border-2 border-[#38bdf8] shadow-[0_4px_16px_rgba(0,0,0,0.85)]";
 
   if (isCritical) {
     badgeStyle =
-      "bg-[#ffb4ab]/20 text-[#ffb4ab] border-[#ffb4ab]/40 animate-pulse shadow-[0_0_12px_rgba(255,180,171,0.25)]";
+      "bg-[#2c0508] text-[#ffdad6] border-2 border-[#ffb4ab] animate-pulse shadow-[0_4px_16px_rgba(0,0,0,0.9),0_0_12px_rgba(255,180,171,0.4)]";
   } else if (isWarning) {
     badgeStyle =
-      "bg-[#ffc640]/15 text-[#ffc640] border-[#ffc640]/30 shadow-[0_0_12px_rgba(255,198,64,0.2)]";
+      "bg-[#1c1200] text-[#ffdf9f] border-2 border-[#ffc640] shadow-[0_4px_16px_rgba(0,0,0,0.85),0_0_12px_rgba(255,198,64,0.3)]";
   }
 
   const formattedTime =
@@ -139,7 +142,7 @@ export function MissionCountdown({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-mono font-bold border backdrop-blur-md transition-colors duration-200 ${badgeStyle} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-mono font-black transition-all ${badgeStyle} ${className}`}
     >
       <ClockIcon className="w-3.5 h-3.5 shrink-0" />
       <span>{formattedTime}</span>

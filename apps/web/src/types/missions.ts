@@ -3,7 +3,6 @@ import type {
   BackendMissionStatus,
   BackendMissionStep,
   BackendMissionType,
-  GamePlayStepConfig,
 } from "@shared/types/admin";
 
 import type { StepSubmissionItem } from "@/types/player";
@@ -101,8 +100,16 @@ export interface ClientMission {
   totalStepsCount: number;
 }
 
-export interface ClientMissionStep extends BackendMissionStep {
-  targetConfig?: GamePlayStepConfig | null;
+export interface ClientGamePlayConfig {
+  provider?: string;
+  gameId?: string;
+  minUniqueGames?: number;
+  minBet?: number;
+}
+
+export interface ClientMissionStep
+  extends Omit<BackendMissionStep, "targetConfig"> {
+  targetConfig?: ClientGamePlayConfig | Record<string, unknown> | null;
   submission?: StepSubmissionItem;
   submissionStatus?: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
 }
@@ -167,4 +174,5 @@ export interface MissionCountdownProps {
   activatedAt?: string;
   type?: string;
   className?: string;
+  overlayStyle?: boolean;
 }

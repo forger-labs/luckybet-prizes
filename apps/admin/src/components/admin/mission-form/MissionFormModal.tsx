@@ -83,7 +83,6 @@ export function MissionFormModal({
     validateOnChange: false,
     validateOnBlur: false,
     onSubmit: async (values) => {
-
       const steps = ((values.steps as MissionStep[]) || []).map((s, i) => ({
         ...s,
         order: i + 1,

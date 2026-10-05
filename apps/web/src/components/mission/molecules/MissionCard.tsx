@@ -85,19 +85,19 @@ export const MissionCard = ({ mission, onStart }: Props) => {
       transition={{ duration: 0.15 }}
       className={`relative h-full flex flex-col justify-between rounded-2xl border-2 transition-all duration-200 overflow-hidden select-none ${
         completed
-          ? "bg-[#131b2e] border-[#10b981]/30 opacity-80 shadow-md"
+          ? "bg-[#131b2e] border-[#10b981]/50 opacity-85 shadow-md"
           : isJoined
-            ? "bg-[#171f33] border-[#38bdf8]/50 shadow-[0_6px_25px_rgba(0,0,0,0.5),0_0_15px_rgba(56,189,248,0.15)] hover:border-[#8ed5ff]"
-            : "bg-[#171f33] border-[#2d3449] hover:border-[#8ed5ff]/60 shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_6px_25px_rgba(0,0,0,0.6),0_0_15px_rgba(56,189,248,0.2)]"
+            ? "bg-[#171f33] border-[#38bdf8] shadow-[0_6px_25px_rgba(0,0,0,0.6),0_0_15px_rgba(56,189,248,0.2)] hover:border-[#8ed5ff]"
+            : "bg-[#171f33] border-[#2d3449] hover:border-[#38bdf8] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:shadow-[0_6px_25px_rgba(0,0,0,0.7),0_0_18px_rgba(56,189,248,0.25)]"
       }`}
     >
       {/* Top Accent Line */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#38bdf8] via-[#ffc640] to-[#38bdf8] opacity-80 z-20" />
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#38bdf8] via-[#ffc640] to-[#38bdf8] opacity-95 z-20" />
 
       {/* Top Header / Cover Image Banner */}
       <div>
         {coverImage ? (
-          <div className="relative w-full h-36 sm:h-40 bg-[#060e20] overflow-hidden border-b border-[#2d3449]/40">
+          <div className="relative w-full h-36 sm:h-40 bg-[#060e20] overflow-hidden border-b-2 border-[#2d3449]">
             <Image
               src={coverImage}
               alt={title}
@@ -105,9 +105,10 @@ export const MissionCard = ({ mission, onStart }: Props) => {
               unoptimized
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#171f33] via-black/20 to-black/50" />
-            <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2 z-10">
-              <span className="px-2.5 py-1 rounded-lg bg-[#060e20]/90 border border-white/20 text-white font-mono text-[11px] font-black uppercase tracking-wider shadow-md">
+            {/* Dark gradient overlay to secure contrast regardless of image brightness */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#171f33] via-black/40 to-black/70" />
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
+              <span className="px-3 py-1 rounded-xl bg-[#060e20] border-2 border-white/40 text-white font-mono text-[11px] font-black uppercase tracking-wider shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
                 {categoryLabel}
               </span>
               {isClientMission && (
@@ -135,7 +136,7 @@ export const MissionCard = ({ mission, onStart }: Props) => {
                 }
                 size="md"
               />
-              <span className="px-2.5 py-1 rounded-lg bg-[#222a3d] border border-[#3e484f]/40 text-[#dae2fd] font-mono text-xs font-bold uppercase tracking-wider">
+              <span className="px-3 py-1 rounded-xl bg-[#060e20] border-2 border-[#3e484f] text-[#f8fafc] font-mono text-xs font-black uppercase tracking-wider shadow-sm">
                 {categoryLabel}
               </span>
             </div>
@@ -158,15 +159,15 @@ export const MissionCard = ({ mission, onStart }: Props) => {
           <h3
             className={`font-(--font-plus-jakarta-sans) text-base sm:text-lg font-bold mb-1.5 tracking-tight leading-snug line-clamp-1 ${
               completed
-                ? "text-[#87929a] line-through"
-                : "text-[#dae2fd] group-hover:text-[#8ed5ff] transition-colors"
+                ? "text-[#94a3b8] line-through"
+                : "text-[#f8fafc] group-hover:text-[#8ed5ff] transition-colors"
             }`}
           >
             {title}
           </h3>
 
           {description && (
-            <p className="text-[#bdc8d1] font-(--font-be-vietnam-pro) text-xs sm:text-sm leading-relaxed mb-4 line-clamp-2">
+            <p className="text-[#dae2fd] font-(--font-be-vietnam-pro) text-xs sm:text-sm leading-relaxed mb-4 line-clamp-2">
               {description}
             </p>
           )}
@@ -184,21 +185,21 @@ export const MissionCard = ({ mission, onStart }: Props) => {
           {/* Steps Overview & Progress Bar */}
           {steps && steps.length > 0 && (
             <div className="space-y-2 mb-3">
-              <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="text-[#87929a] uppercase tracking-wider">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-[#94a3b8] uppercase tracking-wider">
                   Objetivos ({steps.length})
                 </span>
-                <span className="text-[#8ed5ff] font-mono">
+                <span className="text-[#38bdf8] font-mono">
                   {progressPercent}%
                 </span>
               </div>
 
-              <div className="w-full h-2 rounded-full bg-[#060e20] border border-[#3e484f]/30 overflow-hidden p-0.5">
+              <div className="w-full h-2.5 rounded-full bg-[#060e20] border border-[#3e484f] overflow-hidden p-0.5 shadow-inner">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="h-full rounded-full bg-[#38bdf8] shadow-[0_0_8px_#38bdf8]"
+                  className="h-full rounded-full bg-[#38bdf8] shadow-[0_0_10px_#38bdf8]"
                 />
               </div>
 
@@ -209,8 +210,8 @@ export const MissionCard = ({ mission, onStart }: Props) => {
       </div>
 
       {/* Footer Actions */}
-      <div className="flex items-center justify-between p-5 sm:p-6 pt-3 border-t border-[#2d3449]/70 bg-[#131b2e]/40">
-        <span className="text-xs font-bold text-[#87929a]">
+      <div className="flex items-center justify-between p-5 sm:p-6 pt-3.5 border-t-2 border-[#2d3449] bg-[#0b1326]/60">
+        <span className="text-xs font-black text-[#94a3b8] uppercase tracking-wider">
           {completed
             ? "Misión completada"
             : isJoined

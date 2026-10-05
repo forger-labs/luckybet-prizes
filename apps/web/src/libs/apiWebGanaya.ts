@@ -389,9 +389,7 @@ export class ApiWebGanaya {
     }
   }
 
-  async claimMissionReward(
-    userMissionId: number,
-  ): Promise<
+  async claimMissionReward(userMissionId: number): Promise<
     ApiResponse<{
       id: number;
       userMissionId: number;

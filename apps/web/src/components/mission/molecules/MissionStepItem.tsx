@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CheckCircleIcon } from "@/icons";
-import type { ClientMissionStep } from "@/types/missions";
+import type { ClientGamePlayConfig, ClientMissionStep } from "@/types/missions";
 
 interface Props {
   step: ClientMissionStep;
@@ -42,9 +42,15 @@ export function MissionStepItem({
   const isImage = step.type === "IMAGE";
   const isText = step.type === "TEXT";
 
-  const cfg = step.targetConfig;
-  const isSpecificGame = Boolean(cfg?.gameId);
-  const isProviderFlow = Boolean(cfg?.provider && !cfg?.gameId);
+  const cfg = step.targetConfig as ClientGamePlayConfig | undefined;
+  const gameId = typeof cfg?.gameId === "string" ? cfg.gameId : undefined;
+  const provider = typeof cfg?.provider === "string" ? cfg.provider : undefined;
+  const minUniqueGames =
+    typeof cfg?.minUniqueGames === "number" ? cfg.minUniqueGames : undefined;
+  const minBet = typeof cfg?.minBet === "number" ? cfg.minBet : undefined;
+
+  const isSpecificGame = Boolean(gameId);
+  const isProviderFlow = Boolean(provider && !gameId);
 
   useEffect(() => {
     if (!isRejected && step.submission?.submissionImageUrl) {
@@ -214,7 +220,7 @@ export function MissionStepItem({
                   Juego Asignado
                 </span>
                 <span className="text-xs font-mono font-bold text-[#f8fafc] truncate block">
-                  {cfg.gameId}
+                  {gameId}
                 </span>
               </div>
             )}
@@ -226,7 +232,7 @@ export function MissionStepItem({
                   Proveedor
                 </span>
                 <span className="text-xs font-bold text-[#8ed5ff] truncate block">
-                  {cfg.provider}
+                  {provider}
                 </span>
               </div>
             )}
@@ -238,7 +244,7 @@ export function MissionStepItem({
                   Juegos Distintos
                 </span>
                 <span className="text-xs font-bold text-[#ffc640] block">
-                  Mínimo {cfg.minUniqueGames ?? 1} juego(s)
+                  Mínimo {minUniqueGames ?? 1} juego(s)
                 </span>
               </div>
             )}
@@ -249,8 +255,8 @@ export function MissionStepItem({
                 Apuesta Mínima
               </span>
               <span className="text-xs font-bold text-[#4ade80] block">
-                {cfg.minBet > 0
-                  ? `$${cfg.minBet.toLocaleString()} fichas / jugada`
+                {minBet !== undefined && minBet > 0
+                  ? `$${minBet.toLocaleString()} USD / jugada`
                   : "Sin mínimo de apuesta"}
               </span>
             </div>
@@ -289,9 +295,9 @@ export function MissionStepItem({
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <p className="text-xs text-[#dae2fd]">
                 {isSpecificGame
-                  ? `Juega en "${cfg?.gameId}" para verificar automáticamente este paso.`
-                  : cfg?.provider
-                    ? `Juega en títulos de ${cfg.provider} cumpliendo las condiciones de arriba.`
+                  ? `Juega en "${gameId}" para verificar automáticamente este paso.`
+                  : provider
+                    ? `Juega en títulos de ${provider} cumpliendo las condiciones de arriba.`
                     : "Juega en el casino para validar este paso automáticamente."}
               </p>
               <button

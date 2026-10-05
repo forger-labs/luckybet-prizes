@@ -170,7 +170,6 @@ export function MissionsList() {
 
   const handleSave = useCallback(
     async (data: PartialAdminMission, isCreate: boolean): Promise<boolean> => {
-
       const ok = isCreate
         ? await createMissionAction(dispatch, data)
         : editingMission
