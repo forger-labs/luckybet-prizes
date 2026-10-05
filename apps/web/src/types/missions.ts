@@ -1,4 +1,14 @@
-export type MissionCategory = "all" | "daily" | "fixed" | "special";
+import type {
+  BackendMissionRoom,
+  BackendMissionStatus,
+  BackendMissionStep,
+  BackendMissionType,
+  GamePlayStepConfig,
+} from "@shared/types/admin";
+
+import type { StepSubmissionItem } from "@/types/player";
+
+export type MissionCategory = "all" | "daily" | "weekly" | "fixed" | "special";
 
 export type MissionPlatform =
   | "instagram"
@@ -67,11 +77,76 @@ export interface MissionItem {
   onAction?: () => void;
 }
 
+export interface ClientMission {
+  id: number;
+  title: string;
+  description?: string;
+  type: BackendMissionType;
+  category: Exclude<MissionCategory, "all">;
+  status: BackendMissionStatus;
+  coinsAmount: number;
+  experiencePoints: number;
+  totalCoins: number;
+  room?: BackendMissionRoom | null;
+  imageUrl?: string;
+  activatedAt?: string;
+  expiresAt?: string;
+  steps: BackendMissionStep[];
+  isJoined: boolean;
+  userMissionId?: number;
+  userMissionStatus?: "IN_PROGRESS" | "COMPLETED" | "EXPIRED" | "CANCELLED";
+  currentStep?: number;
+  progressPercent: number;
+  completedStepsCount: number;
+  totalStepsCount: number;
+}
+
+export interface ClientMissionStep extends BackendMissionStep {
+  targetConfig?: GamePlayStepConfig | null;
+  submission?: StepSubmissionItem;
+  submissionStatus?: "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
+}
+
+export interface MissionRewardResponse {
+  id: number;
+  userMissionId: number;
+  playerId: number;
+  coinsAmount: number;
+  roomId?: number | null;
+  experiencePoints: number;
+  status: "PENDING" | "PROCESSING" | "CLAIMED" | "TIMEOUT_UNCERTAIN";
+  externalOperationId?: string | null;
+  errorMessage?: string | null;
+  resolvedByAdminId?: number | null;
+  claimedAt?: string | null;
+  createdAt: string;
+}
+
+export interface ClientMissionDetail extends ClientMission {
+  detailedSteps: ClientMissionStep[];
+  isCompleted: boolean;
+  canSubmitOrClaim: boolean;
+  rewardStatus?:
+    | "PENDING"
+    | "PROCESSING"
+    | "CLAIMED"
+    | "TIMEOUT_UNCERTAIN"
+    | null;
+}
+
+export interface GetMyMissionsQuery {
+  status?: "IN_PROGRESS" | "COMPLETED" | "EXPIRED" | "CANCELLED";
+  missionId?: number;
+  orderDirection?: "ASC" | "DESC";
+  take?: number;
+  skip?: number;
+}
+
 export interface MissionStatsSummary {
   claimableCoins: number;
   completedCount: number;
   totalCount: number;
-  xpMultiplier: string;
+  xpMultiplier?: string;
 }
 
 export interface MissionCategoryTab {
@@ -85,4 +160,11 @@ export interface MissionFilterTabsProps {
   categories: MissionCategoryTab[];
   activeCategory: MissionCategory;
   onSelectCategory: (category: MissionCategory) => void;
+}
+
+export interface MissionCountdownProps {
+  expiresAt?: string;
+  activatedAt?: string;
+  type?: string;
+  className?: string;
 }

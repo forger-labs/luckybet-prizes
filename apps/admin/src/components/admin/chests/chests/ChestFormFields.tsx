@@ -150,6 +150,7 @@ export function ChestFormFields({
             options={PERIOD_OPTIONS}
             value={values.periodType}
             onChange={(val) => setFieldValue("periodType", val)}
+            className="relative"
           />
         </div>
 
@@ -245,6 +246,7 @@ export function ChestFormFields({
           options={roomOptions}
           value={values.roomId}
           onChange={(val) => setFieldValue("roomId", val)}
+          // className="relative"
         />
       </div>
     </div>

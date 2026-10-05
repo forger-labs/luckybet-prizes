@@ -243,6 +243,7 @@ export async function createMissionAction(
   dispatch({ type: "SUBMIT_START" });
   try {
     const payload = buildCreateMissionFormData(data, data.image);
+
     const result = await apiAdminGanaya.createMission(payload);
 
     if (result.status) {

@@ -15,7 +15,7 @@ export interface BackendMissionStep {
   stepOrder: number;
   type: "IMAGE" | "TEXT" | "GAME_PLAY";
   content?: string;
-  targetConfig?: Record<string, unknown> | null;
+  targetConfig?: GamePlayStepConfig | null
 }
 
 export interface BackendMissionRoom {

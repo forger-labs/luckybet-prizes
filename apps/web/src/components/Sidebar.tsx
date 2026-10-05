@@ -84,7 +84,7 @@ export const Sidebar = ({
       </div>
 
       {/* Navigation Links */}
-      <nav className="mt-6 self-start overflow-y-auto">
+      <nav className="mt-6 self-start">
         <ul className="flex flex-col space-y-1">
           {PUBLIC_LINKS.map((link, i) => (
             <ItemSidebar

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-import { CoinsIcon, FlameIcon, TrophyIcon } from "@/icons";
+import { CoinsIcon, TrophyIcon } from "@/icons";
 import type { MissionStatsSummary } from "@/types/missions";
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 }
 
 export const MissionStatsBar = ({ stats }: Props) => {
-  const { claimableCoins, completedCount, totalCount, xpMultiplier } = stats;
+  const { claimableCoins, completedCount, totalCount } = stats;
   const progressPercent =
     totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
@@ -77,7 +77,7 @@ export const MissionStatsBar = ({ stats }: Props) => {
       </motion.div>
 
       {/* 3. XP Multiplier */}
-      <motion.div
+      {/*<motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, delay: 0.15 }}
@@ -101,7 +101,7 @@ export const MissionStatsBar = ({ stats }: Props) => {
             </div>
           </div>
         </div>
-      </motion.div>
+      </motion.div>*/}
     </div>
   );
 };

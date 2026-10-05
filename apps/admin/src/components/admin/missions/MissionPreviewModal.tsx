@@ -188,7 +188,7 @@ export function MissionPreviewModal({
                               </span>
                               <span className="text-outline">·</span>
                               <span className="text-secondary">
-                                Apuesta mínima: ${cfg.minBet} USD
+                                Apuesta mínima: ${cfg.minBet} fichas
                               </span>
                             </div>
                           ) : cfg?.provider ? (
@@ -202,7 +202,7 @@ export function MissionPreviewModal({
                               </span>
                               <span className="text-outline">·</span>
                               <span className="text-secondary">
-                                Apuesta mínima: ${cfg.minBet} USD
+                                Apuesta mínima: ${cfg.minBet} fichas
                               </span>
                             </div>
                           ) : (

@@ -1,7 +1,12 @@
 import axios from "axios";
 
 import HttpClient, { handleApiError } from "@shared/libs/httpClient";
-import type { BackendLevel, GetLevelsQuery } from "@shared/types/admin";
+import type {
+  BackendLevel,
+  BackendMission,
+  GetLevelsQuery,
+  GetMissionsQuery,
+} from "@shared/types/admin";
 import type {
   ApiResponse,
   HttpClientInterface,
@@ -10,6 +15,10 @@ import type {
 
 import { API_URL, LOCAL_STORAGE_KEYS } from "@/constant";
 import type { LuckyBetGameItem } from "@/types/luckybet";
+import type {
+  GetMyMissionsQuery,
+  MissionRewardResponse,
+} from "@/types/missions";
 import type {
   PlayedGameItem,
   PlayedGamesQuery,
@@ -85,15 +94,20 @@ export class ApiWebGanaya {
         if (params.limit !== undefined && params.limit !== null) {
           searchParams.append("limit", params.limit.toString());
         }
-        if (params.from) searchParams.append("from", params.from);
-        if (params.to) searchParams.append("to", params.to);
-        if (params.provider) searchParams.append("provider", params.provider);
-        if (params.gameName) searchParams.append("gameName", params.gameName);
-        if (params.forceRefresh) searchParams.append("forceRefresh", "true");
-
+        if (params.from?.trim())
+          searchParams.append("from", params.from.trim());
+        if (params.to?.trim()) searchParams.append("to", params.to.trim());
+        if (params.provider?.trim())
+          searchParams.append("provider", params.provider.trim());
+        if (params.gameName?.trim())
+          searchParams.append("gameName", params.gameName.trim());
+        if (params.forceRefresh !== undefined) {
+          searchParams.append("forceRefresh", params.forceRefresh.toString());
+        }
         const queryString = searchParams.toString();
         if (queryString) url += `?${queryString}`;
       }
+
       const { data } = await this.httpClient.get({ url });
       const response = data as ApiResponse<PlayedGamesResponse>;
       if (response?.status) result.status = true;
@@ -127,20 +141,19 @@ export class ApiWebGanaya {
     }
   }
 
-  // ── Player Missions ──
+  // ── Missions Catalog & Player Missions ──
 
-  async getPlayerMissions(
-    playerId: number,
-    params?: { take?: number; skip?: number },
-  ): Promise<PaginatedApiResponse<UserMissionBasic[]>> {
-    const result: PaginatedApiResponse<UserMissionBasic[]> = {
+  async getMissions(
+    params?: GetMissionsQuery,
+  ): Promise<PaginatedApiResponse<BackendMission[]>> {
+    const result: PaginatedApiResponse<BackendMission[]> = {
       data: null,
       status: false,
       message: "",
       meta: null,
     };
     try {
-      let url = `/players/${playerId}/missions`;
+      let url = "/missions";
       if (params) {
         const searchParams = new URLSearchParams();
         if (params.take !== undefined && params.take !== null) {
@@ -149,11 +162,20 @@ export class ApiWebGanaya {
         if (params.skip !== undefined && params.skip !== null) {
           searchParams.append("skip", params.skip.toString());
         }
+        if (params.status !== undefined && params.status !== null) {
+          searchParams.append("status", params.status);
+        }
+        if (params.type !== undefined && params.type !== null) {
+          searchParams.append("type", params.type);
+        }
+        if (params.roomId !== undefined && params.roomId !== null) {
+          searchParams.append("roomId", params.roomId.toString());
+        }
         const queryString = searchParams.toString();
         if (queryString) url += `?${queryString}`;
       }
       const { data } = await this.httpClient.get({ url });
-      const response = data as PaginatedApiResponse<UserMissionBasic[]>;
+      const response = data as PaginatedApiResponse<BackendMission[]>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;
@@ -161,25 +183,70 @@ export class ApiWebGanaya {
       return result;
     } catch (error) {
       return handleApiError(error, result) as unknown as PaginatedApiResponse<
-        UserMissionBasic[]
+        BackendMission[]
       >;
     }
   }
 
-  async getPlayerMissionById(
-    playerId: number,
-    userMissionId: number,
-  ): Promise<ApiResponse<UserMissionWithSteps>> {
-    const result: ApiResponse<UserMissionWithSteps> = {
+  async getMyMissions(
+    params?: GetMyMissionsQuery,
+  ): Promise<PaginatedApiResponse<UserMissionWithSteps[]>> {
+    const result: PaginatedApiResponse<UserMissionWithSteps[]> = {
+      data: null,
+      status: false,
+      message: "",
+      meta: null,
+    };
+    try {
+      let url = "/missions/my-missions";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.take !== undefined && params.take !== null) {
+          searchParams.append("take", params.take.toString());
+        }
+        if (params.skip !== undefined && params.skip !== null) {
+          searchParams.append("skip", params.skip.toString());
+        }
+        if (params.status !== undefined && params.status !== null) {
+          searchParams.append("status", params.status);
+        }
+        if (params.missionId !== undefined && params.missionId !== null) {
+          searchParams.append("missionId", params.missionId.toString());
+        }
+        if (
+          params.orderDirection !== undefined &&
+          params.orderDirection !== null
+        ) {
+          searchParams.append("orderDirection", params.orderDirection);
+        }
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as PaginatedApiResponse<UserMissionWithSteps[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      result.meta = response.meta ?? null;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result) as unknown as PaginatedApiResponse<
+        UserMissionWithSteps[]
+      >;
+    }
+  }
+
+  async getMissionById(id: number): Promise<ApiResponse<BackendMission>> {
+    const result: ApiResponse<BackendMission> = {
       data: null,
       status: false,
       message: "",
     };
     try {
       const { data } = await this.httpClient.get({
-        url: `/players/${playerId}/missions/${userMissionId}`,
+        url: `/missions/${id}`,
       });
-      const response = data as ApiResponse<UserMissionWithSteps>;
+      const response = data as ApiResponse<BackendMission>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;
@@ -190,7 +257,6 @@ export class ApiWebGanaya {
   }
 
   async startMission(
-    playerId: number,
     missionId: number,
   ): Promise<ApiResponse<UserMissionBasic>> {
     const result: ApiResponse<UserMissionBasic> = {
@@ -200,7 +266,7 @@ export class ApiWebGanaya {
     };
     try {
       const { data } = await this.httpClient.post({
-        url: `/players/${playerId}/missions/${missionId}/start`,
+        url: `/missions/${missionId}/start`,
       });
       const response = data as ApiResponse<UserMissionBasic>;
       if (response?.status) result.status = true;
@@ -212,8 +278,29 @@ export class ApiWebGanaya {
     }
   }
 
-  async submitStep(
-    playerId: number,
+  async getUserMissionById(
+    userMissionId: number,
+  ): Promise<ApiResponse<UserMissionWithSteps>> {
+    const result: ApiResponse<UserMissionWithSteps> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: `/missions/user-missions/${userMissionId}`,
+      });
+      const response = data as ApiResponse<UserMissionWithSteps>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async submitMissionStep(
     userMissionId: number,
     stepId: number,
     data: FormData,
@@ -225,13 +312,116 @@ export class ApiWebGanaya {
     };
     try {
       const { data: response } = await this.httpClient.post({
-        url: `/players/${playerId}/missions/${userMissionId}/steps/${stepId}/submit`,
+        url: `/missions/user-missions/${userMissionId}/steps/${stepId}/submit`,
         body: data,
       });
       const responseData = response as ApiResponse<StepSubmissionItem>;
       if (responseData?.status) result.status = true;
       result.data = responseData.data;
       result.message = responseData.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async verifyGamePlayStep(
+    userMissionId: number,
+    stepId: number,
+  ): Promise<
+    ApiResponse<{
+      id: number;
+      userMissionId: number;
+      missionStepId: number;
+      status: string;
+    }>
+  > {
+    const result: ApiResponse<{
+      id: number;
+      userMissionId: number;
+      missionStepId: number;
+      status: string;
+    }> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data: response } = await this.httpClient.post({
+        url: `/missions/user-missions/${userMissionId}/steps/${stepId}/verify`,
+      });
+      const responseData = response as ApiResponse<{
+        id: number;
+        userMissionId: number;
+        missionStepId: number;
+        status: string;
+      }>;
+      if (responseData?.status) result.status = true;
+      result.data = responseData.data;
+      result.message = responseData.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Mission Rewards API ──
+
+  async findRewardByUMId(
+    userMissionId: number,
+  ): Promise<ApiResponse<MissionRewardResponse>> {
+    const result: ApiResponse<MissionRewardResponse> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: `/rewards/${userMissionId}`,
+      });
+      const response = data as ApiResponse<MissionRewardResponse>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async claimMissionReward(
+    userMissionId: number,
+  ): Promise<
+    ApiResponse<{
+      id: number;
+      userMissionId: number;
+      status: string;
+      coinsAmount: number;
+    }>
+  > {
+    const result: ApiResponse<{
+      id: number;
+      userMissionId: number;
+      status: string;
+      coinsAmount: number;
+    }> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/rewards/user-missions/${userMissionId}/claim`,
+      });
+      const response = data as ApiResponse<{
+        id: number;
+        userMissionId: number;
+        status: string;
+        coinsAmount: number;
+      }>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
       return result;
     } catch (error) {
       return handleApiError(error, result);
