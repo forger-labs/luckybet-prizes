@@ -59,6 +59,7 @@ export function useDashboardData() {
           currentLevelId: currentLevel?.id,
           nextLevelId: nextLevel?.id,
           coins: currentLevel?.coins ?? 0,
+          roomBonus: player.room?.bonus ?? "0",
         });
       }
     } catch {

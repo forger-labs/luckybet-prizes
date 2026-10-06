@@ -80,5 +80,4 @@ export interface WeeklyChestCardProps {
 export interface FeaturedChestCardProps {
   className?: string;
   defaultPeriod?: ChestPeriodType;
-  onViewMissions?: () => void;
 }

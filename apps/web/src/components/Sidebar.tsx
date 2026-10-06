@@ -73,10 +73,6 @@ export const Sidebar = ({
                     {displayName}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] text-secondary font-medium mt-0.5">
-                  <SparklesIcon className="w-3 h-3 text-secondary" />
-                  <span>Rango VIP Elite I</span>
-                </div>
               </motion.div>
             )}
           </AnimatePresence>

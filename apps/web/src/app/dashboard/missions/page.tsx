@@ -253,15 +253,6 @@ export default function MissionsPage() {
           activeCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
         />
-
-        {/* Casino Countdown Timer Pill */}
-        <div className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2 rounded-xl bg-surface-container border-2 border-primary-container/40 shadow-md">
-          <ClockIcon className="w-4 h-4 text-primary-container" />
-          <span className="text-xs text-[#bdc8d1] font-bold">Reinicio en:</span>
-          <span className="font-(--font-plus-jakarta-sans) text-xs sm:text-sm font-black text-primary tracking-wider font-mono">
-            {formatTime(hour, minute, second)}
-          </span>
-        </div>
       </div>
 
       {/* Missions Grid or Loading Skeleton */}

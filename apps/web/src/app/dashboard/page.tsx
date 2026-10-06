@@ -6,11 +6,39 @@ import { GamesSection } from "@/components/dashboard/games/GamesSection";
 import { LiveWinnersFeed } from "@/components/dashboard/LiveWinnersFeed";
 import { TrendingGames } from "@/components/dashboard/TrendingGames";
 import { UserStatusWidget } from "@/components/dashboard/UserStatusWidget";
+import { LevelUpCelebrationModal } from "@/components/levels/LevelUpCelebrationModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useLevelRewards } from "@/hooks/useLevelRewards";
 
 export default function DashboardPage() {
-  const { userRank, games, isFallbackGames, isLoadingGames, isLoadingUser } =
-    useDashboardData();
+  const {
+    userRank,
+    games,
+    isFallbackGames,
+    isLoadingGames,
+    isLoadingUser,
+    refetch: refetchDashboard,
+  } = useDashboardData();
+
+  const {
+    nextReward,
+    pendingCount,
+    nextLevelName,
+    nextLevelImage,
+    calculatedCoinsForNext,
+    isClaiming,
+    celebrationData,
+    isCelebrationOpen,
+    hasMorePending,
+    remainingCount,
+    subsequentLevelName,
+    claimNextReward,
+    claimNextFromModal,
+    closeCelebration,
+  } = useLevelRewards({
+    roomBonus: userRank.roomBonus,
+    onClaimSuccess: refetchDashboard,
+  });
 
   return (
     <div className="max-w-[1280px] mx-auto space-y-6 sm:space-y-stack-md">
@@ -20,7 +48,17 @@ export default function DashboardPage() {
       {/* User Status & Featured Hero Chest with Weekly/Monthly toggle */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-gutter items-stretch">
         <div className="lg:col-span-4">
-          <UserStatusWidget status={userRank} isLoading={isLoadingUser} />
+          <UserStatusWidget
+            status={userRank}
+            isLoading={isLoadingUser}
+            pendingRewardCount={pendingCount}
+            nextReward={nextReward}
+            nextLevelName={nextLevelName}
+            nextLevelImage={nextLevelImage}
+            calculatedCoinsForNext={calculatedCoinsForNext}
+            isClaimingReward={isClaiming}
+            onClaimReward={claimNextReward}
+          />
         </div>
         <div className="lg:col-span-8 min-h-[300px]">
           <FeaturedChestCard />
@@ -35,10 +73,22 @@ export default function DashboardPage() {
       />
 
       {/* Live Winners Feed & Trending Harbor Games */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-gutter">
+      {/*<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-gutter">
         <LiveWinnersFeed />
         <TrendingGames />
-      </div>
+      </div>*/}
+
+      {/* Level Up Celebration Modal */}
+      <LevelUpCelebrationModal
+        isOpen={isCelebrationOpen}
+        onClose={closeCelebration}
+        celebrationData={celebrationData}
+        hasMorePending={hasMorePending}
+        remainingCount={remainingCount}
+        nextLevelName={subsequentLevelName}
+        onClaimNext={claimNextFromModal}
+        isClaimingNext={isClaiming}
+      />
     </div>
   );
 }

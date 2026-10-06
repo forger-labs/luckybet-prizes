@@ -44,4 +44,5 @@ export interface UserRankStatus {
   currentLevelId?: number;
   nextLevelId?: number;
   coins?: number;
+  roomBonus?: string;
 }

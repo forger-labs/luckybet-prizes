@@ -20,6 +20,10 @@ import type {
   PlayerChestJoinResponse,
   PlayerChestProgressItem,
 } from "@/types/chests";
+import type {
+  GetMyLevelRewardsQuery,
+  PlayerLevelReward,
+} from "@/types/levelRewards";
 import type { LuckyBetGameItem } from "@/types/luckybet";
 import type {
   GetMyMissionsQuery,
@@ -540,7 +544,73 @@ export class ApiWebGanaya {
     }
   }
 
-  // ── Player Chests Endpoints ──
+
+  // ── Level Rewards Endpoints ──
+
+  async getMyLevelRewards(
+    params?: GetMyLevelRewardsQuery,
+  ): Promise<PaginatedApiResponse<PlayerLevelReward[]>> {
+    const result: PaginatedApiResponse<PlayerLevelReward[]> = {
+      data: null,
+      status: false,
+      message: "",
+      meta: null,
+    };
+    try {
+      let url = "/level-rewards";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.status) searchParams.append("status", params.status);
+        if (params.levelId !== undefined && params.levelId !== null)
+          searchParams.append("levelId", params.levelId.toString());
+        if (params.orderBy) searchParams.append("orderBy", params.orderBy);
+        if (params.orderDirection)
+          searchParams.append("orderDirection", params.orderDirection);
+        if (params.take !== undefined)
+          searchParams.append("take", params.take.toString());
+        if (params.skip !== undefined)
+          searchParams.append("skip", params.skip.toString());
+
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as PaginatedApiResponse<PlayerLevelReward[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      result.meta = response.meta ?? null;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result) as unknown as PaginatedApiResponse<
+        PlayerLevelReward[]
+      >;
+    }
+  }
+
+  async claimLevelReward(
+    levelId: number,
+  ): Promise<ApiResponse<PlayerLevelReward>> {
+    const result: ApiResponse<PlayerLevelReward> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/level-rewards/${levelId}/claim`,
+      });
+      const response = data as ApiResponse<PlayerLevelReward>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+    // ── Player Chests Endpoints ──
 
   async getPlayerChestsProgress(
     params?: GetPlayerChestsProgressQuery,

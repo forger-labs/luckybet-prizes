@@ -3,8 +3,10 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
+import { LevelRewardClaimBanner } from "@/components/levels/LevelRewardClaimBanner";
 import { SparklesIcon, TrophyIcon } from "@/icons";
 import type { UserRankStatus } from "@/types/dashboard";
+import type { PlayerLevelReward } from "@/types/levelRewards";
 
 const DEFAULT_STATUS_DATA: UserRankStatus = {
   currentTier: "Principiante",
@@ -18,11 +20,25 @@ const DEFAULT_STATUS_DATA: UserRankStatus = {
 interface UserStatusWidgetProps {
   status?: UserRankStatus;
   isLoading?: boolean;
+  pendingRewardCount?: number;
+  nextReward?: PlayerLevelReward | null;
+  nextLevelName?: string;
+  nextLevelImage?: string | null;
+  calculatedCoinsForNext?: number;
+  isClaimingReward?: boolean;
+  onClaimReward?: () => void;
 }
 
 export const UserStatusWidget = ({
   status = DEFAULT_STATUS_DATA,
   isLoading = false,
+  pendingRewardCount = 0,
+  nextReward = null,
+  nextLevelName,
+  nextLevelImage,
+  calculatedCoinsForNext = 0,
+  isClaimingReward = false,
+  onClaimReward,
 }: UserStatusWidgetProps) => {
   if (isLoading) {
     return (
@@ -35,6 +51,7 @@ export const UserStatusWidget = ({
       </div>
     );
   }
+
   const currentXp = status.currentXp ?? 0;
   const targetXp = status.targetXp > 0 ? status.targetXp : 1000;
   const xpPercentage = Math.min(100, Math.max(0, (currentXp / targetXp) * 100));
@@ -88,37 +105,6 @@ export const UserStatusWidget = ({
           </motion.div>
         </div>
 
-        {/* Perks & Streak Highlights */}
-        {/*<div className="grid grid-cols-2 gap-2 mb-5">
-          <div className="bg-surface-container-high/60 border border-white/5 rounded-lg p-2.5 flex items-center gap-2.5">
-            <div className="p-1.5 rounded-md bg-secondary/20 text-secondary">
-              <FlameIcon className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[11px] text-on-surface-variant uppercase font-medium">
-                Racha
-              </p>
-              <p className="text-xs font-semibold text-on-surface">
-                {status.streakDays} {status.streakDays === 1 ? "día" : "días"}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-surface-container-high/60 border border-white/5 rounded-lg p-2.5 flex items-center gap-2.5">
-            <div className="p-1.5 rounded-md bg-primary/20 text-primary">
-              <SparklesIcon className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[11px] text-on-surface-variant uppercase font-medium">
-                Bonus Nivel
-              </p>
-              <p className="text-xs font-semibold text-primary">
-                {status.multiplier}
-              </p>
-            </div>
-          </div>
-        </div>*/}
-
         {/* Animated XP Progress */}
         <div className="space-y-2">
           <div className="flex justify-between text-xs font-medium">
@@ -160,6 +146,19 @@ export const UserStatusWidget = ({
             </span>
           </div>
         </div>
+
+        {/* Claim Pending Level Reward Banner */}
+        {pendingRewardCount > 0 && nextReward && onClaimReward && (
+          <LevelRewardClaimBanner
+            pendingCount={pendingRewardCount}
+            nextReward={nextReward}
+            nextLevelName={nextLevelName}
+            nextLevelImage={nextLevelImage}
+            calculatedCoins={calculatedCoinsForNext}
+            isClaiming={isClaimingReward}
+            onClaim={onClaimReward}
+          />
+        )}
       </div>
     </motion.section>
   );

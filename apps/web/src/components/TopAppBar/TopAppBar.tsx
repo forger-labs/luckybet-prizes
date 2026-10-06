@@ -33,10 +33,6 @@ export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {
               className="h-8 sm:h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
             />
           </div>
-          <span className="hidden lg:inline-flex items-center gap-1 text-[11px] font-bold text-secondary bg-secondary/15 border border-secondary/30 px-2 py-0.5 rounded-full ml-1">
-            <SparklesIcon className="w-3 h-3 text-secondary" />
-            HARBOR
-          </span>
         </Link>
       </div>
 
@@ -45,7 +41,7 @@ export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {
         <Balance />
 
         {/* Notifications Icon Button */}
-        <motion.button
+        {/*<motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           type="button"
@@ -54,7 +50,7 @@ export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {
         >
           <BellIcon className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface-container-lowest animate-pulse" />
-        </motion.button>
+        </motion.button>*/}
 
         {/* User Profile Avatar with VIP ring */}
         <motion.div
@@ -73,9 +69,6 @@ export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {
           <div className="hidden xl:flex flex-col text-left leading-tight">
             <span className="text-xs font-bold text-on-surface truncate max-w-[120px]">
               {displayName}
-            </span>
-            <span className="text-[10px] text-secondary font-medium">
-              VIP Elite I
             </span>
           </div>
         </motion.div>

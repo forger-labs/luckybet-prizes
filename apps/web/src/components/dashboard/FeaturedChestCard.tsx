@@ -17,6 +17,8 @@ import {
   SparklesIcon,
 } from "@/icons";
 import type { FeaturedChestCardProps } from "@/types/chests";
+import { usePathname } from "next/navigation";
+import { ROUTES } from "@shared/constants";
 
 const DEFAULT_CHEST_BG =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuCSC7oM947uIZvDHrVhv_MLm2W22WS_o2xWCxRC7byGghsKgL558BQAx6iagOuJcBi-L6qk9cHTG9-k97XcRwzDg_y6ZPsKLGG8CEZJXE8P_CjV5g6qOi7SIBukRc7--tXAs30I-v7s9yQMYGZWUHLf3Z97x39q-UejO_nKUgUF0MHECi3DwiPFLtayaqqfB8-9dyeWE4g1pSvygY-ZPLNFBTBi9ErUQgNXNR6scLU8D8n52ME2GyhmYuVuOfSD972Kod4TAORUe7KC";
@@ -24,7 +26,6 @@ const DEFAULT_CHEST_BG =
 export const FeaturedChestCard = ({
   className = "",
   defaultPeriod = "WEEKLY",
-  onViewMissions,
 }: FeaturedChestCardProps) => {
   const {
     selectedPeriod,
@@ -39,6 +40,8 @@ export const FeaturedChestCard = ({
     setIsRewardModalOpen,
     claimedResult,
   } = usePlayerChests(defaultPeriod);
+  const pathname = usePathname()
+  const isOnMissionsPage = pathname === ROUTES.MISSIONS;
 
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -182,15 +185,7 @@ export const FeaturedChestCard = ({
                 <CheckCircleIcon className="w-4 h-4" />
                 <span>Reclamado</span>
               </button>
-            ) : onViewMissions ? (
-              <button
-                type="button"
-                onClick={onViewMissions}
-                className="bg-surface-container-high hover:bg-surface-bright text-on-surface px-5 py-2.5 rounded-xl font-title-md text-sm font-semibold transition-colors cursor-pointer"
-              >
-                Ver Misiones
-              </button>
-            ) : (
+            ) : !isOnMissionsPage && (
               <Link
                 href="/dashboard/missions"
                 className="bg-secondary/20 hover:bg-secondary/30 border border-secondary/40 text-secondary px-5 py-2.5 rounded-xl font-title-md text-sm font-bold transition-all cursor-pointer flex items-center gap-2"

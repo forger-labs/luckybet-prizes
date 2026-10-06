@@ -46,7 +46,7 @@ export const GameCard = ({
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
         {tag ? (
           <span
-            className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border  ${tagColorClasses[tagColor]}`}
+            className={`bg-surface-container-lowest/60 text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border  ${tagColorClasses[tagColor]}`}
           >
             {tag}
           </span>
