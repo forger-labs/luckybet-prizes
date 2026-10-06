@@ -32,7 +32,7 @@ export const MissionActionButton = ({
       whileTap={{ scale: 0.96 }}
       onClick={onClick}
       type="button"
-      className="px-4 py-2 rounded-xl bg-[#38bdf8] hover:bg-[#7bd0ff] text-[#00354a] font-black text-xs sm:text-sm transition-all border-2 border-[#8ed5ff] shadow-md cursor-pointer inline-flex items-center gap-1.5"
+      className="px-4 py-2 rounded-xl bg-primary-container hover:bg-[#7bd0ff] text-on-primary font-black text-xs sm:text-sm transition-all border-2 border-primary shadow-md cursor-pointer inline-flex items-center gap-1.5"
     >
       <span>{label}</span>
     </motion.button>

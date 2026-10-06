@@ -55,11 +55,11 @@ export const VARIANT_THEMES: Record<ToastVariant, ToastThemeConfig> = {
     boxShadow: "0 10px 30px -5px rgba(14, 165, 233, 0.45)",
     emblemBg: "bg-[#0284c7]",
     emblemText: "text-white",
-    tagBg: "bg-[#38bdf8]",
+    tagBg: "bg-primary-container",
     tagText: "text-[#082f49]",
     titleColor: "text-white",
     descColor: "text-[#bae6fd]",
-    barColor: "bg-[#38bdf8]",
+    barColor: "bg-primary-container",
     closeBtnHover: "hover:bg-[#0284c7]",
   },
   action: {

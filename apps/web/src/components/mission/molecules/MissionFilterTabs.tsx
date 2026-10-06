@@ -25,8 +25,8 @@ export const MissionFilterTabs = ({
             onClick={() => onSelectCategory(tab.id)}
             className={`relative px-4 py-2 rounded-xl text-xs sm:text-sm font-black transition-all shrink-0 flex items-center gap-2 cursor-pointer border-2 ${
               isActive
-                ? "bg-[#38bdf8] text-[#00354a] border-[#8ed5ff] shadow-[0_0_15px_rgba(56,189,248,0.4)]"
-                : "bg-[#171f33] text-[#dae2fd] border-[#2d3449] hover:border-[#87929a] hover:bg-[#222a3d]"
+                ? "bg-primary-container text-on-primary border-primary shadow-[0_0_15px_rgba(56,189,248,0.4)]"
+                : "bg-surface-container text-[#dae2fd] border-[#2d3449] hover:border-[#87929a] hover:bg-[#222a3d]"
             }`}
           >
             <span>{tab.label}</span>
@@ -34,7 +34,7 @@ export const MissionFilterTabs = ({
             <span
               className={`text-[11px] font-black px-2 py-0.5 rounded-md transition-colors ${
                 isActive
-                  ? "bg-[#00354a] text-[#8ed5ff]"
+                  ? "bg-on-primary text-primary"
                   : "bg-[#0b1326] text-[#87929a]"
               }`}
             >

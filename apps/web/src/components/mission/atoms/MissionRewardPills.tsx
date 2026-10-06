@@ -19,11 +19,11 @@ export function MissionRewardPills({
 
   return (
     <div
-      className={`flex flex-wrap items-center gap-2 p-2.5 sm:p-3 rounded-xl bg-[#060e20]/90 border border-[#3e484f]/30 ${className}`}
+      className={`flex flex-wrap items-center gap-2 p-2.5 sm:p-3 rounded-xl bg-surface-container-lowest/90 border border-[#3e484f]/30 ${className}`}
     >
       {/* Total Tokens Pill */}
       <div
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#ffc640]/15 border border-[#ffc640]/30 text-[#ffc640] shadow-[0_0_12px_rgba(255,198,64,0.18)] ${
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/15 border border-[#ffc640]/30 text-secondary shadow-[0_0_12px_rgba(255,198,64,0.18)] ${
           isSm ? "text-xs" : "text-xs sm:text-sm"
         }`}
       >
@@ -34,7 +34,7 @@ export function MissionRewardPills({
           {coins.toLocaleString()} Fichas
         </span>
         {bonusPercent > 0 && (
-          <span className="text-[10px] font-bold px-1.5 py-0.2 bg-[#ffc640]/25 rounded text-[#ffc640] border border-[#ffc640]/40">
+          <span className="text-[10px] font-bold px-1.5 py-0.2 bg-secondary/25 rounded text-secondary border border-[#ffc640]/40">
             +{bonusPercent}%
           </span>
         )}
@@ -42,7 +42,7 @@ export function MissionRewardPills({
 
       {/* XP Pill */}
       <div
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#8ed5ff]/15 border border-[#8ed5ff]/30 text-[#8ed5ff] ${
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 border border-primary/30 text-primary ${
           isSm ? "text-xs" : "text-xs sm:text-sm"
         }`}
       >

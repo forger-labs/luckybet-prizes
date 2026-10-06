@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardWelcomeHeader } from "@/components/dashboard/DashboardWelcomeHeader";
-import { FeaturedMission } from "@/components/dashboard/FeaturedMission";
+import { FeaturedChestCard } from "@/components/dashboard/FeaturedChestCard";
 import { GamesSection } from "@/components/dashboard/games/GamesSection";
 import { LiveWinnersFeed } from "@/components/dashboard/LiveWinnersFeed";
 import { TrendingGames } from "@/components/dashboard/TrendingGames";
@@ -17,13 +17,13 @@ export default function DashboardPage() {
       {/* Welcome Banner */}
       <DashboardWelcomeHeader />
 
-      {/* User Status & Featured Hero Mission */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-gutter">
+      {/* User Status & Featured Hero Chest with Weekly/Monthly toggle */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-gutter items-stretch">
         <div className="lg:col-span-4">
           <UserStatusWidget status={userRank} isLoading={isLoadingUser} />
         </div>
-        <div className="lg:col-span-8 min-h-[320px]">
-          <FeaturedMission />
+        <div className="lg:col-span-8 min-h-[300px]">
+          <FeaturedChestCard />
         </div>
       </div>
 

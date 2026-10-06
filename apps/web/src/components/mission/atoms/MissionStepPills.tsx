@@ -30,11 +30,11 @@ export function MissionStepPills({
         let label = "Texto";
 
         if (isGamePlay) {
-          badgeStyle = "bg-[#8ed5ff]/15 text-[#8ed5ff] border-[#8ed5ff]/30";
+          badgeStyle = "bg-primary/15 text-primary border-primary/30";
           iconName = "sports_esports";
           label = "Juego LuckyBet";
         } else if (isImage) {
-          badgeStyle = "bg-[#ffc640]/15 text-[#ffc640] border-[#ffc640]/30";
+          badgeStyle = "bg-secondary/15 text-secondary border-[#ffc640]/30";
           iconName = "image";
           label = "Captura";
         }
@@ -55,7 +55,7 @@ export function MissionStepPills({
       })}
 
       {remainingCount > 0 && (
-        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-[#131b2e] text-[#87929a] border border-[#3e484f]/40">
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-surface-container-low text-[#87929a] border border-[#3e484f]/40">
           +{remainingCount} más
         </span>
       )}

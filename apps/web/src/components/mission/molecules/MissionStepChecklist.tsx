@@ -58,7 +58,7 @@ export const MissionStepChecklist = ({
           initial={{ width: 0 }}
           animate={{ width: `${progressPercent}%` }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="h-full rounded-full bg-[#38bdf8] shadow-[0_0_8px_#38bdf8]"
+          className="h-full rounded-full bg-primary-container shadow-[0_0_8px_#38bdf8]"
         />
       </div>
 
@@ -74,8 +74,8 @@ export const MissionStepChecklist = ({
               onClick={() => onToggleStep?.(step.id)}
               className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-150 flex items-center justify-between gap-4 cursor-pointer select-none ${
                 isDone
-                  ? "bg-[#131b2e] border-[#059669] text-white"
-                  : "bg-[#171f33] border-[#2d3449] hover:border-[#8ed5ff] hover:bg-[#222a3d]"
+                  ? "bg-surface-container-low border-[#059669] text-white"
+                  : "bg-surface-container border-[#2d3449] hover:border-primary hover:bg-[#222a3d]"
               }`}
             >
               <div className="flex items-center gap-3.5 flex-1 min-w-0">
@@ -84,7 +84,7 @@ export const MissionStepChecklist = ({
                   className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-colors shadow-sm ${
                     isDone
                       ? "bg-[#10b981] text-[#064e3b]"
-                      : "bg-[#00354a] text-[#8ed5ff] border border-[#38bdf8]"
+                      : "bg-on-primary text-primary border border-[#38bdf8]"
                   }`}
                 >
                   {isDone ? (
@@ -130,8 +130,8 @@ export const MissionStepChecklist = ({
 
       {/* Verification / Security note */}
       {verificationNote && (
-        <div className="p-3.5 rounded-xl bg-[#131b2e] border-2 border-[#2d3449] flex items-start gap-2.5">
-          <span className="material-symbols-outlined text-[#38bdf8] text-base shrink-0 mt-0.5">
+        <div className="p-3.5 rounded-xl bg-surface-container-low border-2 border-[#2d3449] flex items-start gap-2.5">
+          <span className="material-symbols-outlined text-primary-container text-base shrink-0 mt-0.5">
             verified_user
           </span>
           <p className="text-xs text-[#bdc8d1] leading-relaxed">

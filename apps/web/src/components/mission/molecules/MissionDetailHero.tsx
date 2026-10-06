@@ -42,11 +42,11 @@ export const MissionDetailHero = ({ mission }: Props) => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="relative overflow-hidden rounded-3xl border-2 border-[#2d3449] bg-[#171f33] shadow-[0_6px_35px_rgba(0,0,0,0.7)]"
+      className="relative overflow-hidden rounded-3xl border-2 border-[#2d3449] bg-surface-container shadow-[0_6px_35px_rgba(0,0,0,0.7)]"
     >
       {/* Hero Banner Image */}
       {imageUrl && (
-        <div className="relative w-full h-48 sm:h-60 bg-[#060e20] overflow-hidden border-b-2 border-[#2d3449]">
+        <div className="relative w-full h-48 sm:h-60 bg-surface-container-lowest overflow-hidden border-b-2 border-[#2d3449]">
           <Image
             src={imageUrl}
             alt={title}
@@ -55,9 +55,9 @@ export const MissionDetailHero = ({ mission }: Props) => {
             className="object-cover"
           />
           {/* Deep dark gradient overlay guarantees ultra-high contrast for countdown & category pills */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#171f33] via-black/45 to-black/75" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface-container via-black/45 to-black/75" />
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-3 z-10">
-            <span className="px-3.5 py-1.5 rounded-xl bg-[#060e20] border-2 border-white/40 text-white font-mono text-xs font-black uppercase tracking-wider shadow-[0_4px_16px_rgba(0,0,0,0.85)]">
+            <span className="px-3.5 py-1.5 rounded-xl bg-surface-container-lowest border-2 border-white/40 text-white font-mono text-xs font-black uppercase tracking-wider shadow-[0_4px_16px_rgba(0,0,0,0.85)]">
               {categoryLabel}
             </span>
             <MissionCountdown
@@ -73,8 +73,8 @@ export const MissionDetailHero = ({ mission }: Props) => {
         {/* Badges Row (if no cover image) */}
         {!imageUrl && (
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-[#00354a] text-[#8ed5ff] border-2 border-[#38bdf8]">
-              <BoltIcon className="w-3.5 h-3.5 text-[#8ed5ff]" />
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-on-primary text-primary border-2 border-[#38bdf8]">
+              <BoltIcon className="w-3.5 h-3.5 text-primary" />
               {categoryLabel}
             </span>
             <MissionCountdown
@@ -97,12 +97,12 @@ export const MissionDetailHero = ({ mission }: Props) => {
                 Completada
               </span>
             ) : isJoined ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-[#00354a] text-[#8ed5ff] border-2 border-[#38bdf8] shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-[#38bdf8] animate-pulse" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-on-primary text-primary border-2 border-[#38bdf8] shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-primary-container animate-pulse" />
                 En Curso
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-[#402d00] text-[#ffc640] border-2 border-[#e3aa00] shadow-sm">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-[#402d00] text-secondary border-2 border-[#e3aa00] shadow-sm">
                 Disponible
               </span>
             )}

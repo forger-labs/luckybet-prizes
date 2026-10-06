@@ -24,7 +24,7 @@ export const Sidebar = ({
 
   return (
     <aside
-      className={`hidden sticky md:grid left-0 top-0 pt-20 pb-6 grid-cols-1 grid-rows-[auto_1fr_auto] bg-surface-container-low/95 backdrop-blur-xl border-r border-white/5 min-h-dvh h-dvh transition-all duration-300 z-30 ${
+      className={`hidden sticky lg:grid left-0 top-0 pt-20 pb-6 grid-cols-1 grid-rows-[auto_1fr_auto] bg-surface-container-low/95 backdrop-blur-xl border-r border-white/5 min-h-dvh h-dvh transition-all duration-300 z-30 ${
         open ? "w-64" : "w-20"
       }`}
     >

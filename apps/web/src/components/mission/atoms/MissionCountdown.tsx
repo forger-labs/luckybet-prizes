@@ -106,9 +106,9 @@ export function MissionCountdown({
     if (type?.toLowerCase() === "fixed") {
       return (
         <span
-          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-[#060e20] text-[#dae2fd] border-2 border-[#3e484f] shadow-[0_4px_12px_rgba(0,0,0,0.7)] ${className}`}
+          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-surface-container-lowest text-[#dae2fd] border-2 border-[#3e484f] shadow-[0_4px_12px_rgba(0,0,0,0.7)] ${className}`}
         >
-          <span className="material-symbols-outlined text-sm text-[#8ed5ff]">
+          <span className="material-symbols-outlined text-sm text-primary">
             all_inclusive
           </span>
           <span>Permanente</span>
@@ -123,7 +123,7 @@ export function MissionCountdown({
 
   // Solid dark background for ultra-high contrast against any bright or light image background
   let badgeStyle =
-    "bg-[#060e20] text-[#8ed5ff] border-2 border-[#38bdf8] shadow-[0_4px_16px_rgba(0,0,0,0.85)]";
+    "bg-surface-container-lowest text-primary border-2 border-[#38bdf8] shadow-[0_4px_16px_rgba(0,0,0,0.85)]";
 
   if (isCritical) {
     badgeStyle =

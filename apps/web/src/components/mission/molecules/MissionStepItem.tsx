@@ -120,12 +120,12 @@ export function MissionStepItem({
     <div
       className={`p-5 sm:p-6 rounded-2xl border-2 transition-all duration-200 ${
         isApproved
-          ? "bg-[#131b2e] border-[#10b981]/50 shadow-sm"
+          ? "bg-surface-container-low border-[#10b981]/50 shadow-sm"
           : isRejected
-            ? "bg-[#171f33] border-[#ffb4ab] shadow-[0_0_20px_rgba(255,180,171,0.15)]"
+            ? "bg-surface-container border-[#ffb4ab] shadow-[0_0_20px_rgba(255,180,171,0.15)]"
             : isPending
-              ? "bg-[#171f33] border-[#ffc640]/60 shadow-[0_0_15px_rgba(255,198,64,0.15)]"
-              : "bg-[#171f33] border-[#2d3449] hover:border-[#8ed5ff]/60"
+              ? "bg-surface-container border-[#ffc640]/60 shadow-[0_0_15px_rgba(255,198,64,0.15)]"
+              : "bg-surface-container border-[#2d3449] hover:border-primary/60"
       }`}
     >
       {/* Step Header */}
@@ -138,8 +138,8 @@ export function MissionStepItem({
                 : isRejected
                   ? "bg-[#ffb4ab]/25 text-[#ffb4ab] border-2 border-[#ffb4ab]"
                   : isPending
-                    ? "bg-[#ffc640]/25 text-[#ffc640] border-2 border-[#ffc640]"
-                    : "bg-[#00354a] text-[#8ed5ff] border-2 border-[#38bdf8]"
+                    ? "bg-secondary/25 text-secondary border-2 border-[#ffc640]"
+                    : "bg-on-primary text-primary border-2 border-[#38bdf8]"
             }`}
           >
             {isApproved ? (
@@ -155,7 +155,7 @@ export function MissionStepItem({
                 Paso {step.stepOrder || stepIndex + 1}
               </span>
               <span className="text-[#3e484f]">•</span>
-              <span className="text-xs font-bold text-[#8ed5ff]">
+              <span className="text-xs font-bold text-primary">
                 {isGamePlay
                   ? "Juego LuckyBet"
                   : isImage
@@ -183,7 +183,7 @@ export function MissionStepItem({
             </span>
           )}
           {isPending && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-black text-[#ffc640] bg-[#402d00] px-3 py-1 rounded-xl border border-[#e3aa00] shadow-sm">
+            <span className="inline-flex items-center gap-1.5 text-xs font-black text-secondary bg-[#402d00] px-3 py-1 rounded-xl border border-[#e3aa00] shadow-sm">
               <span className="material-symbols-outlined text-sm animate-spin">
                 sync
               </span>{" "}
@@ -207,7 +207,7 @@ export function MissionStepItem({
       {/* GAME_PLAY Detailed Rules Breakdown */}
       {isGamePlay && cfg && (
         <div className="my-3.5 p-3.5 sm:p-4 rounded-xl bg-[#0b1326] border border-[#38bdf8]/30 space-y-2">
-          <div className="flex items-center gap-1.5 text-[#38bdf8] text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-1.5 text-primary-container text-xs font-bold uppercase tracking-wider">
             <span className="material-symbols-outlined text-sm">tune</span>
             <span>Condiciones Requeridas</span>
           </div>
@@ -215,7 +215,7 @@ export function MissionStepItem({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
             {/* Specific Game Mode */}
             {isSpecificGame && (
-              <div className="p-2.5 rounded-lg bg-[#171f33] border border-[#2d3449] space-y-0.5">
+              <div className="p-2.5 rounded-lg bg-surface-container border border-[#2d3449] space-y-0.5">
                 <span className="text-[11px] text-[#94a3b8] font-medium block">
                   Juego Asignado
                 </span>
@@ -227,11 +227,11 @@ export function MissionStepItem({
 
             {/* Provider Flow: Provider Name */}
             {isProviderFlow && (
-              <div className="p-2.5 rounded-lg bg-[#171f33] border border-[#2d3449] space-y-0.5">
+              <div className="p-2.5 rounded-lg bg-surface-container border border-[#2d3449] space-y-0.5">
                 <span className="text-[11px] text-[#94a3b8] font-medium block">
                   Proveedor
                 </span>
-                <span className="text-xs font-bold text-[#8ed5ff] truncate block">
+                <span className="text-xs font-bold text-primary truncate block">
                   {provider}
                 </span>
               </div>
@@ -239,18 +239,18 @@ export function MissionStepItem({
 
             {/* Provider Flow: Min Unique Games */}
             {isProviderFlow && (
-              <div className="p-2.5 rounded-lg bg-[#171f33] border border-[#2d3449] space-y-0.5">
+              <div className="p-2.5 rounded-lg bg-surface-container border border-[#2d3449] space-y-0.5">
                 <span className="text-[11px] text-[#94a3b8] font-medium block">
                   Juegos Distintos
                 </span>
-                <span className="text-xs font-bold text-[#ffc640] block">
+                <span className="text-xs font-bold text-secondary block">
                   Mínimo {minUniqueGames ?? 1} juego(s)
                 </span>
               </div>
             )}
 
             {/* Min Bet Amount (Shown for both) */}
-            <div className="p-2.5 rounded-lg bg-[#171f33] border border-[#2d3449] space-y-0.5">
+            <div className="p-2.5 rounded-lg bg-surface-container border border-[#2d3449] space-y-0.5">
               <span className="text-[11px] text-[#94a3b8] font-medium block">
                 Apuesta Mínima
               </span>
@@ -303,7 +303,7 @@ export function MissionStepItem({
               <button
                 type="submit"
                 disabled={loading || isPending}
-                className="px-5 py-2.5 rounded-xl bg-[#38bdf8] hover:bg-[#7bd0ff] disabled:opacity-40 text-[#00354a] font-black text-xs sm:text-sm transition-all border border-[#8ed5ff] cursor-pointer inline-flex items-center gap-2 shrink-0 shadow-md"
+                className="px-5 py-2.5 rounded-xl bg-primary-container hover:bg-[#7bd0ff] disabled:opacity-40 text-on-primary font-black text-xs sm:text-sm transition-all border border-primary cursor-pointer inline-flex items-center gap-2 shrink-0 shadow-md"
               >
                 <span className="material-symbols-outlined text-sm">
                   {loading ? "sync" : "sports_esports"}
@@ -335,7 +335,7 @@ export function MissionStepItem({
                 <button
                   type="submit"
                   disabled={loading || isPending || !textValue.trim()}
-                  className="px-5 py-2.5 rounded-xl bg-[#38bdf8] hover:bg-[#7bd0ff] disabled:opacity-40 text-[#00354a] font-black text-xs sm:text-sm transition-all border border-[#8ed5ff] cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 shadow-md"
+                  className="px-5 py-2.5 rounded-xl bg-primary-container hover:bg-[#7bd0ff] disabled:opacity-40 text-on-primary font-black text-xs sm:text-sm transition-all border border-primary cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 shadow-md"
                 >
                   <span className="material-symbols-outlined text-sm">
                     send
@@ -380,7 +380,7 @@ export function MissionStepItem({
                     className="object-cover"
                   />
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-xs font-bold text-white bg-[#171f33]/90 px-3 py-1.5 rounded-xl border border-white/20">
+                    <span className="text-xs font-bold text-white bg-surface-container/90 px-3 py-1.5 rounded-xl border border-white/20">
                       Captura actual en revisión
                     </span>
                   </div>
@@ -407,7 +407,7 @@ export function MissionStepItem({
                       type="button"
                       disabled={loading || isPending}
                       onClick={() => fileInputRef.current?.click()}
-                      className="text-xs text-[#38bdf8] hover:underline font-bold cursor-pointer block"
+                      className="text-xs text-primary-container hover:underline font-bold cursor-pointer block"
                     >
                       Cambiar imagen
                     </button>
@@ -415,7 +415,7 @@ export function MissionStepItem({
                   <button
                     type="submit"
                     disabled={loading || isPending}
-                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#38bdf8] hover:bg-[#7bd0ff] disabled:opacity-40 text-[#00354a] font-black text-xs sm:text-sm transition-all border border-[#8ed5ff] cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 shadow-md"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary-container hover:bg-[#7bd0ff] disabled:opacity-40 text-on-primary font-black text-xs sm:text-sm transition-all border border-primary cursor-pointer inline-flex items-center justify-center gap-1.5 shrink-0 shadow-md"
                   >
                     <span className="material-symbols-outlined text-sm">
                       upload
@@ -439,11 +439,11 @@ export function MissionStepItem({
                   onDrop={handleDrop}
                   className={`w-full p-6 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2.5 cursor-pointer text-center select-none ${
                     isDragging
-                      ? "bg-[#00354a]/40 border-[#38bdf8] shadow-[0_0_20px_rgba(56,189,248,0.25)]"
-                      : "bg-[#0b1326] border-[#3e484f] hover:border-[#38bdf8] hover:bg-[#060e20]"
+                      ? "bg-on-primary/40 border-[#38bdf8] shadow-[0_0_20px_rgba(56,189,248,0.25)]"
+                      : "bg-[#0b1326] border-[#3e484f] hover:border-[#38bdf8] hover:bg-surface-container-lowest"
                   }`}
                 >
-                  <div className="w-12 h-12 rounded-xl bg-[#171f33] border border-[#3e484f] flex items-center justify-center text-[#38bdf8] shadow-sm">
+                  <div className="w-12 h-12 rounded-xl bg-surface-container border border-[#3e484f] flex items-center justify-center text-primary-container shadow-sm">
                     <span className="material-symbols-outlined text-2xl">
                       add_photo_alternate
                     </span>
@@ -451,7 +451,7 @@ export function MissionStepItem({
                   <div>
                     <p className="font-(--font-plus-jakarta-sans) text-xs sm:text-sm font-bold text-[#f8fafc]">
                       Arrastra tu imagen aquí o{" "}
-                      <span className="text-[#38bdf8] underline font-bold">
+                      <span className="text-primary-container underline font-bold">
                         selecciona un archivo
                       </span>
                     </p>

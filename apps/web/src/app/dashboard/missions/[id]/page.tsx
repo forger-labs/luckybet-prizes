@@ -316,7 +316,7 @@ export default function MissionDetailPage() {
         <button
           type="button"
           onClick={() => router.push("/dashboard/missions")}
-          className="px-5 py-2.5 rounded-xl bg-[#38bdf8] text-[#00354a] font-bold text-sm cursor-pointer"
+          className="px-5 py-2.5 rounded-xl bg-primary-container text-on-primary font-bold text-sm cursor-pointer"
         >
           Volver al listado
         </button>
@@ -331,10 +331,10 @@ export default function MissionDetailPage() {
         <button
           type="button"
           onClick={() => router.push("/dashboard/missions")}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-[#f8fafc] hover:text-[#38bdf8] transition-colors cursor-pointer group"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-[#f8fafc] hover:text-primary-container transition-colors cursor-pointer group"
         >
-          <div className="w-9 h-9 rounded-xl bg-[#171f33] border-2 border-[#2d3449] flex items-center justify-center group-hover:border-[#38bdf8] group-hover:bg-[#222a3d] transition-all shadow-sm">
-            <ChevronLeftIcon className="w-4 h-4 text-white group-hover:text-[#38bdf8] transition-colors" />
+          <div className="w-9 h-9 rounded-xl bg-surface-container border-2 border-[#2d3449] flex items-center justify-center group-hover:border-[#38bdf8] group-hover:bg-[#222a3d] transition-all shadow-sm">
+            <ChevronLeftIcon className="w-4 h-4 text-white group-hover:text-primary-container transition-colors" />
           </div>
           <span>Volver a Misiones</span>
         </button>
@@ -350,7 +350,7 @@ export default function MissionDetailPage() {
       {/* Grid: Step Progression List + Action Sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: Step Checklist & Forms (8 cols) */}
-        <div className="lg:col-span-8 p-6 sm:p-7 rounded-3xl bg-[#171f33] border-2 border-[#2d3449] shadow-[0_4px_25px_rgba(0,0,0,0.5)] space-y-5">
+        <div className="lg:col-span-8 p-6 sm:p-7 rounded-3xl bg-surface-container border-2 border-[#2d3449] shadow-[0_4px_25px_rgba(0,0,0,0.5)] space-y-5">
           <div className="flex items-center justify-between pb-3 border-b border-[#2d3449]">
             <div>
               <h3 className="font-(--font-plus-jakarta-sans) text-base sm:text-lg font-black text-[#f8fafc]">
@@ -360,7 +360,7 @@ export default function MissionDetailPage() {
                 Completa cada paso para desbloquear tu recompensa
               </p>
             </div>
-            <span className="px-3 py-1 rounded-xl bg-[#00354a] text-[#8ed5ff] text-xs font-mono font-bold border border-[#38bdf8]/40">
+            <span className="px-3 py-1 rounded-xl bg-on-primary text-primary text-xs font-mono font-bold border border-primary-container/40">
               {missionDetail.completedStepsCount}/
               {missionDetail.totalStepsCount} ({missionDetail.progressPercent}%)
             </span>
@@ -383,16 +383,16 @@ export default function MissionDetailPage() {
 
         {/* Right: Actions CTA Card (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="p-6 rounded-3xl bg-[#171f33] border-2 border-[#ffc640]/50 shadow-[0_4px_25px_rgba(0,0,0,0.5),0_0_15px_rgba(255,198,64,0.15)] space-y-4">
-            <div className="flex items-center gap-2 text-[#ffc640]">
-              <SparklesIcon className="w-4 h-4 text-[#ffc640]" />
+          <div className="p-6 rounded-3xl bg-surface-container border-2 border-secondary/50 shadow-[0_4px_25px_rgba(0,0,0,0.5),0_0_15px_rgba(255,198,64,0.15)] space-y-4">
+            <div className="flex items-center gap-2 text-secondary">
+              <SparklesIcon className="w-4 h-4 text-secondary" />
               <span className="text-xs uppercase font-black tracking-wider">
                 Recompensa del Casino
               </span>
             </div>
 
             <div className="space-y-1">
-              <p className="font-(--font-plus-jakarta-sans) text-2xl sm:text-3xl font-black text-[#ffc640] tracking-tight">
+              <p className="font-(--font-plus-jakarta-sans) text-2xl sm:text-3xl font-black text-secondary tracking-tight">
                 +{missionDetail.totalCoins.toLocaleString("es-ES")} Fichas
               </p>
               <p className="text-xs text-[#dae2fd] font-medium leading-relaxed">
@@ -410,9 +410,9 @@ export default function MissionDetailPage() {
                   whileTap={{ scale: 0.98 }}
                   disabled={actionLoading}
                   onClick={handleStartMission}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-[#38bdf8] hover:bg-[#7bd0ff] text-[#00354a] font-(--font-plus-jakarta-sans) text-sm sm:text-base font-black border-2 border-[#8ed5ff] shadow-lg transition-all text-center flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3.5 px-6 rounded-2xl bg-primary-container hover:bg-[#7bd0ff] text-on-primary font-(--font-plus-jakarta-sans) text-sm sm:text-base font-black border-2 border-primary shadow-lg transition-all text-center flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  <BoltIcon className="w-4 h-4 text-[#00354a]" />
+                  <BoltIcon className="w-4 h-4 text-on-primary" />
                   <span>
                     {actionLoading ? "Iniciando..." : "Comenzar Misión"}
                   </span>
@@ -427,9 +427,9 @@ export default function MissionDetailPage() {
                   whileTap={{ scale: 0.98 }}
                   disabled={actionLoading}
                   onClick={handleClaimReward}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-[#ffc640] hover:bg-[#ffdf9f] text-[#402d00] font-(--font-plus-jakarta-sans) text-sm sm:text-base font-black border-2 border-[#ffdf9f] shadow-[0_0_20px_rgba(255,198,64,0.35)] transition-all text-center flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="w-full py-3.5 px-6 rounded-2xl bg-secondary hover:bg-[#ffdf9f] text-on-secondary font-(--font-plus-jakarta-sans) text-sm sm:text-base font-black border-2 border-[#ffdf9f] shadow-[0_0_20px_rgba(255,198,64,0.35)] transition-all text-center flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
-                  <SparklesIcon className="w-4 h-4 text-[#402d00]" />
+                  <SparklesIcon className="w-4 h-4 text-on-secondary" />
                   <span>
                     {actionLoading ? "Reclamando..." : "Reclamar Recompensa"}
                   </span>
@@ -457,9 +457,9 @@ export default function MissionDetailPage() {
           </div>
 
           {/* Security / Tips Box */}
-          <div className="p-5 rounded-2xl bg-[#131b2e] border-2 border-[#2d3449] text-xs text-[#dae2fd] space-y-1.5">
+          <div className="p-5 rounded-2xl bg-surface-container-low border-2 border-[#2d3449] text-xs text-[#dae2fd] space-y-1.5">
             <p className="font-bold text-[#f8fafc] flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-sm text-[#38bdf8]">
+              <span className="material-symbols-outlined text-sm text-primary-container">
                 verified
               </span>
               Validación de Pasos

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { casinoToast } from "@shared/utils/casinoToast";
 
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { FeaturedChestCard } from "@/components/dashboard/FeaturedChestCard";
 import { MissionCard } from "@/components/mission/molecules/MissionCard";
 import { MissionFilterTabs } from "@/components/mission/molecules/MissionFilterTabs";
 import { MissionStatsBar } from "@/components/mission/molecules/MissionStatsBar";
@@ -77,7 +78,6 @@ export default function MissionsPage() {
       const myMissionsMap = new Map<number, UserMissionWithSteps>();
       if (myMissionsRes.status && Array.isArray(myMissionsRes.data)) {
         for (const userMission of myMissionsRes.data) {
-          // Keep the latest or existing user mission
           myMissionsMap.set(userMission.missionId, userMission);
         }
       }
@@ -236,8 +236,15 @@ export default function MissionsPage() {
       {/* Header Banner */}
       <DashboardHeader />
 
+      {/* Featured Active Chest Hero Banner with Weekly/Monthly toggle */}
+      <div className="flex gap-4 md:gap-2 flex-col md:flex-row items-stretch justify-between">
+        <MissionStatsBar stats={stats} />
+        <div className="w-full min-h-[300px]">
+          <FeaturedChestCard />
+        </div>
+      </div>
+
       {/* Solid Casino Stats Bar */}
-      <MissionStatsBar stats={stats} />
 
       {/* Filter and Countdown Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
@@ -248,10 +255,10 @@ export default function MissionsPage() {
         />
 
         {/* Casino Countdown Timer Pill */}
-        <div className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2 rounded-xl bg-[#171f33] border-2 border-[#38bdf8]/40 shadow-md">
-          <ClockIcon className="w-4 h-4 text-[#38bdf8]" />
+        <div className="inline-flex items-center gap-2 self-start sm:self-auto px-4 py-2 rounded-xl bg-surface-container border-2 border-primary-container/40 shadow-md">
+          <ClockIcon className="w-4 h-4 text-primary-container" />
           <span className="text-xs text-[#bdc8d1] font-bold">Reinicio en:</span>
-          <span className="font-(--font-plus-jakarta-sans) text-xs sm:text-sm font-black text-[#8ed5ff] tracking-wider font-mono">
+          <span className="font-(--font-plus-jakarta-sans) text-xs sm:text-sm font-black text-primary tracking-wider font-mono">
             {formatTime(hour, minute, second)}
           </span>
         </div>
@@ -284,7 +291,7 @@ export default function MissionsPage() {
       )}
 
       {!loading && filteredMissions.length === 0 && (
-        <div className="text-center py-16 px-4 rounded-2xl bg-[#171f33] border-2 border-[#2d3449]">
+        <div className="text-center py-16 px-4 rounded-2xl bg-surface-container border-2 border-[#2d3449]">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#222a3d] flex items-center justify-center text-[#87929a]">
             <SparklesIcon className="w-8 h-8 opacity-40" />
           </div>

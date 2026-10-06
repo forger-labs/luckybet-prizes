@@ -14,6 +14,12 @@ import type {
 } from "@shared/types/http";
 
 import { API_URL, LOCAL_STORAGE_KEYS } from "@/constant";
+import type {
+  GetPlayerChestsProgressQuery,
+  PlayerChestClaimResponse,
+  PlayerChestJoinResponse,
+  PlayerChestProgressItem,
+} from "@/types/chests";
 import type { LuckyBetGameItem } from "@/types/luckybet";
 import type {
   GetMyMissionsQuery,
@@ -531,6 +537,106 @@ export class ApiWebGanaya {
       return null;
     } catch {
       return null;
+    }
+  }
+
+  // ── Player Chests Endpoints ──
+
+  async getPlayerChestsProgress(
+    params?: GetPlayerChestsProgressQuery,
+  ): Promise<ApiResponse<PlayerChestProgressItem[]>> {
+    const result: ApiResponse<PlayerChestProgressItem[]> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      let url = "/player-chests/progress";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.periodType) {
+          searchParams.append("periodType", params.periodType);
+        }
+        if (params.chestId !== undefined && params.chestId !== null) {
+          searchParams.append("chestId", params.chestId.toString());
+        }
+        const queryString = searchParams.toString();
+        if (queryString) url += `?${queryString}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as ApiResponse<PlayerChestProgressItem[]>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getPlayerChestProgressById(
+    chestId: number,
+  ): Promise<ApiResponse<PlayerChestProgressItem>> {
+    const result: ApiResponse<PlayerChestProgressItem> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: `/player-chests/${chestId}/progress`,
+      });
+      const response = data as ApiResponse<PlayerChestProgressItem>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async joinPlayerChest(
+    chestId: number,
+  ): Promise<ApiResponse<PlayerChestJoinResponse>> {
+    const result: ApiResponse<PlayerChestJoinResponse> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/player-chests/${chestId}/join`,
+      });
+      const response = data as ApiResponse<PlayerChestJoinResponse>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async claimPlayerChest(
+    chestId: number,
+  ): Promise<ApiResponse<PlayerChestClaimResponse>> {
+    const result: ApiResponse<PlayerChestClaimResponse> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.post({
+        url: `/player-chests/${chestId}/claim`,
+      });
+      const response = data as ApiResponse<PlayerChestClaimResponse>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
     }
   }
 }

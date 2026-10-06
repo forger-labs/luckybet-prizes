@@ -6,7 +6,7 @@ export function MissionsGridSkeleton() {
       {[1, 2, 3, 4, 5, 6].map((idx) => (
         <div
           key={idx}
-          className="rounded-2xl bg-[#171f33] border-2 border-[#2d3449] overflow-hidden p-5 sm:p-6 flex flex-col justify-between animate-pulse min-h-[380px]"
+          className="rounded-2xl bg-surface-container border-2 border-[#2d3449] overflow-hidden p-5 sm:p-6 flex flex-col justify-between animate-pulse min-h-[380px]"
         >
           <div>
             <div className="flex items-center justify-between gap-3 mb-4">
@@ -14,19 +14,19 @@ export function MissionsGridSkeleton() {
               <div className="w-24 h-6 rounded-lg bg-[#222a3d]" />
             </div>
 
-            <div className="w-full h-36 rounded-xl bg-[#131b2e] mb-4" />
+            <div className="w-full h-36 rounded-xl bg-surface-container-low mb-4" />
 
             <div className="w-3/4 h-6 rounded-md bg-[#222a3d] mb-2" />
             <div className="w-full h-4 rounded-md bg-[#222a3d] mb-4" />
 
-            <div className="w-full h-12 rounded-xl bg-[#060e20] mb-4" />
+            <div className="w-full h-12 rounded-xl bg-surface-container-lowest mb-4" />
 
             <div className="space-y-2 mb-4">
               <div className="flex justify-between">
                 <div className="w-16 h-3 rounded bg-[#222a3d]" />
                 <div className="w-8 h-3 rounded bg-[#222a3d]" />
               </div>
-              <div className="w-full h-2 rounded-full bg-[#060e20]" />
+              <div className="w-full h-2 rounded-full bg-surface-container-lowest" />
             </div>
           </div>
 

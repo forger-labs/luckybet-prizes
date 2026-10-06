@@ -85,19 +85,16 @@ export const MissionCard = ({ mission, onStart }: Props) => {
       transition={{ duration: 0.15 }}
       className={`relative h-full flex flex-col justify-between rounded-2xl border-2 transition-all duration-200 overflow-hidden select-none ${
         completed
-          ? "bg-[#131b2e] border-[#10b981]/50 opacity-85 shadow-md"
+          ? "bg-surface-container-low border-[#10b981]/50 opacity-85 shadow-md"
           : isJoined
-            ? "bg-[#171f33] border-[#38bdf8] shadow-[0_6px_25px_rgba(0,0,0,0.6),0_0_15px_rgba(56,189,248,0.2)] hover:border-[#8ed5ff]"
-            : "bg-[#171f33] border-[#2d3449] hover:border-[#38bdf8] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:shadow-[0_6px_25px_rgba(0,0,0,0.7),0_0_18px_rgba(56,189,248,0.25)]"
+            ? "bg-surface-container border-[#38bdf8] shadow-[0_6px_25px_rgba(0,0,0,0.6),0_0_15px_rgba(56,189,248,0.2)] hover:border-primary"
+            : "bg-surface-container border-[#2d3449] hover:border-[#38bdf8] shadow-[0_4px_20px_rgba(0,0,0,0.5)] hover:shadow-[0_6px_25px_rgba(0,0,0,0.7),0_0_18px_rgba(56,189,248,0.25)]"
       }`}
     >
-      {/* Top Accent Line */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#38bdf8] via-[#ffc640] to-[#38bdf8] opacity-95 z-20" />
-
       {/* Top Header / Cover Image Banner */}
       <div>
         {coverImage ? (
-          <div className="relative w-full h-36 sm:h-40 bg-[#060e20] overflow-hidden border-b-2 border-[#2d3449]">
+          <div className="relative w-full h-36 sm:h-40 bg-surface-container-lowest overflow-hidden border-b-2 border-[#2d3449]">
             <Image
               src={coverImage}
               alt={title}
@@ -106,9 +103,9 @@ export const MissionCard = ({ mission, onStart }: Props) => {
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
             {/* Dark gradient overlay to secure contrast regardless of image brightness */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#171f33] via-black/40 to-black/70" />
+            <div className="absolute inset-0 bg-linear-to-t from-surface-container via-black/40 to-black/70" />
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
-              <span className="px-3 py-1 rounded-xl bg-[#060e20] border-2 border-white/40 text-white font-mono text-[11px] font-black uppercase tracking-wider shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+              <span className="px-3 py-1 rounded-xl bg-surface-container-lowest border-2 border-white/40 text-white font-mono text-[11px] font-black uppercase tracking-wider shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
                 {categoryLabel}
               </span>
               {isClientMission && (
@@ -136,7 +133,7 @@ export const MissionCard = ({ mission, onStart }: Props) => {
                 }
                 size="md"
               />
-              <span className="px-3 py-1 rounded-xl bg-[#060e20] border-2 border-[#3e484f] text-[#f8fafc] font-mono text-xs font-black uppercase tracking-wider shadow-sm">
+              <span className="px-3 py-1 rounded-xl bg-surface-container-lowest border-2 border-[#3e484f] text-[#f8fafc] font-mono text-xs font-black uppercase tracking-wider shadow-sm">
                 {categoryLabel}
               </span>
             </div>
@@ -160,7 +157,7 @@ export const MissionCard = ({ mission, onStart }: Props) => {
             className={`font-(--font-plus-jakarta-sans) text-base sm:text-lg font-bold mb-1.5 tracking-tight leading-snug line-clamp-1 ${
               completed
                 ? "text-[#94a3b8] line-through"
-                : "text-[#f8fafc] group-hover:text-[#8ed5ff] transition-colors"
+                : "text-[#f8fafc] group-hover:text-primary transition-colors"
             }`}
           >
             {title}
@@ -189,17 +186,17 @@ export const MissionCard = ({ mission, onStart }: Props) => {
                 <span className="text-[#94a3b8] uppercase tracking-wider">
                   Objetivos ({steps.length})
                 </span>
-                <span className="text-[#38bdf8] font-mono">
+                <span className="text-primary-container font-mono">
                   {progressPercent}%
                 </span>
               </div>
 
-              <div className="w-full h-2.5 rounded-full bg-[#060e20] border border-[#3e484f] overflow-hidden p-0.5 shadow-inner">
+              <div className="w-full h-2.5 rounded-full bg-surface-container-lowest border border-[#3e484f] overflow-hidden p-0.5 shadow-inner">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
                   transition={{ duration: 0.5, ease: "easeOut" }}
-                  className="h-full rounded-full bg-[#38bdf8] shadow-[0_0_10px_#38bdf8]"
+                  className="h-full rounded-full bg-primary-container shadow-[0_0_10px_#38bdf8]"
                 />
               </div>
 
