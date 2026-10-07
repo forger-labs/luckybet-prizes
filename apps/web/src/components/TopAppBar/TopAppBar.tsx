@@ -36,7 +36,7 @@ export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {
       </div>
 
       {/* Right Desktop Nav actions */}
-      <div className="hidden md:flex items-center gap-4">
+      <div className="hidden lg:flex items-center gap-4">
         <Balance />
 
         {/* Notifications Icon Button */}
@@ -74,7 +74,7 @@ export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {
       </div>
 
       {/* Mobile Right Controls: Balance + Hamburger */}
-      <div className="flex md:hidden items-center gap-2">
+      <div className="flex lg:hidden items-center gap-2">
         <Balance />
         <motion.button
           whileTap={{ scale: 0.92 }}
