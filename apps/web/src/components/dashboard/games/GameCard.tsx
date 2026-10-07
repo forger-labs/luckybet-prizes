@@ -26,7 +26,6 @@ export const GameCard = ({
     emerald: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
     purple: "bg-tertiary/20 text-tertiary border-tertiary/40",
   };
-  console.log('gamecard')
 
   const handleCardRedirect = useCallback(async () => {
     if (!token) {
@@ -56,6 +55,7 @@ export const GameCard = ({
 
   return (
     <motion.div
+      onClick={handleCardRedirect}
       whileHover={{ y: -6, transition: { duration: 0.25 } }}
       className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-xl cursor-pointer bg-surface-container"
     >
