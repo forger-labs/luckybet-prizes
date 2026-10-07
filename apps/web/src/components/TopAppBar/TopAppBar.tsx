@@ -8,7 +8,6 @@ import { ROUTES } from "@shared/constants";
 import { OpenMenu } from "@shared/icons/OpenMenu";
 
 import { useAuthContext } from "@/hooks/useAuth";
-import { BellIcon, SparklesIcon } from "@/icons";
 import { Balance } from "./Balance";
 
 export const TopAppBar = ({ onMenuToggle }: { onMenuToggle?: () => void }) => {

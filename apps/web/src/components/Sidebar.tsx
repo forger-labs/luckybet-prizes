@@ -7,7 +7,7 @@ import { PUBLIC_LINKS } from "@shared/constants";
 import { Stars } from "@shared/icons/Stars";
 
 import { useAuthContext } from "@/hooks/useAuth";
-import { ChevronLeftIcon, SparklesIcon } from "@/icons";
+import { ChevronLeftIcon } from "@/icons";
 import { ItemSidebar } from "./ItemSidebar";
 import { Logout } from "./Logout";
 
@@ -55,7 +55,7 @@ export const Sidebar = ({
         >
           <motion.div
             whileHover={{ rotate: 12, scale: 1.05 }}
-            className="p-2 bg-gradient-to-br from-secondary to-secondary-container rounded-xl flex-shrink-0 shadow-md glow-gold-sm"
+            className="p-2 bg-linear-to-br from-secondary to-secondary-container rounded-xl shrink-0 shadow-md glow-gold-sm"
           >
             <Stars height={24} width={24} />
           </motion.div>
@@ -69,7 +69,7 @@ export const Sidebar = ({
                 className="overflow-hidden whitespace-nowrap"
               >
                 <div className="flex items-center gap-1.5">
-                  <p className="font-title-md text-sm font-bold text-on-surface tracking-tight truncate max-w-[130px]">
+                  <p className="font-title-md text-sm font-bold text-on-surface tracking-tight truncate max-w-32.5">
                     {displayName}
                   </p>
                 </div>
