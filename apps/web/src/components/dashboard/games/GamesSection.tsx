@@ -6,6 +6,8 @@ import Link from "next/link";
 import { SparklesIcon } from "@/icons";
 import type { GameItem } from "@/types/dashboard";
 import { GameCard } from "./GameCard";
+import { useAuthContext } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
 
 interface GamesSectionProps {
   games?: GameItem[];
@@ -18,6 +20,21 @@ export const GamesSection = ({
   isFallback = false,
   isLoading = false,
 }: GamesSectionProps) => {
+  const { token } = useAuthContext()
+
+  const [mobile, setMobile] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setMobile(window.innerWidth < 900) // Luckybet breakpoint for mobile games
+    }
+
+    handleResize() // Set initial state
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
   return (
     <section className="space-y-4">
       {/* Section Header */}
@@ -103,7 +120,7 @@ export const GamesSection = ({
                 ease: [0.25, 1, 0.5, 1],
               }}
             >
-              <GameCard {...game} />
+              <GameCard {...game} token={token} mobile={mobile} />
             </motion.div>
           ))}
         </div>

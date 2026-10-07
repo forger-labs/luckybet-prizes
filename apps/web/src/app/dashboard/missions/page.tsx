@@ -11,7 +11,7 @@ import { MissionCard } from "@/components/mission/molecules/MissionCard";
 import { MissionFilterTabs } from "@/components/mission/molecules/MissionFilterTabs";
 import { MissionStatsBar } from "@/components/mission/molecules/MissionStatsBar";
 import { MissionsGridSkeleton } from "@/components/mission/molecules/MissionsGridSkeleton";
-import { ClockIcon, SparklesIcon } from "@/icons";
+import { SparklesIcon } from "@/icons";
 import { webApi } from "@/libs/apiWebGanaya";
 import type {
   ClientMission,
@@ -20,18 +20,6 @@ import type {
   MissionStatsSummary,
 } from "@/types/missions";
 import type { UserMissionWithSteps } from "@/types/player";
-
-const INTERVAL_IN_MILLISECONDS = 1000;
-const DAY_HOURS = 24;
-const HOURS_IN_SECONDS = 60;
-const MINUTES_IN_SECONDS = 60;
-
-const formatTime = (hour: number, minute: number, second: number) => {
-  const h = hour.toString().padStart(2, "0");
-  const m = minute.toString().padStart(2, "0");
-  const s = second.toString().padStart(2, "0");
-  return `${h}:${m}:${s}`;
-};
 
 const TYPE_TO_CATEGORY: Record<string, Exclude<MissionCategory, "all">> = {
   DAILY: "daily",
@@ -44,27 +32,6 @@ export default function MissionsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] =
     useState<MissionCategory>("all");
-  const [hour, setHour] = useState(24);
-  const [minute, setMinute] = useState(0);
-  const [second, setSecond] = useState(0);
-
-  // ── Live 24h Countdown ──
-  useEffect(() => {
-    const updateCountdown = () => {
-      const date = new Date();
-      const hours = DAY_HOURS - date.getUTCHours() - 1;
-      const minutes = MINUTES_IN_SECONDS - date.getUTCMinutes() - 1;
-      const seconds = HOURS_IN_SECONDS - date.getUTCSeconds() - 1;
-
-      setHour(Math.max(0, hours));
-      setMinute(Math.max(0, minutes));
-      setSecond(Math.max(0, seconds));
-    };
-
-    updateCountdown();
-    const timer = setInterval(updateCountdown, INTERVAL_IN_MILLISECONDS);
-    return () => clearInterval(timer);
-  }, []);
 
   // ── Parallel Data Fetching & Deduplication ──
   const loadMissionsData = useCallback(async () => {

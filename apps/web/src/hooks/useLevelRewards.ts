@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { casinoToast } from "@shared/utils/casinoToast";
 import type { BackendLevel } from "@shared/types";
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { webApi } from "@/libs/apiWebGanaya";
 import type {
@@ -89,10 +89,11 @@ export function useLevelRewards(options?: UseLevelRewardsOptions) {
   const nextReward = pendingRewards.length > 0 ? pendingRewards[0] : null;
   const pendingCount = pendingRewards.length;
   const nextLevel = nextReward
-    ? levelsMap[nextReward.levelId] ?? nextReward.level
+    ? (levelsMap[nextReward.levelId] ?? nextReward.level)
     : null;
 
-  const nextLevelName = nextLevel?.name ?? (nextReward ? `Nivel ${nextReward.levelId}` : "");
+  const nextLevelName =
+    nextLevel?.name ?? (nextReward ? `Nivel ${nextReward.levelId}` : "");
   const nextLevelImage = nextLevel?.image ?? null;
 
   const calculatedCoinsForNext = nextReward
@@ -151,7 +152,8 @@ export function useLevelRewards(options?: UseLevelRewardsOptions) {
       } catch {
         casinoToast.error({
           title: "Error de conexión",
-          description: "No se pudo conectar con el servidor para reclamar el premio",
+          description:
+            "No se pudo conectar con el servidor para reclamar el premio",
         });
         return false;
       } finally {
@@ -183,8 +185,8 @@ export function useLevelRewards(options?: UseLevelRewardsOptions) {
   const subsequentPendingReward =
     pendingRewards.length > 0 ? pendingRewards[0] : null;
   const subsequentLevel = subsequentPendingReward
-    ? levelsMap[subsequentPendingReward.levelId] ??
-      subsequentPendingReward.level
+    ? (levelsMap[subsequentPendingReward.levelId] ??
+      subsequentPendingReward.level)
     : null;
   const subsequentLevelName =
     subsequentLevel?.name ??

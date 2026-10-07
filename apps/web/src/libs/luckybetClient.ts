@@ -123,6 +123,21 @@ export class LuckyBetClient {
       token,
     });
   }
+
+  async openGame(
+    token: string,
+    gameId: string,
+    mobile: boolean,
+  ): Promise<LuckyBetResponse<{ url: string }>> {
+    return this.executeCommand<
+      { token: string; gameId: string },
+      { url: string }
+    >("gameOpen", {
+      token,
+      gameId,
+      mobile: mobile ? 1 : 0,
+    });
+  }
 }
 
 export const luckybetClient = new LuckyBetClient();

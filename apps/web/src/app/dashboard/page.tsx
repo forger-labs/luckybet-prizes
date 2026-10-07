@@ -3,8 +3,7 @@
 import { DashboardWelcomeHeader } from "@/components/dashboard/DashboardWelcomeHeader";
 import { FeaturedChestCard } from "@/components/dashboard/FeaturedChestCard";
 import { GamesSection } from "@/components/dashboard/games/GamesSection";
-import { LiveWinnersFeed } from "@/components/dashboard/LiveWinnersFeed";
-import { TrendingGames } from "@/components/dashboard/TrendingGames";
+import { LeaderboardWidget } from "@/components/dashboard/leaderboard";
 import { UserStatusWidget } from "@/components/dashboard/UserStatusWidget";
 import { LevelUpCelebrationModal } from "@/components/levels/LevelUpCelebrationModal";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -72,11 +71,10 @@ export default function DashboardPage() {
         isLoading={isLoadingGames}
       />
 
-      {/* Live Winners Feed & Trending Harbor Games */}
-      {/*<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-gutter">
-        <LiveWinnersFeed />
-        <TrendingGames />
-      </div>*/}
+      {/* Monthly & Realtime Leaderboard Podium */}
+      <section className="pt-2">
+        <LeaderboardWidget />
+      </section>
 
       {/* Level Up Celebration Modal */}
       <LevelUpCelebrationModal

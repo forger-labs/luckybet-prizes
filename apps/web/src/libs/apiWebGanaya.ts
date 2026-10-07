@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import HttpClient, { handleApiError } from "@shared/libs/httpClient";
+import type { LeaderboardQuery, LeaderboardResponseData } from "@shared/types";
 import type {
   BackendLevel,
   BackendMission,
@@ -544,7 +545,6 @@ export class ApiWebGanaya {
     }
   }
 
-
   // ── Level Rewards Endpoints ──
 
   async getMyLevelRewards(
@@ -610,7 +610,7 @@ export class ApiWebGanaya {
     }
   }
 
-    // ── Player Chests Endpoints ──
+  // ── Player Chests Endpoints ──
 
   async getPlayerChestsProgress(
     params?: GetPlayerChestsProgressQuery,
@@ -701,6 +701,38 @@ export class ApiWebGanaya {
         url: `/player-chests/${chestId}/claim`,
       });
       const response = data as ApiResponse<PlayerChestClaimResponse>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  // ── Statistics & Leaderboard ──
+
+  async getLeaderboard(
+    params?: LeaderboardQuery,
+  ): Promise<ApiResponse<LeaderboardResponseData>> {
+    const result: ApiResponse<LeaderboardResponseData> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      let url = "/statistics/leaderboard";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.period) searchParams.append("period", params.period);
+        if (params.limit !== undefined && params.limit !== null) {
+          searchParams.append("limit", params.limit.toString());
+        }
+        const qs = searchParams.toString();
+        if (qs) url += `?${qs}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as ApiResponse<LeaderboardResponseData>;
       if (response?.status) result.status = true;
       result.data = response.data;
       result.message = response.message;
