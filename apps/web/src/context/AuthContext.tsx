@@ -152,7 +152,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     if (isLoading) return;
     const isAuth = Boolean(token && user);
     const isLoginPage = pathname === ROUTES.LOGIN;
-    if (isAuth && isLoginPage) router.push(ROUTES.DASHBOARD);
+    if (isAuth && isLoginPage) router.push(ROUTES.MISSIONS);
     else if (!isAuth && !isLoginPage && pathname.startsWith("/dashboard"))
       router.push(ROUTES.LOGIN);
   }, [isLoading, token, user, pathname, router]);

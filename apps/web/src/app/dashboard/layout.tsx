@@ -11,7 +11,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div>
+    <>
       <TopAppBar onMenuToggle={() => setMobileOpen(!mobileOpen)} />
 
       <div className="flex">
@@ -23,10 +23,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Mobile drawer */}
         <MobileSidebar open={mobileOpen} onClose={() => setMobileOpen(false)} />
 
-        <main className="px-8 pt-26 pb-20 min-h-dvh bg-background flex-1">
+        <main className="px-8 pt-26 pb-20 min-h-dvh bg-background flex-1 w-screen">
           {children}
         </main>
       </div>
-    </div>
+    </>
   );
 }

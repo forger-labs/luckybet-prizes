@@ -55,8 +55,9 @@ export const GameCard = ({
 
   return (
     <motion.div
-      onClick={handleCardRedirect}
+      // onClick={handleCardRedirect}
       whileHover={{ y: -6, transition: { duration: 0.25 } }}
+      tabIndex={0}
       className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-xl cursor-pointer bg-surface-container"
     >
       {/* Game Image */}
@@ -65,13 +66,13 @@ export const GameCard = ({
         sizes="(max-width: 768px) 50vw, 25vw"
         alt={alt}
         unoptimized
-        className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+        className="object-cover transition-transform duration-700 ease-out group-focus:scale-110 group-hover:scale-110"
         src={imageUrl}
       />
 
       {/* Dynamic Gradients */}
       <div className="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/50 to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-95" />
-      <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-primary/10 opacity-0 group-focus:opacity-100 group-hover:opacity-100 transition-opacity duration-300" />
 
       {/* Top Overlay Badges */}
       <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
@@ -95,14 +96,14 @@ export const GameCard = ({
 
       {/* Bottom Content Area */}
       <div className="absolute inset-0 flex flex-col justify-end p-4 z-10">
-        <div className="transform transition-transform duration-300 group-hover:-translate-y-2">
+        <div className="transform transition-transform duration-300 group-focus:-translate-y-2 group-hover:-translate-y-2">
           {jackpot && (
             <p className="text-[11px] font-bold text-secondary flex items-center gap-1 mb-0.5">
               <span>Bote:</span>
               <span>{jackpot}</span>
             </p>
           )}
-          <h3 className="font-title-md text-base sm:text-lg font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">
+          <h3 className="font-title-md text-base sm:text-lg font-bold text-on-surface group-focus:text-primary group-hover:text-primary transition-colors line-clamp-1">
             {title}
           </h3>
           <p className="text-xs text-on-surface-variant font-medium">
@@ -114,7 +115,7 @@ export const GameCard = ({
         <motion.button
           whileTap={{ scale: 0.95 }}
           type="button"
-          className="mt-2.5 w-full bg-primary hover:bg-primary-container text-on-primary font-label-md py-2.5 rounded-xl font-bold text-xs sm:text-sm opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 cursor-pointer shadow-lg flex items-center justify-center gap-1.5"
+          className="mt-2.5 w-full bg-primary hover:bg-primary-container text-on-primary font-label-md py-2.5 rounded-xl font-bold text-xs sm:text-sm opacity-0 translate-y-4 group-hover:opacity-100 group-focus:opacity-100 group-hover:translate-y-0 group-focus:translate-y-0 transition-all duration-300 cursor-pointer shadow-lg flex items-center justify-center gap-1.5"
           onClick={handleCardRedirect}
         >
           Jugar Ahora

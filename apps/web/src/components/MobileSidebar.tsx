@@ -13,6 +13,7 @@ import { useAuthContext } from "@/hooks/useAuth";
 import { SparklesIcon } from "@/icons";
 import { ItemSidebar } from "./ItemSidebar";
 import { Logout } from "./Logout";
+import { useDashboardData } from "@/hooks/useDashboardData";
 
 export const MobileSidebar = ({
   open,
@@ -24,6 +25,7 @@ export const MobileSidebar = ({
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
   const { user, logout } = useAuthContext();
+  const {userRank} = useDashboardData()
   const displayName = user?.name || user?.login || "Jugador";
 
   // Close drawer on route change
@@ -68,10 +70,6 @@ export const MobileSidebar = ({
                     <p className="font-title-md text-sm font-bold text-on-surface truncate max-w-[130px]">
                       {displayName}
                     </p>
-                    <div className="flex items-center gap-1 text-[11px] text-secondary font-medium">
-                      <SparklesIcon className="w-3 h-3 text-secondary" />
-                      <span>VIP Elite I</span>
-                    </div>
                   </div>
                 </div>
 
@@ -117,7 +115,7 @@ export const MobileSidebar = ({
                     {displayName}
                   </span>
                   <span className="text-[11px] text-on-surface-variant">
-                    Nivel 14 • 8.450 XP
+                    {userRank ? `Rango: ${userRank.currentTier} ${userRank.currentXp} XP` : "Rango: Desconocido"}
                   </span>
                 </div>
               </div>

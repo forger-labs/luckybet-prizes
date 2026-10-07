@@ -44,7 +44,7 @@ export const LoginForm = () => {
             title: "¡Bienvenido!",
             description: "Has iniciado sesión exitosamente.",
           });
-          router.push(ROUTES.DASHBOARD);
+          router.push(ROUTES.MISSIONS);
         } else {
           casinoToast.error({
             title: "Error al iniciar sesión",
