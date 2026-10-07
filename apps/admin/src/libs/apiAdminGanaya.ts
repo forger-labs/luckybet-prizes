@@ -2,6 +2,17 @@ import axios from "axios";
 
 import HttpClient, { handleApiError } from "@shared/libs/httpClient";
 import type {
+  ChestsSummaryQuery,
+  StatisticsChestsSummaryData,
+  StatisticsDateRangeQuery,
+  StatisticsLevelsDistributionData,
+  StatisticsLiabilitiesData,
+  StatisticsMissionsEngagementData,
+  StatisticsOperationalRiskData,
+  StatisticsReviewersSlaData,
+  StatisticsSummaryData,
+} from "@shared/types";
+import type {
   BackendChest,
   BackendGameItem,
   BackendLevel,
@@ -86,7 +97,7 @@ axios.interceptors.response.use(
   },
 );
 
-export default class ApiAdminGanaya {
+export class ApiAdminGanaya {
   constructor(private readonly httpClient: HttpClientInterface) {}
 
   async login(username: string, password: string) {
@@ -1400,6 +1411,204 @@ export default class ApiAdminGanaya {
       return handleApiError(error, result);
     }
   }
+
+  // ── Statistics API ──
+
+  async getStatisticsSummary(
+    params?: StatisticsDateRangeQuery,
+  ): Promise<ApiResponse<StatisticsSummaryData>> {
+    const result: ApiResponse<StatisticsSummaryData> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      let url = "/statistics/summary";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        const qs = searchParams.toString();
+        if (qs) url += `?${qs}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as ApiResponse<StatisticsSummaryData>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getLiabilities(
+    params?: StatisticsDateRangeQuery,
+  ): Promise<ApiResponse<StatisticsLiabilitiesData>> {
+    const result: ApiResponse<StatisticsLiabilitiesData> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      let url = "/statistics/liabilities";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        const qs = searchParams.toString();
+        if (qs) url += `?${qs}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as ApiResponse<StatisticsLiabilitiesData>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getOperationalRisk(
+    params?: StatisticsDateRangeQuery,
+  ): Promise<ApiResponse<StatisticsOperationalRiskData>> {
+    const result: ApiResponse<StatisticsOperationalRiskData> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      let url = "/statistics/operational/risk";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        const qs = searchParams.toString();
+        if (qs) url += `?${qs}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as ApiResponse<StatisticsOperationalRiskData>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getReviewersSla(
+    params?: StatisticsDateRangeQuery,
+  ): Promise<ApiResponse<StatisticsReviewersSlaData>> {
+    const result: ApiResponse<StatisticsReviewersSlaData> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      let url = "/statistics/operational/reviewers-sla";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        const qs = searchParams.toString();
+        if (qs) url += `?${qs}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as ApiResponse<StatisticsReviewersSlaData>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getMissionsEngagement(
+    params?: StatisticsDateRangeQuery,
+  ): Promise<ApiResponse<StatisticsMissionsEngagementData>> {
+    const result: ApiResponse<StatisticsMissionsEngagementData> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      let url = "/statistics/missions/engagement";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.startDate)
+          searchParams.append("startDate", params.startDate);
+        if (params.endDate) searchParams.append("endDate", params.endDate);
+        const qs = searchParams.toString();
+        if (qs) url += `?${qs}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as ApiResponse<StatisticsMissionsEngagementData>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getLevelsDistribution(): Promise<
+    ApiResponse<StatisticsLevelsDistributionData>
+  > {
+    const result: ApiResponse<StatisticsLevelsDistributionData> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      const { data } = await this.httpClient.get({
+        url: "/statistics/levels/distribution",
+      });
+      const response = data as ApiResponse<StatisticsLevelsDistributionData>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
+
+  async getChestsSummary(
+    params?: ChestsSummaryQuery,
+  ): Promise<ApiResponse<StatisticsChestsSummaryData>> {
+    const result: ApiResponse<StatisticsChestsSummaryData> = {
+      data: null,
+      status: false,
+      message: "",
+    };
+    try {
+      let url = "/statistics/chests/summary";
+      if (params) {
+        const searchParams = new URLSearchParams();
+        if (params.periodKey)
+          searchParams.append("periodKey", params.periodKey);
+        const qs = searchParams.toString();
+        if (qs) url += `?${qs}`;
+      }
+      const { data } = await this.httpClient.get({ url });
+      const response = data as ApiResponse<StatisticsChestsSummaryData>;
+      if (response?.status) result.status = true;
+      result.data = response.data;
+      result.message = response.message;
+      return result;
+    } catch (error) {
+      return handleApiError(error, result);
+    }
+  }
 }
 
 export const apiAdminGanaya = new ApiAdminGanaya(httpClient);
+export default apiAdminGanaya;

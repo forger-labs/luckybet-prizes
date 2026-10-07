@@ -15,6 +15,7 @@ export const ROUTES = {
     revision: "/panel/revision",
     salas: "/panel/salas",
     cofres: "/panel/cofres",
+    estadisticas: "/panel/estadisticas",
   },
 };
 
