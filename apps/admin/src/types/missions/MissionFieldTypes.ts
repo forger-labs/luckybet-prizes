@@ -1,8 +1,29 @@
-import type { AdminMission } from "@shared/types";
+import type { FormikProps } from "formik";
+import type { ReactNode } from "react";
+
+import type { BackendRoom } from "@shared/types";
+
+import type { PartialAdminMission } from "./MissionFormModalTypes";
 
 export interface MissionFieldsProps {
-  mission: Partial<AdminMission>;
+  formik: FormikProps<PartialAdminMission>;
+  rooms?: BackendRoom[];
+}
+
+export interface MissionCoverUploadProps {
+  coverImage?: string;
   onChange: (field: string, value: unknown) => void;
-  errors?: Record<string, string>;
-  readOnly?: boolean;
+}
+
+export interface MissionRewardFieldsProps {
+  formik: FormikProps<PartialAdminMission>;
+  rooms?: BackendRoom[];
+}
+
+export interface FieldGroupProps {
+  htmlFor: string;
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: ReactNode;
 }

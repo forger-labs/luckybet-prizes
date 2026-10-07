@@ -1,46 +1,92 @@
-import { FeaturedMission } from "@/components/dashboard/FeaturedMission";
+"use client";
+
+import { DashboardWelcomeHeader } from "@/components/dashboard/DashboardWelcomeHeader";
+import { FeaturedChestCard } from "@/components/dashboard/FeaturedChestCard";
 import { GamesSection } from "@/components/dashboard/games/GamesSection";
-import { LiveWinnersFeed } from "@/components/dashboard/LiveWinnersFeed";
+import { LeaderboardWidget } from "@/components/dashboard/leaderboard";
 import { UserStatusWidget } from "@/components/dashboard/UserStatusWidget";
+import { LevelUpCelebrationModal } from "@/components/levels/LevelUpCelebrationModal";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { useLevelRewards } from "@/hooks/useLevelRewards";
 
 export default function DashboardPage() {
+  const {
+    userRank,
+    games,
+    isFallbackGames,
+    isLoadingGames,
+    isLoadingUser,
+    refetch: refetchDashboard,
+  } = useDashboardData();
+
+  const {
+    nextReward,
+    pendingCount,
+    nextLevelName,
+    nextLevelImage,
+    calculatedCoinsForNext,
+    isClaiming,
+    celebrationData,
+    isCelebrationOpen,
+    hasMorePending,
+    remainingCount,
+    subsequentLevelName,
+    claimNextReward,
+    claimNextFromModal,
+    closeCelebration,
+  } = useLevelRewards({
+    roomBonus: userRank.roomBonus,
+    onClaimSuccess: refetchDashboard,
+  });
+
   return (
-    <div className="max-w-[1280px] mx-auto space-y-stack-md">
-      {/* User Status & Featured Mission */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+    <div className="max-w-[1280px] mx-auto space-y-6 sm:space-y-stack-md">
+      {/* Welcome Banner */}
+      <DashboardWelcomeHeader />
+
+      {/* User Status & Featured Hero Chest with Weekly/Monthly toggle */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-gutter items-stretch">
         <div className="lg:col-span-4">
-          <UserStatusWidget />
+          <UserStatusWidget
+            status={userRank}
+            isLoading={isLoadingUser}
+            pendingRewardCount={pendingCount}
+            nextReward={nextReward}
+            nextLevelName={nextLevelName}
+            nextLevelImage={nextLevelImage}
+            calculatedCoinsForNext={calculatedCoinsForNext}
+            isClaimingReward={isClaiming}
+            onClaimReward={claimNextReward}
+          />
         </div>
-        <div className="lg:col-span-8 min-h-[260px]">
-          <FeaturedMission />
+        <div className="lg:col-span-8 min-h-[300px]">
+          <FeaturedChestCard />
         </div>
       </div>
 
-      {/* Quick Access Games */}
-      <GamesSection />
+      {/* Quick Access Games with Played/Featured Support */}
+      <GamesSection
+        games={games}
+        isFallback={isFallbackGames}
+        isLoading={isLoadingGames}
+      />
 
-      {/* Live Winners & Harbor Trends */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
-        <LiveWinnersFeed />
+      {/* Monthly & Realtime Leaderboard Podium */}
+      <section className="pt-2">
+        <LeaderboardWidget />
+      </section>
 
-        <section className="glass-card rounded-xl p-6">
-          <h3 className="font-title-md text-title-md text-on-surface mb-4">
-            Juegos en Tendencia
-          </h3>
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <div>
-                <p className="font-label-md text-on-surface">
-                  Blackjack Popularity
-                </p>
-                <p className="text-label-sm text-on-surface-variant">
-                  +24% this week
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+      {/* Level Up Celebration Modal */}
+      <LevelUpCelebrationModal
+        isOpen={isCelebrationOpen}
+        onClose={closeCelebration}
+        celebrationData={celebrationData}
+        hasMorePending={hasMorePending}
+        remainingCount={remainingCount}
+        nextLevelName={subsequentLevelName}
+        onClaimNext={claimNextFromModal}
+        isClaimingNext={isClaiming}
+      />
     </div>
   );
 }

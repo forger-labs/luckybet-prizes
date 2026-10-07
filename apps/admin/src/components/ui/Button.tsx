@@ -1,7 +1,8 @@
 "use client";
 
-import { LoadingIcon } from "@shared/icons/LoadingIcon";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
+
+import { LoadingIcon } from "@shared/icons/LoadingIcon";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
@@ -20,7 +21,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:
     "bg-primary text-on-primary hover:bg-primary-fixed-dim active:scale-[0.98]",
   secondary:
-    "bg-secondary text-on-secondary hover:bg-secondary-fixed-dim active:scale-[0.98] glow-button",
+    "bg-gradient-to-r from-secondary via-secondary to-secondary-container text-on-secondary font-bold hover:brightness-110 active:scale-[0.97] border border-secondary-fixed/40 shadow-[0_0_18px_rgba(255,198,64,0.28)] hover:shadow-[0_0_28px_rgba(255,198,64,0.45)]",
   ghost:
     "bg-transparent text-primary border border-primary/40 hover:bg-primary/10 active:scale-[0.98]",
   danger:

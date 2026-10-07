@@ -1,8 +1,20 @@
-import type { MissionStatus } from "@shared/types";
+import type { BackendRoom, MissionStatus } from "@shared/types";
 
-export type FilterValue = "all" | MissionStatus;
+export type MissionStatusFilter = "all" | MissionStatus;
+export type MissionCategoryFilter = "all" | "daily" | "weekly" | "fixed";
 
-export interface FilterTabsProps {
-  activeFilter: FilterValue;
-  onChange: (filter: FilterValue) => void;
+export interface MissionFilters {
+  search: string;
+  status: MissionStatusFilter;
+  category: MissionCategoryFilter;
+  roomId: string;
+}
+
+export interface MissionsFilterBarProps {
+  filters: MissionFilters;
+  limit: number;
+  rooms?: BackendRoom[];
+  onFilterChange: (filters: Partial<MissionFilters>) => void;
+  onLimitChange: (limit: number) => void;
+  onResetFilters: () => void;
 }

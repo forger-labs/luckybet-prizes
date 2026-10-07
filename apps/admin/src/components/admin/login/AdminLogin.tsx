@@ -1,98 +1,70 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
+
+import { casinoToast } from "@shared/utils/casinoToast";
+
+import { ROUTES } from "@/constant";
+import { useAuthAdmin } from "@/hooks/useAuthAdmin";
 import LoginCard from "./LoginCard";
 import LoginForm from "./LoginForm";
 
-/**
- * AdminLogin — organismo principal de la pantalla de login administrativo.
- *
- * Compone LoginCard + LoginForm con los efectos ambientales
- * (background glows, partículas flotantes) y el footer legal.
- *
- * Sigue diseño atómico flexible: no fuerza separación donde no tiene sentido.
- */
 export default function AdminLogin() {
-  const navigation = useRouter();
-  const particleRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { login } = useAuthAdmin();
+  const router = useRouter();
 
-  const handleLogin = useCallback(
-    async (data: { email: string; password: string; remember: boolean }) => {
-      // Simulated auth — will be replaced with real AuthAdminContext
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      // eslint-disable-next-line no-console
-      console.log("Admin login:", data.email, "remember:", data.remember);
-      navigation.push("/panel");
-    },
-    [navigation],
-  );
+  const handleLogin = async (username: string, password: string) => {
+    try {
+      const res = await login(username, password);
+      if (res.status) {
+        casinoToast.success({
+          title: `Bienvenido, ${username}`,
+          duration: 3500,
+        });
 
-  // Floating particles — pure atmosphere, no state
-  useEffect(() => {
-    const createParticle = () => {
-      const particle = document.createElement("div");
-      const size = Math.random() * 4 + 2;
-      const startX = Math.random() * 100;
-      const startY = Math.random() * 100;
+        router.push(ROUTES.panel.index);
+        return;
+      }
 
-      Object.assign(particle.style, {
-        width: `${size}px`,
-        height: `${size}px`,
-        background: "rgba(142, 213, 255, 0.2)",
-        position: "fixed",
-        borderRadius: "50%",
-        left: `${startX}vw`,
-        top: `${startY}vh`,
-        pointerEvents: "none",
-        zIndex: "-5",
+      casinoToast.error({
+        title: "Error al iniciar sesión",
+        description: `${res.message}`,
       });
-
-      document.body.appendChild(particle);
-
-      const animation = particle.animate(
-        [
-          { transform: "translate(0, 0) scale(1)", opacity: 0 },
-          {
-            transform: `translate(${Math.random() * 100 - 50}px, -100px) scale(0)`,
-            opacity: 0.5,
-          },
-          {
-            transform: `translate(${Math.random() * 200 - 100}px, -200px) scale(0)`,
-            opacity: 0,
-          },
-        ],
-        {
-          duration: Math.random() * 3000 + 3000,
-          easing: "ease-out",
-        },
-      );
-
-      animation.onfinish = () => particle.remove();
-    };
-
-    particleRef.current = setInterval(createParticle, 500);
-    return () => {
-      if (particleRef.current) clearInterval(particleRef.current);
-    };
-  }, []);
+    } catch (err) {
+      casinoToast.error({
+        title: "Error al iniciar sesión",
+        description: `${err}`,
+      });
+    }
+  };
 
   return (
-    <main className="min-h-dvh flex items-center justify-center p-container-padding-mobile md:p-container-padding-desktop relative overflow-hidden">
-      {/* Ambient Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-secondary/10 blur-[120px] rounded-full" />
+    <main className="min-h-dvh flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden bg-background">
+      {/* ── Ambient Background Layer (Zero JS, 60fps GPU-accelerated) ── */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        {/* Cyber subtle grid */}
+        <div className="absolute inset-0 bg-cyber-grid opacity-60" />
+
+        {/* Top-left Arctic Neon Orb */}
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-primary/15 rounded-full blur-[120px] animate-glow-pulse" />
+
+        {/* Bottom-right Evening Gold Orb */}
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-secondary/10 rounded-full blur-[140px] animate-glow-pulse" />
+
+        {/* Center ambient vignette */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(11,19,38,0.7)_100%)]" />
       </div>
 
-      {/* Login Card */}
-      <LoginCard
-        icon="admin_panel_settings"
-        title="LuckyBet Premios"
-        subtitle="Admin Portal"
-      >
-        <LoginForm onLogin={handleLogin} />
-      </LoginCard>
+      {/* ── Login Centerpiece ── */}
+      <div className="w-full flex justify-center animate-in fade-in zoom-in-95 duration-500">
+        <LoginCard
+          icon="admin_panel_settings"
+          title="LuckyBet Premios"
+          subtitle="Panel de Control"
+        >
+          <LoginForm onLogin={handleLogin} />
+        </LoginCard>
+      </div>
     </main>
   );
 }

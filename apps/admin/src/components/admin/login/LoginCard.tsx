@@ -1,27 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { LoginCardProps } from "@/types/login";
 
-interface LoginCardProps {
-  /** Brand logo icon (Material Symbols name) */
-  icon?: string;
-  /** Brand title */
-  title: string;
-  /** Brand subtitle */
-  subtitle?: string;
-  /** Card body content */
-  children: ReactNode;
-  /** Footer content (shown below a divider) */
-  footer?: ReactNode;
-}
-
-/**
- * LoginCard — molécula que envuelve el formulario en el glassmorphism card
- * con el branding (logo + título + subtítulo) y un footer opcional.
- *
- * Es "flexible" porque combina brand + card en un solo componente
- * sin forzar una separación atómica innecesaria.
- */
 export default function LoginCard({
   icon = "admin_panel_settings",
   title,
@@ -30,30 +10,47 @@ export default function LoginCard({
   footer,
 }: LoginCardProps) {
   return (
-    <div className="w-full max-w-[440px] glass-card rounded-xl p-8 md:p-10 shadow-2xl relative animate-in fade-in zoom-in duration-700">
+    <div className="w-full max-w-[460px] bg-surface-container-low/90 backdrop-blur-2xl rounded-2xl p-8 md:p-10 border border-outline-variant/30 shadow-[0_20px_50px_rgba(0,0,0,0.6)] relative z-10 transition-all">
+      {/* Top Ambient Glow behind card */}
+      <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-12 bg-primary/20 blur-2xl rounded-full pointer-events-none" />
+
       {/* Brand Header */}
-      <div className="flex flex-col items-center mb-stack-lg">
-        <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary-container rounded-xl flex items-center justify-center mb-stack-sm shadow-[0_0_30px_rgba(123,208,255,0.2)]">
-          <span className="material-symbols-outlined text-on-primary-container !text-[32px]">
-            {icon}
-          </span>
+      <div className="flex flex-col items-center text-center mb-8">
+        {/* Emblem */}
+        <div className="relative mb-4 group">
+          <div className="absolute inset-0 bg-primary/25 rounded-2xl blur-lg animate-glow-pulse" />
+          <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-surface-container-highest to-surface-container-high border border-primary/40 flex items-center justify-center text-primary shadow-[0_0_20px_rgba(56,189,248,0.25)] transition-transform duration-300 group-hover:scale-105">
+            <span className="material-symbols-outlined text-3xl">{icon}</span>
+          </div>
         </div>
-        <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight text-center">
+
+        {/* Title */}
+        <h1 className="font-(--font-plus-jakarta-sans) text-2xl md:text-3xl font-extrabold text-on-surface tracking-tight leading-tight">
           {title}
         </h1>
+
+        {/* Subtitle Pill */}
         {subtitle && (
-          <p className="font-label-md text-label-md text-on-surface-variant mt-1 uppercase tracking-widest">
+          <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 border border-secondary/25 text-secondary text-xs font-semibold uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
             {subtitle}
-          </p>
+          </div>
         )}
       </div>
 
-      {/* Body */}
+      {/* Form Body */}
       {children}
 
-      {/* Footer */}
+      {/* Security Footer */}
+      <div className="mt-8 pt-6 border-t border-outline-variant/15 flex items-center justify-center gap-2 text-on-surface-variant/80 text-xs">
+        <span className="material-symbols-outlined text-sm text-primary/80">
+          lock
+        </span>
+        <span>Acceso restringido · Conexión segura cifrada</span>
+      </div>
+
       {footer && (
-        <div className="mt-stack-lg pt-stack-md border-t border-outline-variant/20 text-center">
+        <div className="mt-4 text-center text-xs text-on-surface-variant">
           {footer}
         </div>
       )}

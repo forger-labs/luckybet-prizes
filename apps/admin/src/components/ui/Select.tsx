@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import type { SelectProps } from "@/types/Select";
 
 /**
@@ -20,6 +21,8 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
   (
     {
       icon,
+      id,
+      name,
       options,
       placeholder = "Seleccionar...",
       value,
@@ -27,6 +30,7 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
       error,
       className = "",
       disabled = false,
+      isRelative = false,
     },
     ref,
   ) => {
@@ -85,14 +89,19 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
     }, [open]);
 
     return (
-      <div ref={containerRef} className={`relative ${className}`}>
+      <div
+        ref={containerRef}
+        className={`${isRelative ? "relative" : ""} ${className}`}
+      >
         {/* Trigger */}
         <button
           type="button"
+          id={id}
+          name={name}
           disabled={disabled}
           onClick={handleToggle}
           className={`
-            w-full flex items-center gap-2
+            w-full flex items-center gap-2 relative
             bg-surface-container-lowest border
             rounded-lg py-3.5 px-4 text-left
             transition-all duration-300
@@ -134,7 +143,7 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
         {/* Dropdown panel */}
         {open && (
           <div
-            className="absolute z-50 mt-1 w-full bg-surface-container/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto"
+            className="absolute flex flex-col z-50 mt-1 w-fit bg-surface-container/90 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl max-h-60 overflow-y-auto"
             role="listbox"
           >
             {options.length === 0 ? (
@@ -150,7 +159,7 @@ const Select = forwardRef<HTMLDivElement, SelectProps>(
                   aria-selected={option.value === value}
                   onClick={() => handleSelect(option.value)}
                   className={`
-                    w-full text-left px-4 py-3 text-body-md transition-colors
+                    w-full text-left pl-4 pr-12 py-3 text-body-md transition-colors
                     ${
                       option.value === value
                         ? "bg-primary/10 text-primary"

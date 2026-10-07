@@ -1,5 +1,7 @@
 "use client";
+
 import { type ReactNode, useState } from "react";
+
 import { MobileSidebar } from "@/components/MobileSidebar";
 import { Sidebar } from "@/components/Sidebar";
 import { TopAppBar } from "@/components/TopAppBar/TopAppBar";

@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Be_Vietnam_Pro, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
+import { CasinoToaster } from "@shared/components/toasts/CasinoToaster";
+
+import { AuthAdminProvider } from "@/context/AuthAdminContext";
+
 const materialSymbolsUrl =
   "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap";
 
@@ -40,7 +44,8 @@ export default function AdminRootLayout({
         />
       </head>
       <body className="min-h-dvh flex flex-col bg-background text-on-surface antialiased">
-        {children}
+        <AuthAdminProvider>{children}</AuthAdminProvider>
+        <CasinoToaster />
       </body>
     </html>
   );

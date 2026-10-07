@@ -1,164 +1,267 @@
 "use client";
 
-import type { Mission } from "@shared/types/mission";
-import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { casinoToast } from "@shared/utils/casinoToast";
+
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { MissionSection } from "@/components/mission/organisms/MissionSection";
+import { FeaturedChestCard } from "@/components/dashboard/FeaturedChestCard";
+import { MissionCard } from "@/components/mission/molecules/MissionCard";
+import { MissionFilterTabs } from "@/components/mission/molecules/MissionFilterTabs";
+import { MissionStatsBar } from "@/components/mission/molecules/MissionStatsBar";
+import { MissionsGridSkeleton } from "@/components/mission/molecules/MissionsGridSkeleton";
+import { SparklesIcon } from "@/icons";
+import { webApi } from "@/libs/apiWebGanaya";
+import type {
+  ClientMission,
+  MissionCategory,
+  MissionCategoryTab,
+  MissionStatsSummary,
+} from "@/types/missions";
+import type { UserMissionWithSteps } from "@/types/player";
 
-const dailyMissions: Mission[] = [
-  {
-    id: "instagram",
-    title: "Seguir en Instagram",
-    description:
-      "Seguí la cuenta oficial de LuckyBet en Instagram para mantenerte al día con las últimas promociones.",
-    reward: "500 fichas",
-    icon: "camera",
-    color: "#E1306C",
-    href: "/dashboard/missions/instagram",
-    completed: true,
-  },
-  {
-    id: "telegram",
-    title: "Unirse al Telegram",
-    description:
-      "Unite al canal oficial de Telegram y recibí notificaciones exclusivas de eventos especiales.",
-    reward: "750 fichas",
-    icon: "send",
-    color: "#0088cc",
-    href: "/dashboard/missions/telegram",
-  },
-  {
-    id: "whatsapp",
-    title: "Compartir en WhatsApp",
-    description:
-      "Compartí LuckyBet con tus amigos en WhatsApp y ambos recibirán una recompensa.",
-    reward: "300 fichas",
-    icon: "chat",
-    color: "#25D366",
-    href: "/dashboard/missions/whatsapp",
-  },
-  {
-    id: "twitter",
-    title: "Seguir en Twitter/X",
-    description:
-      "Seguí a LuckyBet en Twitter/X para participar en sorteos semanales exclusivos.",
-    reward: "400 fichas",
-    icon: "x",
-    color: "#1da1f2",
-    href: "/dashboard/missions/twitter",
-  },
-];
-
-const fixedMissions: Mission[] = [
-  {
-    id: "profile",
-    title: "Completar perfil",
-    description:
-      "Asegurá tu cuenta verificando tu correo y completando tu información de perfil.",
-    reward: "200 fichas",
-    icon: "person",
-    color: "#a78bfa",
-    completed: false,
-    progress: 65,
-  },
-  {
-    id: "referral",
-    title: "Invitar a un amigo",
-    description:
-      "Invitá a un amigo a registrarse y ambos recibirán un bono de bienvenida.",
-    reward: "1000 fichas",
-    icon: "share",
-    color: "#f97316",
-    progress: 30,
-  },
-  {
-    id: "first-deposit",
-    title: "Primer depósito",
-    description:
-      "Realizá tu primer depósito y recibí un bono del 100% inmediato.",
-    reward: "5000 fichas",
-    icon: "account_balance",
-    color: "#22c55e",
-    completed: true,
-  },
-];
-
-const INTERVAL_IN_MILISECONDS = 100;
-
-const DAY_HOURS = 24;
-const HOURS_IN_SECONDS = 60;
-const MINUTES_IN_SECONDS = 60;
-
-const showTime = (hour: number, minute: number, second: number) => {
-  const formattedHour = hour >= 10 ? hour : `0${hour}`;
-  const formattedMinute = minute >= 10 ? minute : `0${minute}`;
-  const formattedSecond = second >= 10 ? second : `0${second}`;
-
-  return `${formattedHour}:${formattedMinute}:${formattedSecond}`;
+const TYPE_TO_CATEGORY: Record<string, Exclude<MissionCategory, "all">> = {
+  DAILY: "daily",
+  WEEKLY: "weekly",
+  FIXED: "fixed",
 };
 
 export default function MissionsPage() {
-  const [hour, setHour] = useState(24);
-  const [minute, setMinute] = useState(0);
-  const [second, setSecond] = useState(0);
+  const [missions, setMissions] = useState<ClientMission[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedCategory, setSelectedCategory] =
+    useState<MissionCategory>("all");
 
-  useEffect(() => {
-    const countDownUntilZero = () => {
-      const date = new Date();
-      const hours = DAY_HOURS - date.getUTCHours() - 1;
-      const minutes = MINUTES_IN_SECONDS - date.getUTCMinutes() - 1;
-      const seconds = HOURS_IN_SECONDS - date.getUTCSeconds() - 1;
+  // ── Parallel Data Fetching & Deduplication ──
+  const loadMissionsData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [allMissionsRes, myMissionsRes] = await Promise.all([
+        webApi.getMissions({ status: "ACTIVE", take: 100 }),
+        webApi.getMyMissions({ orderDirection: "ASC", take: 100 }),
+      ]);
 
-      setHour(hours);
-      setMinute(minutes);
-      setSecond(seconds);
-    };
+      const myMissionsMap = new Map<number, UserMissionWithSteps>();
+      if (myMissionsRes.status && Array.isArray(myMissionsRes.data)) {
+        for (const userMission of myMissionsRes.data) {
+          myMissionsMap.set(userMission.missionId, userMission);
+        }
+      }
 
-    const timeoutToClear = setInterval(
-      countDownUntilZero,
-      INTERVAL_IN_MILISECONDS,
-    );
+      const activeCatalogMissions = allMissionsRes.data ?? [];
 
-    return () => clearInterval(timeoutToClear);
+      const unifiedMissions: ClientMission[] = activeCatalogMissions.map(
+        (cat) => {
+          const userMission = myMissionsMap.get(cat.id);
+          const isJoined = Boolean(userMission);
+          const userMissionStatus = userMission?.status;
+
+          const baseCoins = cat.coinsAmount ?? 0;
+          const bonusPercent = cat.room ? Number(cat.room.bonus) || 0 : 0;
+          const totalCoins = Math.round(
+            baseCoins + baseCoins * (bonusPercent / 100),
+          );
+
+          const steps = cat.steps ?? [];
+          const totalStepsCount = steps.length;
+          let completedStepsCount = 0;
+
+          if (userMission?.steps && Array.isArray(userMission.steps)) {
+            completedStepsCount = userMission.steps.filter(
+              (s) => s.status === "APPROVED",
+            ).length;
+          } else if (userMissionStatus === "COMPLETED") {
+            completedStepsCount = totalStepsCount;
+          }
+
+          const progressPercent =
+            totalStepsCount > 0
+              ? Math.round((completedStepsCount / totalStepsCount) * 100)
+              : userMissionStatus === "COMPLETED"
+                ? 100
+                : 0;
+
+          const category = TYPE_TO_CATEGORY[cat.type] || "daily";
+
+          return {
+            id: cat.id,
+            title: cat.title,
+            description: cat.description,
+            type: cat.type,
+            category,
+            status: cat.status,
+            coinsAmount: cat.coinsAmount,
+            experiencePoints: cat.experiencePoints,
+            totalCoins,
+            room: cat.room,
+            imageUrl: cat.imageUrl,
+            activatedAt: cat.activatedAt,
+            expiresAt: cat.expiresAt,
+            steps,
+            isJoined,
+            userMissionId: userMission?.id,
+            userMissionStatus,
+            currentStep: userMission?.currentStep ?? 1,
+            progressPercent,
+            completedStepsCount,
+            totalStepsCount,
+          };
+        },
+      );
+
+      setMissions(unifiedMissions);
+    } catch {
+      casinoToast.error({
+        title: "Error al cargar misiones",
+        description: "No se pudieron obtener las misiones en este momento.",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    loadMissionsData();
+  }, [loadMissionsData]);
+
+  // ── Start Mission Action Handler ──
+  const handleStartMission = useCallback(
+    async (missionId: number) => {
+      try {
+        const res = await webApi.startMission(missionId);
+        if (res.status) {
+          casinoToast.success({
+            title: "¡Misión Iniciada!",
+            description: "La misión se ha agregado a tu lista de progreso.",
+          });
+          loadMissionsData();
+        } else {
+          casinoToast.error({
+            title: "No se pudo iniciar",
+            description: Array.isArray(res.message)
+              ? res.message[0]
+              : res.message || "Error al iniciar la misión.",
+          });
+        }
+      } catch {
+        casinoToast.error({
+          title: "Error de red",
+          description: "Ocurrió un error inesperado al iniciar la misión.",
+        });
+      }
+    },
+    [loadMissionsData],
+  );
+
+  // ── Computed Stats Summary ──
+  const stats: MissionStatsSummary = useMemo(() => {
+    const claimable = missions
+      .filter((m) => m.userMissionStatus !== "COMPLETED")
+      .reduce((acc, m) => acc + (m.totalCoins || 0), 0);
+    const completed = missions.filter(
+      (m) => m.userMissionStatus === "COMPLETED",
+    ).length;
+
+    return {
+      claimableCoins: claimable,
+      completedCount: completed,
+      totalCount: missions.length,
+    };
+  }, [missions]);
+
+  // ── Category Tabs ──
+  const categoryTabs: MissionCategoryTab[] = useMemo(() => {
+    return [
+      { id: "all", label: "Todas", count: missions.length },
+      {
+        id: "daily",
+        label: "Diarias",
+        count: missions.filter((m) => m.category === "daily").length,
+      },
+      {
+        id: "weekly",
+        label: "Semanales",
+        count: missions.filter((m) => m.category === "weekly").length,
+      },
+      {
+        id: "fixed",
+        label: "Permanentes",
+        count: missions.filter((m) => m.category === "fixed").length,
+      },
+    ];
+  }, [missions]);
+
+  // ── Filtered Missions by Category ──
+  const filteredMissions = useMemo(() => {
+    if (selectedCategory === "all") return missions;
+    return missions.filter((m) => m.category === selectedCategory);
+  }, [missions, selectedCategory]);
+
   return (
-    <>
-      {/* Ambient glows */}
-      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
-      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-secondary/5 rounded-full blur-[120px]" />
+    <div className="max-w-[1280px] mx-auto space-y-6 sm:space-y-stack-md">
+      {/* Header Banner */}
+      <DashboardHeader />
 
-      <div className="md:pb-12 px-container-padding-mobile md:px-container-padding-desktop">
-        <div className="max-w-7xl mx-auto space-y-stack-md md:space-y-stack-lg">
-          <DashboardHeader />
-
-          {/* 12-column bento grid */}
-          <div className="grid grid-cols-12 gap-stack-md">
-            {/* Daily Missions */}
-            <div className="col-span-12 lg:col-span-8">
-              <MissionSection
-                title="Misiones Diarias"
-                titleColor="#8ed5ff"
-                icon="schedule"
-                timer={`Se renueva en ${showTime(hour, minute, second)}`}
-                missions={dailyMissions}
-                columns={2}
-              />
-            </div>
-
-            {/* Fixed Missions */}
-            <div className="col-span-12 lg:col-span-4">
-              <MissionSection
-                title="Misiones Fijas"
-                titleColor="#ffc640"
-                icon="verified"
-                missions={fixedMissions}
-                columns={1}
-              />
-            </div>
-          </div>
+      {/* Featured Active Chest Hero Banner with Weekly/Monthly toggle */}
+      <div className="flex gap-4 md:gap-2 flex-col md:flex-row items-stretch justify-between">
+        <MissionStatsBar stats={stats} />
+        <div className="w-full min-h-[300px]">
+          <FeaturedChestCard />
         </div>
       </div>
-    </>
+
+      {/* Solid Casino Stats Bar */}
+
+      {/* Filter and Countdown Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+        <MissionFilterTabs
+          categories={categoryTabs}
+          activeCategory={selectedCategory}
+          onSelectCategory={setSelectedCategory}
+        />
+      </div>
+
+      {/* Missions Grid or Loading Skeleton */}
+      {loading ? (
+        <MissionsGridSkeleton />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <AnimatePresence mode="popLayout">
+            {filteredMissions.map((mission, idx) => (
+              <motion.div
+                key={mission.id}
+                layout
+                initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -10 }}
+                transition={{
+                  duration: 0.2,
+                  delay: idx * 0.03,
+                }}
+                className="h-full"
+              >
+                <MissionCard mission={mission} onStart={handleStartMission} />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {!loading && filteredMissions.length === 0 && (
+        <div className="text-center py-16 px-4 rounded-2xl bg-surface-container border-2 border-[#2d3449]">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#222a3d] flex items-center justify-center text-[#87929a]">
+            <SparklesIcon className="w-8 h-8 opacity-40" />
+          </div>
+          <h3 className="font-(--font-plus-jakarta-sans) text-lg font-black text-white mb-1">
+            No hay misiones disponibles
+          </h3>
+          <p className="text-xs sm:text-sm text-[#87929a]">
+            Actualmente no hay misiones en esta categoría. Vuelve a consultar
+            más tarde.
+          </p>
+        </div>
+      )}
+    </div>
   );
 }

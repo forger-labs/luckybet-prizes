@@ -1,35 +1,36 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import type { ModalProps, ModalSize } from "@/types/Modal";
 
 const sizeStyles: Record<ModalSize, string> = {
   sm: "max-w-sm",
   md: "max-w-lg",
   lg: "max-w-2xl",
+  xl: "max-w-4xl",
 };
 
-/**
- * Modal — overlay de vidrio esmerilado con fondo blur.
- *
- * Soporta cierre por backdrop click, tecla Escape, botón X en el header,
- * y animación de entrada (scale + fade). Ideal para formularios y
- * visualización detallada sin cambiar de ruta.
- */
-function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  subtitle,
+  icon,
+  children,
+  size = "md",
+}: ModalProps) {
   const [animating, setAnimating] = useState(false);
   const previousActiveElement = useRef<Element | null>(null);
 
-  // Lock body scroll and trap focus when open
   useEffect(() => {
     if (open) {
       previousActiveElement.current = document.activeElement;
-      // Trigger mount animation on next frame
       requestAnimationFrame(() => setAnimating(true));
+      document.body.style.overflow = "hidden";
     } else {
       setAnimating(false);
       document.body.style.overflow = "";
-      // Restore focus
       if (previousActiveElement.current instanceof HTMLElement) {
         previousActiveElement.current.focus();
       }
@@ -58,7 +59,7 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -66,39 +67,60 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
       {/* Backdrop */}
       <button
         type="button"
-        aria-label="Cerrar"
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
+        aria-label="Cerrar modal"
+        className={`
+          fixed inset-0 bg-black/70  cursor-default transition-opacity duration-300
+          ${animating ? "opacity-100" : "opacity-0"}
+        `}
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Modal Dialog Panel */}
       <div
         className={`
-          relative w-full ${sizeStyles[size]}
-          bg-surface-container/80 backdrop-blur-xl
-          border border-white/10 rounded-xl
-          shadow-[0_0_40px_rgba(56,189,248,0.1)]
-          transition-all duration-200 ease-out
-          ${animating ? "scale-100 opacity-100" : "scale-95 opacity-0"}
+          relative w-full ${sizeStyles[size]} my-auto
+          bg-surface-container-low/95 backdrop-blur-2xl
+          border border-outline-variant/30 rounded-2xl
+          shadow-[0_25px_60px_rgba(0,0,0,0.8)]
+          transition-all duration-300 ease-out z-10
+          flex flex-col max-h-[88vh]
+          ${animating ? "scale-100 opacity-100 translate-y-0" : "scale-95 opacity-0 translate-y-2"}
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-white/10">
-          <h2 className="text-title-md text-on-surface font-headline-lg">
-            {title}
-          </h2>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-outline-variant/20 shrink-0 bg-surface-container/40 rounded-t-2xl">
+          <div className="flex items-center gap-3 min-w-0">
+            {icon && (
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/25 flex items-center justify-center text-primary shadow-[0_0_12px_rgba(56,189,248,0.15)] shrink-0">
+                <span className="material-symbols-outlined text-xl">
+                  {icon}
+                </span>
+              </div>
+            )}
+            <div className="min-w-0">
+              <h3 className="font-(--font-plus-jakarta-sans) text-title-md font-bold text-on-surface truncate">
+                {title}
+              </h3>
+              {subtitle && (
+                <p className="text-label-sm text-on-surface-variant truncate mt-0.5">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar"
-            className="text-outline cursor-pointer p-2 hover:text-on-surface transition-colors rounded-lg hover:bg-white/5"
+            aria-label="Cerrar modal"
+            className="w-9 h-9 rounded-xl bg-surface-container border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high hover:border-outline-variant/60 active:scale-95 transition-all cursor-pointer shrink-0 ml-3"
           >
-            <span className="text-xl text-red-400">Cerrar</span>
+            <span className="material-symbols-outlined text-lg">close</span>
           </button>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+        {/* Body content */}
+        <div className="px-6 py-5 overflow-y-auto overflow-x-hidden flex-1">
           {children}
         </div>
       </div>
@@ -107,5 +129,3 @@ function Modal({ open, onClose, title, children, size = "md" }: ModalProps) {
 }
 
 Modal.displayName = "Modal";
-
-export { Modal };

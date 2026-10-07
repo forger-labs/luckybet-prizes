@@ -1,5 +1,4 @@
 import { Home } from "./icons/Home";
-import { Ranking } from "./icons/Ranking";
 import { RocketLaunch } from "./icons/RocketLaunch";
 import type { AdminSidebarLink, SidebarLinkType } from "./types";
 import type { IconsProps } from "./types/iconsProps";
@@ -19,6 +18,11 @@ export const ADMIN_ROUTES = {
   MISIONES: "/panel",
   REVISION: "/panel/revision",
   USUARIOS: "/panel/usuarios",
+  JUGADORES: "/panel/jugadores",
+  NIVELES: "/panel/niveles",
+  SALAS: "/panel/salas",
+  COFRES: "/panel/cofres",
+  ESTADISTICAS: "/panel/estadisticas",
 };
 
 export const ADMIN_LINKS: AdminSidebarLink[] = [
@@ -33,9 +37,34 @@ export const ADMIN_LINKS: AdminSidebarLink[] = [
     text: "Revisión de Tareas",
   },
   {
+    path: ADMIN_ROUTES.JUGADORES,
+    icon: "stadia_controller",
+    text: "Jugadores",
+  },
+  {
     path: ADMIN_ROUTES.USUARIOS,
     icon: "group",
     text: "Usuarios",
+  },
+  {
+    path: ADMIN_ROUTES.NIVELES,
+    icon: "military_tech",
+    text: "Niveles",
+  },
+  {
+    path: ADMIN_ROUTES.SALAS,
+    icon: "meeting_room",
+    text: "Salas",
+  },
+  {
+    path: ADMIN_ROUTES.COFRES,
+    icon: "inventory_2",
+    text: "Cofres",
+  },
+  {
+    path: ADMIN_ROUTES.ESTADISTICAS,
+    icon: "query_stats",
+    text: "Estadísticas",
   },
 ];
 
@@ -49,10 +78,5 @@ export const PUBLIC_LINKS: SidebarLinkType[] = [
     path: ROUTES.MISSIONS,
     icon: (props: IconsProps) => <RocketLaunch {...props} />,
     text: "Misiones",
-  },
-  {
-    path: ROUTES.RANKING,
-    icon: (props: IconsProps) => <Ranking {...props} />,
-    text: "Ranking",
   },
 ];

@@ -1,221 +1,477 @@
 "use client";
 
-import Image from "next/image";
+import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
-import { TopAppBar } from "@/components/TopAppBar/TopAppBar";
+import { useCallback, useEffect, useState } from "react";
 
-const missionData: Record<
-  string,
-  {
-    id: string;
-    name: string;
-    reward: string;
-    icon: string;
-    color: string;
-    steps: string[];
-    description: string;
-    image: string;
-  }
-> = {
-  instagram: {
-    id: "i-1",
-    name: "Instagram Explorer",
-    reward: "6.000 fichas",
-    icon: "camera",
-    color: "#E1306C",
-    description: "Completá los pasos para reclamar tu botín real.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDtDQiDEy5gi2rPeLo-4jVny7N8PBMHtLtqF74vQIdq9JGmBlPUbynFVgN0fHX9cUc-ubavyBqrgDM1em2v0H1yM5N_bnVQr6DESWw02I37iuTUKQes2a91m7TwO2w8UR9cHpvv_AiVW9SJ_wTMAE0CKL0EoMWFUgeHQ5tOTm4GNQUVMZghDRqvg_MTOhP3H87ijPtz88fGpHq1wAcnsXCD1NmSKEMAgZQl53LoJXHnRySax6fBznu5_G-Ny8e-xh20YCIyUZmJyKJ4",
-    steps: [
-      "Seguir la cuenta",
-      "Comentar algo positivo",
-      "Activar notificaciones",
-    ],
-  },
-  telegram: {
-    id: "t-1",
+import { casinoToast } from "@shared/utils/casinoToast";
 
-    name: "Telegram Explorer",
-    reward: "4.500 fichas",
-    icon: "send",
-    color: "#0088cc",
-    description:
-      "Unite al canal y activá las notificaciones para recibir tu recompensa.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCkSkzErHPVB2v-2XLuFWNEj2muBqY1r_epJ1FKc4l2ZDpMJQA8pC4zICxBBnmYhUohPpwhGaupOxgAehubgFLsf1DjAtmefs4XikobHbJNahMG0gT6VHUTZVJcatpXVgivZxFb7TK3W4qyz6jwDntOBZ6unIhQGsDR7lXwfovJSVixPI9uiOJed9x5pdShz-7ZpxXWW5lWveFHr89yRhiJK3jk4x8WeAa-mAtTsVVLLvf8mvJglJPUhu_WoXW82CCUtyVSabZlS480",
-    steps: ["Unirse al canal", "Activar notificaciones", "Escribir un saludo"],
-  },
-  whatsapp: {
-    id: "w-1",
+import { MissionDetailHero } from "@/components/mission/molecules/MissionDetailHero";
+import { MissionDetailSkeleton } from "@/components/mission/molecules/MissionDetailSkeleton";
+import { MissionStepItem } from "@/components/mission/molecules/MissionStepItem";
+import { BoltIcon, ChevronLeftIcon, SparklesIcon } from "@/icons";
+import { webApi } from "@/libs/apiWebGanaya";
+import type {
+  ClientMissionDetail,
+  ClientMissionStep,
+  MissionCategory,
+} from "@/types/missions";
+import type { StepSubmissionItem, UserMissionWithSteps } from "@/types/player";
 
-    name: "WhatsApp Challenge",
-    reward: "3.000 fichas",
-    icon: "chat",
-    color: "#25D366",
-    description: "Compartí y ayudanos a crecer en WhatsApp.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCkSkzErHPVB2v-2XLuFWNEj2muBqY1r_epJ1FKc4l2ZDpMJQA8pC4zICxBBnmYhUohPpwhGaupOxgAehubgFLsf1DjAtmefs4XikobHbJNahMG0gT6VHUTZVJcatpXVgivZxFb7TK3W4qyz6jwDntOBZ6unIhQGsDR7lXwfovJSVixPI9uiOJed9x5pdShz-7ZpxXWW5lWveFHr89yRhiJK3jk4x8WeAa-mAtTsVVLLvf8mvJglJPUhu_WoXW82CCUtyVSabZlS480",
-    steps: ["Compartir el link", "Enviar a 3 contactos", "Capturar pantalla"],
-  },
-  twitter: {
-    id: "tw-1",
-
-    name: "Twitter/X Explorer",
-    reward: "2.500 fichas",
-    icon: "x",
-    color: "#1da1f2",
-    description: "Seguinos en X y participá de la conversación.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCkSkzErHPVB2v-2XLuFWNEj2muBqY1r_epJ1FKc4l2ZDpMJQA8pC4zICxBBnmYhUohPpwhGaupOxgAehubgFLsf1DjAtmefs4XikobHbJNahMG0gT6VHUTZVJcatpXVgivZxFb7TK3W4qyz6jwDntOBZ6unIhQGsDR7lXwfovJSVixPI9uiOJed9x5pdShz-7ZpxXWW5lWveFHr89yRhiJK3jk4x8WeAa-mAtTsVVLLvf8mvJglJPUhu_WoXW82CCUtyVSabZlS480",
-    steps: ["Seguir la cuenta", "Retuitear un post", "Comentar"],
-  },
+const TYPE_TO_CATEGORY: Record<string, Exclude<MissionCategory, "all">> = {
+  DAILY: "daily",
+  WEEKLY: "weekly",
+  FIXED: "fixed",
 };
 
 export default function MissionDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
-  const mission = missionData[id];
+  const idStr = (params?.id as string) || "";
+  const missionId = Number(idStr);
 
-  if (!mission) {
+  const [missionDetail, setMissionDetail] =
+    useState<ClientMissionDetail | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [actionLoading, setActionLoading] = useState<boolean>(false);
+
+  // ── Load Mission & User Mission State ──
+  const loadMissionData = useCallback(async () => {
+    if (!missionId || Number.isNaN(missionId)) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const [catRes, myMissionsRes] = await Promise.all([
+        webApi.getMissionById(missionId),
+        webApi.getMyMissions({ missionId, take: 1 }),
+      ]);
+
+      if (!catRes.status || !catRes.data) {
+        casinoToast.error({
+          title: "Misión no encontrada",
+          description: "No se pudo cargar la información de la misión.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const cat = catRes.data;
+      const userMission: UserMissionWithSteps | undefined =
+        myMissionsRes.status &&
+        Array.isArray(myMissionsRes.data) &&
+        myMissionsRes.data.length > 0
+          ? myMissionsRes.data[0]
+          : undefined;
+
+      const isJoined = Boolean(userMission);
+      const userMissionStatus = userMission?.status;
+      let isCompleted: boolean = false;
+
+      // ── Check Reward Status via findRewardByUMId ──
+      let rewardStatus: ClientMissionDetail["rewardStatus"] = null;
+      if (userMission?.id) {
+        const rewardRes = await webApi.findRewardByUMId(userMission.id);
+        if (rewardRes.status && rewardRes.data) {
+          rewardStatus = rewardRes.data.status;
+          if (rewardStatus === "CLAIMED") {
+            isCompleted = true;
+          }
+        }
+      }
+
+      const baseCoins = cat.coinsAmount ?? 0;
+      const bonusPercent = cat.room ? Number(cat.room.bonus) || 0 : 0;
+      const totalCoins = Math.round(
+        baseCoins + baseCoins * (bonusPercent / 100),
+      );
+
+      const catalogSteps = cat.steps ?? [];
+      const userStepsMap = new Map<number, StepSubmissionItem>();
+
+      if (userMission?.steps && Array.isArray(userMission.steps)) {
+        for (const s of userMission.steps) {
+          userStepsMap.set(s.missionStepId, s);
+        }
+      }
+
+      const detailedSteps: ClientMissionStep[] = catalogSteps.map((step) => {
+        const sub = userStepsMap.get(step.id);
+        const subStatus: ClientMissionStep["submissionStatus"] = sub
+          ? (sub.status as ClientMissionStep["submissionStatus"])
+          : isCompleted
+            ? "APPROVED"
+            : "NOT_STARTED";
+
+        return {
+          ...step,
+          submission: sub,
+          submissionStatus: subStatus,
+          targetConfig: step.targetConfig ?? null,
+        };
+      });
+
+      const completedStepsCount = detailedSteps.filter(
+        (s) => s.submissionStatus === "APPROVED",
+      ).length;
+      const totalStepsCount = detailedSteps.length;
+      const progressPercent =
+        totalStepsCount > 0
+          ? Math.round((completedStepsCount / totalStepsCount) * 100)
+          : isCompleted
+            ? 100
+            : 0;
+
+      const currentStep = userMission?.currentStep ?? 0;
+      const canSubmitOrClaim =
+        isJoined &&
+        rewardStatus !== "CLAIMED" &&
+        ((completedStepsCount === totalStepsCount && totalStepsCount > 0) ||
+          rewardStatus === "PENDING" ||
+          isCompleted);
+
+      const category = TYPE_TO_CATEGORY[cat.type] || "daily";
+
+      setMissionDetail({
+        id: cat.id,
+        title: cat.title,
+        description: cat.description,
+        type: cat.type,
+        category,
+        status: cat.status,
+        coinsAmount: cat.coinsAmount,
+        experiencePoints: cat.experiencePoints,
+        totalCoins,
+        room: cat.room,
+        imageUrl: cat.imageUrl,
+        activatedAt: cat.activatedAt,
+        expiresAt: cat.expiresAt,
+        steps: catalogSteps,
+        detailedSteps,
+        isJoined,
+        userMissionId: userMission?.id,
+        userMissionStatus,
+        currentStep,
+        progressPercent,
+        completedStepsCount,
+        totalStepsCount,
+        isCompleted: isCompleted,
+        canSubmitOrClaim,
+        rewardStatus,
+      });
+    } catch {
+      casinoToast.error({
+        title: "Error de red",
+        description: "Ocurrió un error al consultar los datos de la misión.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [missionId]);
+
+  useEffect(() => {
+    loadMissionData();
+  }, [loadMissionData]);
+
+  // ── Start Mission Action ──
+  const handleStartMission = async () => {
+    if (!missionId) return;
+    setActionLoading(true);
+    try {
+      const res = await webApi.startMission(missionId);
+      if (res.status) {
+        casinoToast.success({
+          title: "¡Misión Iniciada!",
+          description: "Ya puedes comenzar a completar los pasos y objetivos.",
+        });
+        await loadMissionData();
+      } else {
+        casinoToast.error({
+          title: "Error",
+          description: Array.isArray(res.message)
+            ? res.message[0]
+            : res.message || "No se pudo iniciar la misión.",
+        });
+      }
+    } catch {
+      casinoToast.error({
+        title: "Error de conexión",
+        description: "No se pudo comunicar con el servidor.",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ── Verify Game Play Step Action ──
+  const handleVerifyGamePlay = async (stepId: number) => {
+    if (!missionDetail?.userMissionId) return;
+    try {
+      const res = await webApi.verifyGamePlayStep(
+        missionDetail.userMissionId,
+        stepId,
+      );
+      if (res.status && res.data?.status === "APPROVED") {
+        casinoToast.success({
+          title: "¡Paso Verificado!",
+          description: "Se comprobó exitosamente tu jugada en el casino.",
+        });
+        await loadMissionData();
+      } else {
+        casinoToast.error({
+          title: "Verificación no cumplida",
+          description: Array.isArray(res.message)
+            ? res.message[0]
+            : res.message ||
+              "Aún no cumples los requisitos de juego para este paso.",
+        });
+      }
+    } catch {
+      casinoToast.error({
+        title: "Error al verificar",
+        description: "No se pudo comprobar la jugada en este momento.",
+      });
+    }
+  };
+
+  // ── Submit Step (Text or Image) Action ──
+  const handleSubmitStep = async (
+    stepId: number,
+    data: { text?: string; file?: File },
+  ) => {
+    if (!missionDetail?.userMissionId) return;
+    try {
+      const formData = new FormData();
+      if (data.text) formData.append("submissionText", data.text);
+      if (data.file) formData.append("submissionImage", data.file);
+
+      const res = await webApi.submitMissionStep(
+        missionDetail.userMissionId,
+        stepId,
+        formData,
+      );
+
+      if (res.status) {
+        casinoToast.success({
+          title: "Comprobante Enviado",
+          description: "Tu comprobante fue recibido y está en revisión.",
+        });
+        await loadMissionData();
+      } else {
+        casinoToast.error({
+          title: "Error al enviar",
+          description: Array.isArray(res.message)
+            ? res.message[0]
+            : res.message || "No se pudo enviar la evidencia del paso.",
+        });
+      }
+    } catch {
+      casinoToast.error({
+        title: "Error de red",
+        description: "No fue posible subir el comprobante.",
+      });
+    }
+  };
+
+  // ── Claim Mission Reward Action ──
+  const handleClaimReward = async () => {
+    if (!missionDetail?.userMissionId) return;
+    setActionLoading(true);
+    try {
+      const res = await webApi.claimMissionReward(missionDetail.userMissionId);
+      if (res.status) {
+        casinoToast.success({
+          title: "¡Recompensa Reclamada!",
+          description:
+            "Tus fichas y experiencia han sido acreditadas a tu balance.",
+        });
+        await loadMissionData();
+      } else {
+        casinoToast.error({
+          title: "Error al reclamar",
+          description: Array.isArray(res.message)
+            ? res.message[0]
+            : res.message || "No se pudo procesar el reclamo de la recompensa.",
+        });
+      }
+    } catch {
+      casinoToast.error({
+        title: "Error de conexión",
+        description: "Ocurrió un fallo al reclamar tus fichas.",
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <MissionDetailSkeleton />;
+  }
+
+  if (!missionDetail) {
     return (
-      <div className="min-h-dvh bg-background flex items-center justify-center">
-        <TopAppBar />
-        <div className="text-center pt-20">
-          <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">
-            Misión no encontrada
-          </h2>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            className="mt-4 bg-secondary text-on-secondary font-label-md px-6 py-3 rounded-full active-scale"
-          >
-            Volver al tablero
-          </button>
-        </div>
+      <div className="max-w-5xl mx-auto py-16 text-center space-y-4">
+        <h2 className="text-xl font-black text-white">Misión no encontrada</h2>
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/missions")}
+          className="px-5 py-2.5 rounded-xl bg-primary-container text-on-primary font-bold text-sm cursor-pointer"
+        >
+          Volver al listado
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-background">
-      <TopAppBar />
-
-      {/* Ambient glows */}
-      <div className="fixed top-0 right-0 -z-10 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
-      <div className="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-secondary/5 rounded-full blur-[120px]" />
-
-      <main className="pt-20 pb-24 md:pb-16 px-container-padding-mobile md:px-container-padding-desktop">
-        <div className="max-w-5xl mx-auto">
-          {/* Desktop back button */}
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard")}
-            className="hidden md:flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-6 font-label-md"
-          >
-            <span className="material-symbols-outlined">arrow_back</span>
-            Volver al tablero
-          </button>
-
-          {/* Desktop 2-column layout */}
-          <div className="md:grid md:grid-cols-5 md:gap-gutter md:items-start">
-            {/* Left column — Hero (spans 3 cols on desktop) */}
-            <div className="md:col-span-3">
-              {/* Mission Hero */}
-              <div className="relative mt-4 md:mt-0 mb-8">
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent rounded-3xl blur-2xl" />
-                <div className="relative glass-card rounded-3xl p-8 flex flex-col items-center text-center overflow-hidden md:p-10">
-                  {/* Icon */}
-                  <div
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transform rotate-3 active-scale"
-                    style={{
-                      background: `linear-gradient(135deg, #ffdf9f 0%, #ffc640 100%)`,
-                      boxShadow: `0 0 20px rgba(255, 198, 64, 0.25)`,
-                    }}
-                  >
-                    <Image
-                      alt={`${mission.name} icon`}
-                      className="w-12 h-12"
-                      src={mission.image}
-                      width={48}
-                      height={48}
-                    />
-                  </div>
-                  <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold mb-2">
-                    {mission.name}
-                  </h2>
-                  <p className="font-body-md text-on-surface-variant mb-6">
-                    {mission.description}
-                  </p>
-
-                  {/* Reward Badge */}
-                  <div className="bg-secondary-container/20 border border-secondary/30 rounded-full px-6 py-2 flex items-center gap-2 mb-2">
-                    <span
-                      className="material-symbols-outlined text-secondary"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      military_tech
-                    </span>
-                    <span className="font-title-md text-title-md text-secondary font-bold">
-                      {mission.reward}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right column — Checklist + Actions (spans 2 cols on desktop) */}
-            <div className="md:col-span-2 md:pt-4">
-              {/* Checklist */}
-              <section className="w-full space-y-4 mb-stack-lg">
-                <h3 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest pl-2">
-                  Pasos a seguir
-                </h3>
-                <div className="space-y-3">
-                  {mission.steps.map((step) => (
-                    <ChecklistItem key={`${step}-${mission.id}`} label={step} />
-                  ))}
-                </div>
-              </section>
-
-              {/* Action Buttons */}
-              <div className="w-full flex flex-col gap-3">
-                <button
-                  type="submit"
-                  className="w-full h-14 bg-secondary text-on-secondary-container font-title-md rounded-xl flex items-center justify-center gap-2 glow-gold active:scale-[0.98] transition-all hover:brightness-110"
-                >
-                  <span className="material-symbols-outlined">open_in_new</span>
-                  Ir a la red
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard")}
-                  className="w-full h-14 bg-surface-container-high text-on-surface-variant font-label-md rounded-xl flex items-center justify-center active:scale-[0.98] transition-all hover:bg-surface-variant border border-outline-variant/30"
-                >
-                  Cerrar
-                </button>
-              </div>
-            </div>
+    <div className="max-w-5xl mx-auto space-y-6 sm:space-y-stack-md">
+      {/* Back to Missions Navigation */}
+      <div className="flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => router.push("/dashboard/missions")}
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-black text-[#f8fafc] hover:text-primary-container transition-colors cursor-pointer group"
+        >
+          <div className="w-9 h-9 rounded-xl bg-surface-container border-2 border-[#2d3449] flex items-center justify-center group-hover:border-[#38bdf8] group-hover:bg-[#222a3d] transition-all shadow-sm">
+            <ChevronLeftIcon className="w-4 h-4 text-white group-hover:text-primary-container transition-colors" />
           </div>
-        </div>
-      </main>
-    </div>
-  );
-}
+          <span>Volver a Misiones</span>
+        </button>
 
-/* ───── Checklist Item Component ───── */
-function ChecklistItem({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      className="w-full glass-card rounded-xl p-4 flex items-center gap-4 group hover:bg-surface-container-high transition-all text-left"
-    >
-      <div className="w-6 h-6 rounded-full border-2 border-primary/40 flex items-center justify-center group-hover:border-primary transition-colors shrink-0">
-        <span className="material-symbols-outlined text-primary text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">
-          check
+        <span className="text-xs text-[#94a3b8] font-mono font-bold">
+          ID: #{missionDetail.id}
         </span>
       </div>
-      <span className="font-body-md text-on-surface">{label}</span>
-    </button>
+
+      {/* Hero Section */}
+      <MissionDetailHero mission={missionDetail} />
+
+      {/* Grid: Step Progression List + Action Sidebar */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left: Step Checklist & Forms (8 cols) */}
+        <div className="lg:col-span-8 p-6 sm:p-7 rounded-3xl bg-surface-container border-2 border-[#2d3449] shadow-[0_4px_25px_rgba(0,0,0,0.5)] space-y-5">
+          <div className="flex items-center justify-between pb-3 border-b border-[#2d3449]">
+            <div>
+              <h3 className="font-(--font-plus-jakarta-sans) text-base sm:text-lg font-black text-[#f8fafc]">
+                Objetivos de la Misión
+              </h3>
+              <p className="text-xs text-[#94a3b8]">
+                Completa cada paso para desbloquear tu recompensa
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-xl bg-on-primary text-primary text-xs font-mono font-bold border border-primary-container/40">
+              {missionDetail.completedStepsCount}/
+              {missionDetail.totalStepsCount} ({missionDetail.progressPercent}%)
+            </span>
+          </div>
+
+          {/* Steps List */}
+          <div className="space-y-4">
+            {missionDetail.detailedSteps.map((step, idx) => (
+              <MissionStepItem
+                key={step.id || idx}
+                step={step}
+                stepIndex={idx}
+                isMissionJoined={missionDetail.isJoined}
+                onVerifyGamePlay={handleVerifyGamePlay}
+                onSubmitStep={handleSubmitStep}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Actions CTA Card (4 cols) */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="p-6 rounded-3xl bg-surface-container border-2 border-secondary/50 shadow-[0_4px_25px_rgba(0,0,0,0.5),0_0_15px_rgba(255,198,64,0.15)] space-y-4">
+            <div className="flex items-center gap-2 text-secondary">
+              <SparklesIcon className="w-4 h-4 text-secondary" />
+              <span className="text-xs uppercase font-black tracking-wider">
+                Recompensa del Casino
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              <p className="font-(--font-plus-jakarta-sans) text-2xl sm:text-3xl font-black text-secondary tracking-tight">
+                +{missionDetail.totalCoins.toLocaleString("es-ES")} Fichas
+              </p>
+              <p className="text-xs text-[#dae2fd] font-medium leading-relaxed">
+                +{missionDetail.experiencePoints} XP de nivel garantizados al
+                completar todos los objetivos.
+              </p>
+            </div>
+
+            <div className="pt-3 space-y-3">
+              {/* Not Joined Yet CTA */}
+              {!missionDetail.isJoined && (
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={actionLoading}
+                  onClick={handleStartMission}
+                  className="w-full py-3.5 px-6 rounded-2xl bg-primary-container hover:bg-[#7bd0ff] text-on-primary font-(--font-plus-jakarta-sans) text-sm sm:text-base font-black border-2 border-primary shadow-lg transition-all text-center flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <BoltIcon className="w-4 h-4 text-on-primary" />
+                  <span>
+                    {actionLoading ? "Iniciando..." : "Comenzar Misión"}
+                  </span>
+                </motion.button>
+              )}
+
+              {/* Claim Reward Button */}
+              {missionDetail.canSubmitOrClaim && (
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={actionLoading}
+                  onClick={handleClaimReward}
+                  className="w-full py-3.5 px-6 rounded-2xl bg-secondary hover:bg-[#ffdf9f] text-on-secondary font-(--font-plus-jakarta-sans) text-sm sm:text-base font-black border-2 border-[#ffdf9f] shadow-[0_0_20px_rgba(255,198,64,0.35)] transition-all text-center flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  <SparklesIcon className="w-4 h-4 text-on-secondary" />
+                  <span>
+                    {actionLoading ? "Reclamando..." : "Reclamar Recompensa"}
+                  </span>
+                </motion.button>
+              )}
+
+              {/* Completed Status State */}
+              {missionDetail.isCompleted && (
+                <div className="w-full py-3 px-4 rounded-2xl bg-[#064e3b] border-2 border-[#059669] text-[#34d399] text-center font-black text-sm flex items-center justify-center gap-2 shadow-sm">
+                  <span className="material-symbols-outlined text-base">
+                    check_circle
+                  </span>
+                  <span>Misión Completada y Reclamada</span>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/missions")}
+                className="w-full py-3 px-6 rounded-2xl bg-[#222a3d] hover:bg-[#2d3449] text-[#f8fafc] font-(--font-be-vietnam-pro) text-xs sm:text-sm font-bold border-2 border-[#3e484f] transition-all text-center cursor-pointer"
+              >
+                Cerrar y volver
+              </button>
+            </div>
+          </div>
+
+          {/* Security / Tips Box */}
+          <div className="p-5 rounded-2xl bg-surface-container-low border-2 border-[#2d3449] text-xs text-[#dae2fd] space-y-1.5">
+            <p className="font-bold text-[#f8fafc] flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm text-primary-container">
+                verified
+              </span>
+              Validación de Pasos
+            </p>
+            <p className="leading-relaxed">
+              Los pasos se procesan de forma simultánea. Si un paso fue
+              rechazado por el revisor, podrás corregirlo y reenviarlo
+              directamente.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+
 import type { PageEntry, PaginationProps } from "@/types/Pagination";
 
 /**

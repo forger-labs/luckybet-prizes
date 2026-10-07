@@ -1,15 +1,19 @@
 "use client";
 
+import { useFormik } from "formik";
+import { useCallback, useEffect, useState } from "react";
+import * as Yup from "yup";
+
 import type {
   AdminMission,
   MissionStep,
   VerificationType,
 } from "@shared/types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { casinoToast } from "@shared/utils/casinoToast";
+
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import type {
-  FormErrors,
   MissionFormModalProps,
   PartialAdminMission,
 } from "@/types/missions/MissionFormModalTypes";
@@ -17,309 +21,166 @@ import { MissionFields } from "./MissionFields";
 import { StepBuilder } from "./StepBuilder";
 
 const DEFAULT_STEP: MissionStep = {
-  id: "new_step_1",
+  id: 1,
   title: "",
-  verificationType: "upload_image" as VerificationType,
+  verificationType: "IMAGE" as VerificationType,
   order: 1,
 };
 
-function createEmptyFormData(): PartialAdminMission {
+const validationSchema = Yup.object({
+  title: Yup.string()
+    .required("El título es obligatorio")
+    .min(3, "Mínimo 3 caracteres"),
+  description: Yup.string()
+    .required("La descripción es obligatoria")
+    .min(10, "Mínimo 10 caracteres"),
+  tokenReward: Yup.number()
+    .required("La recompensa es obligatoria")
+    .min(1, "Debe ser mayor a 0"),
+  roomId: Yup.number().nullable().optional(),
+  xpReward: Yup.number()
+    .required("La experiencia es obligatoria")
+    .min(1, "Debe ser mayor a 0"),
+  category: Yup.string().required("Seleccione una categoría"),
+  steps: Yup.array()
+    .of(
+      Yup.object({
+        title: Yup.string().required("El título del paso es obligatorio"),
+      }),
+    )
+    .min(1, "Agregue al menos un paso"),
+});
+
+function createEmptyInitialValues(): PartialAdminMission {
   return {
     title: "",
     description: "",
     tokenReward: 0,
-    bonusPercent: 0,
+    roomId: null,
     xpReward: 0,
     category: "daily",
     status: "inactive",
-    steps: [{ ...DEFAULT_STEP, id: crypto.randomUUID() }],
+    steps: [{ ...DEFAULT_STEP, id: Date.now() }],
   };
 }
 
-/**
- * MissionFormModal — modal de creación/edición de misión.
- *
- * Integra MissionFields + StepBuilder, maneja dirty state para el
- * confirm de descarte, y bloquea contenido en misiones activas.
- */
-function MissionFormModal({
+export function MissionFormModal({
   open,
   onClose,
   mission,
   onSave,
+  isSubmitting = false,
+  games = [],
+  providers = [],
+  rooms = [],
 }: MissionFormModalProps) {
   const isCreating = mission === null;
-  const readOnly = !isCreating && mission.status === "active";
+  const [dirty, setDirty] = useState(false);
 
-  const isDirtyRef = useRef(false);
-  const [formData, setFormData] = useState<PartialAdminMission>(
-    isCreating ? createEmptyFormData() : { ...mission },
-  );
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const formik = useFormik({
+    initialValues: isCreating ? createEmptyInitialValues() : { ...mission },
+    validationSchema,
+    validateOnChange: false,
+    validateOnBlur: false,
+    onSubmit: async (values) => {
+      const steps = ((values.steps as MissionStep[]) || []).map((s, i) => ({
+        ...s,
+        order: i + 1,
+      }));
 
-  /* ── Reset form state when modal opens ── */
+      const payload: PartialAdminMission = {
+        title: (values.title as string) || "",
+        description: (values.description as string) || "",
+        tokenReward: Number(values.tokenReward) || 0,
+        roomId: values.roomId ? Number(values.roomId) : null,
+        xpReward: Number(values.xpReward) || 0,
+        category: (values.category as AdminMission["category"]) || "daily",
+        status: (values.status as AdminMission["status"]) || "inactive",
+        steps,
+        coverImage: values.coverImage as string | undefined,
+        image: values.image as File | undefined,
+      };
+
+      const ok = await onSave(payload, isCreating);
+      if (ok) onClose();
+    },
+  });
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset form on modal open
   useEffect(() => {
     if (open) {
-      if (isCreating) {
-        setFormData(createEmptyFormData());
-      } else {
-        setFormData({ ...mission });
-      }
-      setErrors({});
-      isDirtyRef.current = false;
-      setShowDiscardConfirm(false);
+      formik.resetForm({
+        values: isCreating
+          ? createEmptyInitialValues()
+          : ({ ...mission } as PartialAdminMission),
+      });
+      setDirty(false);
     }
   }, [open, isCreating, mission]);
 
-  /* ── Field change handler ── */
-  const handleFieldChange = useCallback((field: string, value: unknown) => {
-    isDirtyRef.current = true;
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error for the changed field
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[field as keyof FormErrors];
-      return next;
-    });
-  }, []);
+  useEffect(() => {
+    setDirty(formik.dirty);
+  }, [formik.dirty]);
 
-  /* ── Steps change handler ── */
-  const handleStepsChange = useCallback((steps: MissionStep[]) => {
-    isDirtyRef.current = true;
-    setFormData((prev) => ({ ...prev, steps }));
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next.steps;
-      // Clear per-step errors
-      Object.keys(next).forEach((key) => {
-        if (key.startsWith("step_")) delete next[key as keyof FormErrors];
+  const handleRequestClose = useCallback(() => {
+    if (dirty) {
+      casinoToast.action({
+        title: "¿Descartar cambios?",
+        description: "Hay modificaciones sin guardar. ¿Desea descartarlas?",
+        button: {
+          title: "Sí, descartar",
+          onClick: () => onClose(),
+        },
       });
-      return next;
-    });
-  }, []);
-
-  /* ── Validation ── */
-  const validate = useCallback((): boolean => {
-    const newErrors: FormErrors = {};
-
-    // Title: required, min 3 chars
-    const title = formData.title;
-    if (!title || title.toString().trim().length < 3) {
-      newErrors.title = "El título debe tener al menos 3 caracteres";
+      return;
     }
-
-    // Description: required, min 10 chars
-    const description = formData.description;
-    if (!description || description.toString().trim().length < 10) {
-      newErrors.description =
-        "La descripción debe tener al menos 10 caracteres";
-    }
-
-    // Token reward: required, > 0
-    const tokenReward = Number(formData.tokenReward);
-    if (
-      !formData.tokenReward ||
-      Number.isNaN(tokenReward) ||
-      tokenReward <= 0
-    ) {
-      newErrors.tokenReward = "La recompensa debe ser mayor a 0";
-    }
-
-    // XP reward: required, > 0
-    const xpReward = Number(formData.xpReward);
-    if (!formData.xpReward || Number.isNaN(xpReward) || xpReward <= 0) {
-      newErrors.xpReward = "La experiencia debe ser mayor a 0";
-    }
-
-    // Category: required
-    if (!formData.category) {
-      newErrors.category = "Seleccioná una categoría";
-    }
-
-    // Steps: at least 1, each with title
-    const steps = (formData.steps as MissionStep[]) || [];
-    if (steps.length === 0) {
-      newErrors.steps = "Agregá al menos un paso";
-    }
-    steps.forEach((step, i) => {
-      if (!step.title || step.title.trim().length < 1) {
-        newErrors[`step_${i}_title`] = "El título del paso es obligatorio";
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData]);
-
-  /* ── Save handler ── */
-  const handleSave = useCallback(() => {
-    if (!validate()) return;
-
-    const steps = ((formData.steps as MissionStep[]) || []).map((s, i) => ({
-      ...s,
-      order: i + 1,
-    }));
-
-    if (isCreating) {
-      const createData: PartialAdminMission = {
-        title: (formData.title as string) || "",
-        description: (formData.description as string) || "",
-        tokenReward: Number(formData.tokenReward) || 0,
-        bonusPercent: Number(formData.bonusPercent) || 0,
-        xpReward: Number(formData.xpReward) || 0,
-        category: (formData.category as AdminMission["category"]) || "daily",
-        status: "inactive",
-        steps,
-        coverImage: formData.coverImage as string | undefined,
-      };
-      onSave(createData, true);
-    } else {
-      const updateData: PartialAdminMission = {
-        title: formData.title as string,
-        description: formData.description as string,
-        tokenReward: Number(formData.tokenReward),
-        bonusPercent: Number(formData.bonusPercent),
-        xpReward: Number(formData.xpReward),
-        category: formData.category as AdminMission["category"],
-        status: (formData.status as AdminMission["status"]) || "inactive",
-        steps,
-        coverImage: formData.coverImage as string | undefined,
-      };
-      onSave(updateData, false);
-    }
-
-    isDirtyRef.current = false;
-  }, [isCreating, formData, validate, onSave]);
-
-  /* ── Close with dirty guard ── */
-  const handleClose = useCallback(() => {
-    if (isDirtyRef.current) {
-      setShowDiscardConfirm(true);
-    } else {
-      onClose();
-    }
-  }, [onClose]);
-
-  const confirmDiscard = useCallback(() => {
-    setShowDiscardConfirm(false);
-    isDirtyRef.current = false;
     onClose();
-  }, [onClose]);
-
-  const cancelDiscard = useCallback(() => {
-    setShowDiscardConfirm(false);
-  }, []);
+  }, [dirty, onClose]);
 
   return (
-    <>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        title={
-          isCreating
-            ? "Nueva Misión"
-            : readOnly
-              ? "Detalles de misión"
-              : "Editar Misión"
-        }
-        size="lg"
-      >
-        {/* Content Lock Banner */}
-        {readOnly && (
-          <div className="flex items-start gap-3 p-4 rounded-lg bg-primary/5 border border-primary/15 mb-4">
-            <span className="material-symbols-outlined text-primary shrink-0 mt-0.5">
-              info
-            </span>
-            <p className="text-body-md text-on-surface-variant">
-              Misión activa — contenido bloqueado. Los parámetros no pueden
-              modificarse.
-            </p>
-          </div>
-        )}
+    <Modal
+      open={open}
+      onClose={handleRequestClose}
+      title={isCreating ? "Crear Nueva Misión" : "Editar Misión"}
+      subtitle={
+        isCreating
+          ? "Configure los parámetros de la misión, recompensas y pasos"
+          : "Actualice los parámetros o requisitos de la misión"
+      }
+      icon={isCreating ? "add_circle" : "edit_square"}
+      size="xl"
+    >
+      <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <MissionFields formik={formik} rooms={rooms} />
 
-        {/* Mission Fields */}
-        <MissionFields
-          mission={formData}
-          onChange={handleFieldChange}
-          errors={errors as Record<string, string>}
-          readOnly={readOnly}
-        />
+        <div className="pt-6 border-t border-outline-variant/20">
+          <StepBuilder formik={formik} games={games} providers={providers} />
+        </div>
 
-        {/* Step Builder — hidden in readOnly mode */}
-        {!readOnly && (
-          <>
-            <div className="mt-6 pt-6 border-t border-outline-variant/20">
-              <StepBuilder
-                steps={(formData.steps as MissionStep[]) || []}
-                onChange={handleStepsChange}
-                readOnly={readOnly}
-                errors={undefined}
-              />
-            </div>
-            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-outline-variant/20">
-              <Button
-                variant="ghost"
-                onClick={handleClose}
-                className="text-base"
-              >
-                Descartar
-              </Button>
-              <Button
-                variant="primary"
-                disabled={readOnly}
-                onClick={handleSave}
-                className="text-base"
-              >
-                Guardar
-              </Button>
-            </div>
-          </>
-        )}
-
-        {/* Footer */}
-      </Modal>
-
-      {/* Discard Confirmation Dialog */}
-      {showDiscardConfirm && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-          {/* Invisible backdrop */}
+        <div className="flex items-center justify-end gap-3 pt-5 border-t border-outline-variant/20">
           <button
             type="button"
-            aria-label="Cancelar descarte"
-            className="absolute inset-0 bg-black/50 cursor-default"
-            onClick={cancelDiscard}
-          />
-          <div className="relative bg-surface-container border border-white/10 rounded-xl p-6 max-w-sm w-full shadow-xl">
-            <h3 className="text-title-md text-on-surface mb-2">
-              ¿Descartar cambios?
-            </h3>
-            <p className="text-body-md text-on-surface-variant mb-4">
-              Los cambios sin guardar se perderán.
-            </p>
-            <div className="flex items-center justify-start gap-3">
-              <Button
-                variant="ghost"
-                className="text-base"
-                onClick={cancelDiscard}
-              >
-                Seguir editando
-              </Button>
-              <Button
-                variant="danger"
-                className="text-base"
-                onClick={confirmDiscard}
-              >
-                Descartar
-              </Button>
-            </div>
-          </div>
+            onClick={handleRequestClose}
+            className="px-5 py-2.5 rounded-xl text-body-md text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
+          >
+            Cancelar
+          </button>
+          <Button
+            type="submit"
+            variant="secondary"
+            disabled={isSubmitting || formik.isSubmitting}
+            className="font-bold shadow-[0_0_15px_rgba(255,198,64,0.2)] hover:shadow-[0_0_20px_rgba(255,198,64,0.35)] cursor-pointer"
+          >
+            {isSubmitting || formik.isSubmitting
+              ? "Guardando..."
+              : isCreating
+                ? "Crear misión"
+                : "Guardar cambios"}
+          </Button>
         </div>
-      )}
-    </>
+      </form>
+    </Modal>
   );
 }
 
 MissionFormModal.displayName = "MissionFormModal";
-
-export { MissionFormModal };

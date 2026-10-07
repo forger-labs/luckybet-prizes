@@ -1,37 +1,49 @@
-/**
- * MissionsReducer — state management for the Mission Control page.
- *
- * Uses useReducer pattern (page-local state, zero external deps).
- * Handles loading, filtering, searching, pagination, and all
- * mission CRUD / state transitions.
- */
-
-import type { AdminMission, MissionStatus } from "@shared/types";
 import type { Dispatch } from "react";
-import { MockDataService } from "./MockDataService";
 
-/* ── Constants ── */
+import type {
+  AdminMission,
+  BackendMissionStatus,
+  BackendMissionType,
+  GetMissionsQuery,
+} from "@shared/types";
+import { casinoToast } from "@shared/utils/casinoToast";
 
-const PAGE_SIZE = 8;
+import { apiAdminGanaya } from "@/libs/apiAdminGanaya";
+import {
+  buildCreateMissionFormData,
+  mapAdminToBackend,
+  mapBackendToAdmin,
+} from "@/types/missions/api-mappers";
+import type { MissionFilters } from "@/types/missions/FilterTabs";
+import type { PartialAdminMission } from "@/types/missions/MissionFormModalTypes";
 
-/* ── State ── */
+/* ── Initial State ── */
+
+export const initialFilters: MissionFilters = {
+  search: "",
+  status: "all",
+  category: "all",
+  roomId: "",
+};
 
 export interface MissionsState {
   missions: AdminMission[];
-  filter: "all" | MissionStatus;
-  search: string;
+  total: number;
+  filters: MissionFilters;
   page: number;
-  totalPages: number;
+  limit: number;
   loading: boolean;
+  isSubmitting: boolean;
 }
 
 export const initialState: MissionsState = {
   missions: [],
-  filter: "all",
-  search: "",
+  total: 0,
+  filters: initialFilters,
   page: 1,
-  totalPages: 1,
+  limit: 10,
   loading: true,
+  isSubmitting: false,
 };
 
 /* ── Action Types ── */
@@ -39,62 +51,50 @@ export const initialState: MissionsState = {
 export type MissionsAction =
   | {
       type: "LOAD_MISSIONS";
-      payload: { missions: AdminMission[] };
+      payload: { missions: AdminMission[]; total: number };
     }
   | {
-      type: "SET_FILTER";
-      payload: { filter: "all" | MissionStatus };
+      type: "SET_LOADING";
+      payload: { loading: boolean };
     }
   | {
-      type: "SET_SEARCH";
-      payload: { search: string };
+      type: "SET_FILTERS";
+      payload: Partial<MissionFilters>;
+    }
+  | {
+      type: "RESET_FILTERS";
     }
   | {
       type: "SET_PAGE";
       payload: { page: number };
     }
   | {
-      type: "CREATE_MISSION";
-      payload: { mission: AdminMission };
+      type: "SET_LIMIT";
+      payload: { limit: number };
     }
   | {
-      type: "UPDATE_MISSION";
-      payload: { mission: AdminMission };
+      type: "SUBMIT_START";
     }
   | {
-      type: "DELETE_MISSION";
-      payload: { id: string };
+      type: "SUBMIT_SUCCESS";
+    }
+  | {
+      type: "SUBMIT_ERROR";
     };
 
-/* ── Filter + Search logic ── */
+/* ── Filter logic ── */
 
-function applyFilters(
+export function applyClientSearch(
   missions: AdminMission[],
-  filter: "all" | MissionStatus,
   search: string,
 ): AdminMission[] {
-  let filtered = missions;
-
-  // Status filter
-  if (filter !== "all") {
-    filtered = filtered.filter((m) => m.status === filter);
-  }
-
-  // Search by title
-  if (search.trim()) {
-    const q = search.trim().toLowerCase();
-    filtered = filtered.filter(
-      (m) =>
-        m.title.toLowerCase().includes(q) ||
-        m.description.toLowerCase().includes(q),
-    );
-  }
-
-  return filtered;
-}
-
-function getTotalPages(length: number) {
-  return Math.max(1, Math.ceil(length / PAGE_SIZE));
+  if (!search.trim()) return missions;
+  const q = search.trim().toLowerCase();
+  return missions.filter(
+    (m) =>
+      m.title.toLowerCase().includes(q) ||
+      m.description.toLowerCase().includes(q),
+  );
 }
 
 /* ── Reducer ── */
@@ -105,35 +105,26 @@ export function missionsReducer(
 ): MissionsState {
   switch (action.type) {
     case "LOAD_MISSIONS": {
-      const missions = action.payload.missions;
-      const filtered = applyFilters(missions, state.filter, state.search);
       return {
         ...state,
-        missions,
-        totalPages: getTotalPages(filtered.length),
+        missions: action.payload.missions,
+        total: action.payload.total,
         loading: false,
+      };
+    }
+
+    case "SET_FILTERS": {
+      return {
+        ...state,
+        filters: { ...state.filters, ...action.payload },
         page: 1,
       };
     }
 
-    case "SET_FILTER": {
-      const { filter } = action.payload;
-      const filtered = applyFilters(state.missions, filter, state.search);
+    case "RESET_FILTERS": {
       return {
         ...state,
-        filter,
-        totalPages: getTotalPages(filtered.length),
-        page: 1,
-      };
-    }
-
-    case "SET_SEARCH": {
-      const { search } = action.payload;
-      const filtered = applyFilters(state.missions, state.filter, search);
-      return {
-        ...state,
-        search,
-        totalPages: getTotalPages(filtered.length),
+        filters: initialFilters,
         page: 1,
       };
     }
@@ -142,34 +133,21 @@ export function missionsReducer(
       return { ...state, page: action.payload.page };
     }
 
-    case "CREATE_MISSION": {
-      const missions = [action.payload.mission, ...state.missions];
-      const filtered = applyFilters(missions, state.filter, state.search);
-      return {
-        ...state,
-        missions,
-        totalPages: getTotalPages(filtered.length),
-      };
+    case "SET_LIMIT": {
+      return { ...state, limit: action.payload.limit, page: 1 };
     }
 
-    case "UPDATE_MISSION": {
-      const missions = state.missions.map((m) =>
-        m.id === action.payload.mission.id ? action.payload.mission : m,
-      );
-      const filtered = applyFilters(missions, state.filter, state.search);
-      return {
-        ...state,
-        missions,
-        totalPages: getTotalPages(filtered.length),
-      };
+    case "SET_LOADING": {
+      return { ...state, loading: action.payload.loading };
     }
 
-    case "DELETE_MISSION": {
-      const missions = state.missions.filter((m) => m.id !== action.payload.id);
-      const filtered = applyFilters(missions, state.filter, state.search);
-      const totalPages = getTotalPages(filtered.length);
-      const page = Math.min(state.page, totalPages);
-      return { ...state, missions, totalPages, page };
+    case "SUBMIT_START": {
+      return { ...state, isSubmitting: true };
+    }
+
+    case "SUBMIT_SUCCESS":
+    case "SUBMIT_ERROR": {
+      return { ...state, isSubmitting: false };
     }
 
     default:
@@ -177,64 +155,216 @@ export function missionsReducer(
   }
 }
 
-/* ── Selector: get current page items ── */
+/* ── Helpers ── */
 
-export function getCurrentPageItems(
-  missions: AdminMission[],
-  filter: "all" | MissionStatus,
-  search: string,
+function getMessage(msg: string | string[] | undefined): string {
+  if (!msg) return "Ocurrió un error inesperado";
+  return Array.isArray(msg) ? msg.join("; ") : msg;
+}
+
+const CATEGORY_TO_TYPE: Record<string, BackendMissionType> = {
+  daily: "DAILY",
+  weekly: "WEEKLY",
+  fixed: "FIXED",
+};
+
+const STATUS_TO_BACKEND: Record<string, BackendMissionStatus> = {
+  inactive: "INACTIVE",
+  active: "ACTIVE",
+  completed: "COMPLETED",
+  cancelled: "CANCELLED",
+};
+
+/* ── Action dispatchers (thunks) ── */
+
+export async function loadMissions(
+  dispatch: Dispatch<MissionsAction>,
   page: number,
-): AdminMission[] {
-  const filtered = applyFilters(missions, filter, search);
-  const start = (page - 1) * PAGE_SIZE;
-  return filtered.slice(start, start + PAGE_SIZE);
-}
-
-/* ── Action dispatchers (thunk-like wrappers) ── */
-
-export async function loadMissions(dispatch: Dispatch<MissionsAction>) {
-  const missions = await MockDataService.getMissions();
-  dispatch({ type: "LOAD_MISSIONS", payload: { missions } });
-}
-
-export async function createMission(
-  dispatch: Dispatch<MissionsAction>,
-  data: Parameters<typeof MockDataService.createMission>[0],
+  limit: number,
+  filters: MissionFilters,
 ) {
-  const mission = await MockDataService.createMission(data);
-  dispatch({ type: "CREATE_MISSION", payload: { mission } });
+  dispatch({ type: "SET_LOADING", payload: { loading: true } });
+
+  const query: GetMissionsQuery = {
+    take: limit,
+    skip: (page - 1) * limit,
+  };
+
+  if (filters.status !== "all" && STATUS_TO_BACKEND[filters.status]) {
+    query.status = STATUS_TO_BACKEND[filters.status];
+  }
+
+  if (filters.category !== "all" && CATEGORY_TO_TYPE[filters.category]) {
+    query.type = CATEGORY_TO_TYPE[filters.category];
+  }
+
+  if (filters.roomId) {
+    query.roomId = Number(filters.roomId);
+  }
+
+  try {
+    const result = await apiAdminGanaya.getMissions(query);
+
+    if (result.status && result.data) {
+      dispatch({
+        type: "LOAD_MISSIONS",
+        payload: {
+          missions: result.data.map(mapBackendToAdmin),
+          total: result.meta?.total ?? result.data.length,
+        },
+      });
+      return;
+    }
+
+    dispatch({
+      type: "LOAD_MISSIONS",
+      payload: { missions: [], total: 0 },
+    });
+    casinoToast.error({
+      title: "Error al cargar misiones",
+      description: getMessage(result.message),
+    });
+  } catch {
+    dispatch({
+      type: "LOAD_MISSIONS",
+      payload: { missions: [], total: 0 },
+    });
+    casinoToast.error({
+      title: "Error de conexión",
+      description: "No se pudo conectar con el servidor",
+    });
+  }
 }
 
-export async function updateMission(
+export async function createMissionAction(
+  dispatch: Dispatch<MissionsAction>,
+  data: PartialAdminMission,
+): Promise<boolean> {
+  dispatch({ type: "SUBMIT_START" });
+  try {
+    const payload = buildCreateMissionFormData(data, data.image);
+
+    const result = await apiAdminGanaya.createMission(payload);
+
+    if (result.status) {
+      dispatch({ type: "SUBMIT_SUCCESS" });
+      casinoToast.success({ title: "Misión creada exitosamente" });
+      return true;
+    }
+
+    dispatch({ type: "SUBMIT_ERROR" });
+    casinoToast.error({
+      title: "Error al crear misión",
+      description: getMessage(result.message),
+    });
+    return false;
+  } catch {
+    dispatch({ type: "SUBMIT_ERROR" });
+    casinoToast.error({
+      title: "Error de red",
+      description: "No se pudo comunicar con el servidor",
+    });
+    return false;
+  }
+}
+
+export async function updateMissionAction(
   dispatch: Dispatch<MissionsAction>,
   id: string,
-  data: Partial<AdminMission>,
-) {
-  const mission = await MockDataService.updateMission(id, data);
-  dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+  data: PartialAdminMission,
+): Promise<boolean> {
+  dispatch({ type: "SUBMIT_START" });
+  try {
+    const payload = mapAdminToBackend(data);
+    const result = await apiAdminGanaya.updateMission(Number(id), payload);
+
+    if (result.status) {
+      dispatch({ type: "SUBMIT_SUCCESS" });
+      casinoToast.success({ title: "Misión actualizada" });
+      return true;
+    }
+
+    dispatch({ type: "SUBMIT_ERROR" });
+    casinoToast.error({
+      title: "Error al guardar misión",
+      description: getMessage(result.message),
+    });
+    return false;
+  } catch {
+    dispatch({ type: "SUBMIT_ERROR" });
+    casinoToast.error({
+      title: "Error de red",
+      description: "No se pudo comunicar con el servidor",
+    });
+    return false;
+  }
 }
 
-export async function activateMission(
-  dispatch: Dispatch<MissionsAction>,
-  id: string,
-) {
-  const mission = await MockDataService.activateMission(id);
-  dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+export async function activateMissionAction(id: string): Promise<boolean> {
+  try {
+    const result = await apiAdminGanaya.activateMission(Number(id));
+    if (result.status) {
+      casinoToast.success({ title: "Misión activada correctamente" });
+      return true;
+    }
+    casinoToast.error({
+      title: "Error al activar misión",
+      description: getMessage(result.message),
+    });
+    return false;
+  } catch {
+    casinoToast.error({
+      title: "Error de red",
+      description: "No se pudo comunicar con el servidor",
+    });
+    return false;
+  }
 }
 
-export async function cancelMission(
-  dispatch: Dispatch<MissionsAction>,
-  id: string,
-  reason: string,
-) {
-  const mission = await MockDataService.cancelMission(id, reason);
-  dispatch({ type: "UPDATE_MISSION", payload: { mission } });
+export async function cancelMissionAction(id: string): Promise<boolean> {
+  try {
+    const result = await apiAdminGanaya.updateMissionStatus(
+      Number(id),
+      "CANCELLED",
+    );
+    if (result.status) {
+      casinoToast.success({ title: "Misión cancelada" });
+      return true;
+    }
+    casinoToast.error({
+      title: "Error al cancelar misión",
+      description: getMessage(result.message),
+    });
+    return false;
+  } catch {
+    casinoToast.error({
+      title: "Error de red",
+      description: "No se pudo comunicar con el servidor",
+    });
+    return false;
+  }
 }
 
-export async function deleteMission(
-  dispatch: Dispatch<MissionsAction>,
-  id: string,
-) {
-  await MockDataService.deleteMission(id);
-  dispatch({ type: "DELETE_MISSION", payload: { id } });
+export async function completeMissionAction(id: string): Promise<boolean> {
+  try {
+    const result = await apiAdminGanaya.updateMissionStatus(
+      Number(id),
+      "COMPLETED",
+    );
+    if (result.status) {
+      casinoToast.success({ title: "Misión finalizada correctamente" });
+      return true;
+    }
+    casinoToast.error({
+      title: "Error al finalizar misión",
+      description: getMessage(result.message),
+    });
+    return false;
+  } catch {
+    casinoToast.error({
+      title: "Error de red",
+      description: "No se pudo comunicar con el servidor",
+    });
+    return false;
+  }
 }

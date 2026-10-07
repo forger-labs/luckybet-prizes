@@ -1,96 +1,111 @@
 "use client";
 
-import type { AdminMission } from "@shared/types";
+import Image from "next/image";
+
 import { Badge, statusLabels } from "@/components/ui/Badge";
+import type { MissionRowProps } from "@/types/missions/MissionTable";
+import { MissionCountdown } from "./MissionCountdown";
 import { RowActions } from "./RowActions";
 
-interface MissionRowProps {
-  mission: AdminMission;
-  onEdit?: (id: string) => void;
-  onActivate?: (id: string) => void;
-  onCancel?: (id: string) => void;
-  onDelete?: (id: string) => void;
-  onView?: (id: string) => void;
-  onDuplicate?: (id: string) => void;
-}
-
-/**
- * MissionRow — single table row for a mission.
- *
- * Columns:
- * 1. Title + token reward + XP reward
- * 2. Status badge (color-coded)
- * 3. Steps count + Participants count
- * 4. RowActions (contextual dropdown)
- */
-function MissionRow({
+export function MissionRow({
   mission,
+  onPreview,
   onEdit,
   onActivate,
   onCancel,
-  onDelete,
-  onView,
-  onDuplicate,
+  onComplete,
 }: MissionRowProps) {
+  const bonusNum = mission.room ? Number(mission.room.bonus) || 0 : 0;
+
   return (
-    <tr className="border-b border-outline-variant/20 last:border-b-0 hover:bg-surface-container-high/50 transition-colors">
-      {/* Column 1: Title + Rewards */}
-      <td className="py-4 pr-4 pl-3">
-        <div className="flex flex-col gap-1">
-          <p className="text-body-md font-semibold text-on-surface">
-            {mission.title}
-          </p>
-          <div className="flex items-center gap-3 text-label-sm text-on-surface-variant">
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-sm text-secondary">
-                token
+    <tr className="border-b border-outline-variant/15 last:border-b-0 hover:bg-surface-container-high/40 transition-colors duration-150 group">
+      {/* Column 1: Cover Image + Title + Type */}
+      <td className="py-4 px-4 sm:pl-6">
+        <div className="flex items-center gap-3.5">
+          <div className="relative w-12 h-12 rounded-xl bg-surface-container-highest border border-outline-variant/30 overflow-hidden shrink-0 shadow-sm flex items-center justify-center">
+            {mission.coverImage ? (
+              <Image
+                src={mission.coverImage}
+                alt={mission.title}
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            ) : (
+              <span className="material-symbols-outlined text-primary text-2xl">
+                rocket_launch
               </span>
-              {mission.tokenReward.toLocaleString()}
-              {mission.bonusPercent > 0 && (
-                <span className="text-secondary">
-                  (+{mission.bonusPercent}%)
-                </span>
-              )}
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-sm text-primary">
-                stars
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1 min-w-0">
+            <p className="font-(--font-plus-jakarta-sans) text-body-md font-semibold text-on-surface group-hover:text-primary transition-colors truncate">
+              {mission.title}
+            </p>
+            <div className="flex items-center gap-2 text-label-sm">
+              <span className="px-2 py-0.5 rounded-md bg-surface-container-highest text-on-surface-variant font-mono text-[11px] uppercase tracking-wider">
+                {mission.category}
               </span>
-              {mission.xpReward.toLocaleString()} XP
-            </span>
+              <span className="text-[11px] text-outline">
+                {mission.steps?.length || 0} pasos
+              </span>
+            </div>
           </div>
         </div>
       </td>
 
-      {/* Column 2: Status Badge */}
-      <td className="py-4 pr-4">
-        <Badge variant={mission.status}>{statusLabels[mission.status]}</Badge>
-      </td>
+      {/* Column 2: Rewards & Sala */}
+      <td className="py-4 px-4">
+        <div className="flex flex-col gap-1 text-label-sm">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-secondary/10 border border-secondary/20 text-secondary font-medium text-xs">
+              <span className="material-symbols-outlined text-xs">token</span>
+              <span>{mission.tokenReward.toLocaleString()} fichas</span>
+            </span>
 
-      {/* Column 3: Steps + Participants */}
-      <td className="py-4 pr-4">
-        <div className="flex items-center gap-4 text-body-md text-on-surface-variant">
-          <span className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">flag</span>
-            {mission.steps.length} pasos
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">group</span>
-            {mission.participants} participantes
-          </span>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 text-primary font-medium text-xs">
+              <span className="material-symbols-outlined text-xs">stars</span>
+              <span>{mission.xpReward.toLocaleString()} XP</span>
+            </span>
+          </div>
+
+          {mission.room ? (
+            <span className="text-[11px] text-primary font-semibold">
+              Sala: {mission.room.name} (
+              {bonusNum > 0 ? `+${mission.room.bonus}% Bono` : "0% Bono"})
+            </span>
+          ) : (
+            <span className="text-[11px] text-outline">
+              Sin sala promocional
+            </span>
+          )}
         </div>
       </td>
 
-      {/* Column 4: Actions */}
-      <td className="py-4 pr-14 text-right">
+      {/* Column 3: Status Badge + Live Countdown */}
+      <td className="py-4 px-4">
+        <div className="flex flex-col items-start gap-1.5">
+          <Badge variant={mission.status}>{statusLabels[mission.status]}</Badge>
+
+          {mission.status === "active" && (
+            <MissionCountdown
+              expiresAt={mission.expiresAt}
+              activatedAt={mission.activatedAt}
+              type={mission.category}
+            />
+          )}
+        </div>
+      </td>
+
+      {/* Column 4: Inline Action Buttons */}
+      <td className="py-4 px-4 sm:pr-6 text-right">
         <RowActions
           mission={mission}
+          onPreview={onPreview}
           onEdit={onEdit}
           onActivate={onActivate}
           onCancel={onCancel}
-          onDelete={onDelete}
-          onView={onView}
-          onDuplicate={onDuplicate}
+          onComplete={onComplete}
         />
       </td>
     </tr>
@@ -98,6 +113,3 @@ function MissionRow({
 }
 
 MissionRow.displayName = "MissionRow";
-
-export { MissionRow };
-export type { MissionRowProps };

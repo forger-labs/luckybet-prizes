@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { LoginForm } from "@/components/LoginPage/LoginForm";
 import { LoginHeader } from "@/components/LoginPage/LoginHeader";
 
@@ -20,13 +22,13 @@ export default function LoginPage() {
         {/* Register Link */}
         <section className="mt-auto py-stack-md w-full text-center">
           <p className="font-body-md text-on-surface-variant">
-            ¿No tenés cuenta?{" "}
-            <a
+            ¿No tienes cuenta?{" "}
+            <Link
               href="/"
               className="text-primary font-label-md ml-1 hover:underline underline-offset-4"
             >
-              Registrate
-            </a>
+              Regístrate
+            </Link>
           </p>
         </section>
       </main>

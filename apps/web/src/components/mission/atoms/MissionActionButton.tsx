@@ -1,28 +1,40 @@
+"use client";
+
+import { motion } from "framer-motion";
+
+import { CheckCircleIcon } from "@/icons";
+
 interface Props {
   completed?: boolean;
+  label?: string;
   onClick?: () => void;
 }
 
-export const MissionActionButton = ({ completed, onClick }: Props) => {
+export const MissionActionButton = ({
+  completed,
+  label = "Hacer Misión",
+  onClick,
+}: Props) => {
   if (completed) {
     return (
-      <button
-        type="submit"
-        disabled
-        className="px-6 py-2 rounded-xl bg-surface-variant text-on-surface-variant font-bold text-sm cursor-not-allowed"
-      >
+      <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#064e3b] text-[#34d399] font-black text-xs border-2 border-[#059669]">
+        <CheckCircleIcon className="w-3.5 h-3.5 text-[#34d399]" />
         Completado
-      </button>
+      </span>
     );
   }
 
   return (
-    <button
+    <motion.button
+      whileHover={{
+        scale: 1.04,
+      }}
+      whileTap={{ scale: 0.96 }}
       onClick={onClick}
       type="button"
-      className="px-6 py-2 rounded-xl bg-primary text-on-primary font-bold text-sm active:scale-95 transition-transform"
+      className="px-4 py-2 rounded-xl bg-primary-container hover:bg-[#7bd0ff] text-on-primary font-black text-xs sm:text-sm transition-all border-2 border-primary shadow-md cursor-pointer inline-flex items-center gap-1.5"
     >
-      Hacer Misión
-    </button>
+      <span>{label}</span>
+    </motion.button>
   );
 };

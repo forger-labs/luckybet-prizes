@@ -1,22 +1,33 @@
-import type { AdminMission } from "@shared/types";
+import type {
+  AdminMission,
+  BackendGameItem,
+  BackendProviderItem,
+  BackendRoom,
+} from "@shared/types";
+
 export type PartialAdminMission = Omit<
   AdminMission,
   "id" | "createdAt" | "participants"
->;
+> & {
+  image?: File;
+};
 
 export interface MissionFormModalProps {
   open: boolean;
   onClose: () => void;
-  /** null = create mode, AdminMission = edit/view mode */
   mission: AdminMission | null;
-  onSave: (data: PartialAdminMission, isCreate: boolean) => void;
+  onSave: (data: PartialAdminMission, isCreate: boolean) => Promise<boolean>;
+  isSubmitting?: boolean;
+  games?: BackendGameItem[];
+  providers?: BackendProviderItem[];
+  rooms?: BackendRoom[];
 }
 
 export interface FormErrors {
   title?: string;
   description?: string;
   tokenReward?: string;
-  bonusPercent?: string;
+  roomId?: string;
   xpReward?: string;
   category?: string;
   steps?: string;

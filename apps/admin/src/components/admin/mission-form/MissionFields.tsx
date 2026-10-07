@@ -1,123 +1,50 @@
 "use client";
 
-import Image from "next/image";
-import { useRef } from "react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import type { MissionFieldsProps } from "@/types/missions/MissionFieldTypes";
 import { FieldGroup } from "./FieldGroup";
-import { ReadOnlyFieldRow } from "./ReadOnlyFieldRow";
+import { MissionCoverUpload } from "./MissionCoverUpload";
+import { MissionRewardFields } from "./MissionRewardFields";
 
 const CATEGORY_OPTIONS: { value: string; label: string }[] = [
-  { value: "daily", label: "Diaria" },
-  { value: "weekly", label: "Semanal" },
-  { value: "fixed", label: "Fija" },
+  { value: "daily", label: "Misión diaria" },
+  { value: "weekly", label: "Misión semanal" },
+  { value: "fixed", label: "Misión fija" },
   { value: "special_event", label: "Evento especial" },
 ];
 
 const FIELD_LABELS: Record<string, string> = {
   title: "Título de la misión",
-  description: "Descripción",
+  description: "Descripción detallada",
   tokenReward: "Recompensa en fichas",
-  bonusPercent: "Porcentaje de bono",
-  xpReward: "Experiencia",
+  xpReward: "Experiencia XP",
   category: "Categoría",
+  roomId: "Sala asignada",
 };
 
-/**
- * MissionFields — grupo de campos del formulario de misión.
- *
- * Incluye: título, descripción, recompensa (fichas y bono), XP,
- * categoría, e imagen de portada. Soporta modo readOnly (etiquetas
- * + badge "Bloqueado") para misiones activas.
- */
-function MissionFields({
-  mission,
-  onChange,
-  errors = {},
-  readOnly = false,
-}: MissionFieldsProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+export function MissionFields({ formik, rooms = [] }: MissionFieldsProps) {
+  const { values: mission, setFieldValue, errors } = formik;
 
   const handleInputChange =
     (field: string) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value =
-        e.target.type === "number" ? Number(e.target.value) : e.target.value;
-      onChange(field, value);
+      setFieldValue(field, e.target.value);
     };
 
-  const handleSelectChange = (field: string) => (value: string) => {
-    onChange(field, value);
-  };
-
-  const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      onChange("coverImage", event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  /* ── Read-only mode: fields as labels + "Bloqueado" badge ── */
-  if (readOnly) {
-    return (
-      <div className="flex flex-col gap-4">
-        {(
-          [
-            "title",
-            "description",
-            "tokenReward",
-            "bonusPercent",
-            "xpReward",
-            "category",
-          ] as const
-        ).map((field) => {
-          let displayValue: string | number | undefined = mission[field];
-
-          // Translate category value to label
-          if (field === "category" && typeof displayValue === "string") {
-            displayValue = CATEGORY_OPTIONS.find(
-              (o) => o.value === displayValue,
-            )?.label;
-          }
-
-          // Format numbers
-          if (typeof displayValue === "number") {
-            displayValue =
-              field === "tokenReward" || field === "xpReward"
-                ? displayValue.toLocaleString()
-                : `${displayValue}%`;
-          }
-
-          return (
-            <ReadOnlyFieldRow
-              key={field}
-              label={FIELD_LABELS[field]}
-              value={displayValue}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-
-  /* ── Editable mode ── */
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       {/* Title */}
       <FieldGroup
-        htmlFor="title"
+        htmlFor="mission-title"
         label={FIELD_LABELS.title}
         required
-        error={errors.title}
+        error={errors.title as string}
       >
         <Input
-          id="title"
-          placeholder="Ej: Daily Login Streak"
+          id="mission-title"
+          placeholder="Ej: Racha de inicio de sesión diario"
           value={mission.title ?? ""}
           onChange={handleInputChange("title")}
           wrapperClassName="w-full"
@@ -126,141 +53,45 @@ function MissionFields({
 
       {/* Description */}
       <FieldGroup
-        htmlFor="description"
+        htmlFor="mission-description"
         label={FIELD_LABELS.description}
         required
-        error={errors.description}
+        error={errors.description as string}
       >
         <Textarea
-          id="description"
-          placeholder="Descripción de la misión"
+          id="mission-description"
+          placeholder="Describa el objetivo y las instrucciones para los jugadores..."
           value={mission.description ?? ""}
           onChange={handleInputChange("description")}
         />
       </FieldGroup>
 
-      {/* Token reward */}
-      <FieldGroup
-        htmlFor="tokenReward"
-        label={FIELD_LABELS.tokenReward}
-        required
-        error={errors.tokenReward}
-      >
-        <Input
-          id="tokenReward"
-          type="number"
-          icon="payments"
-          placeholder="0"
-          min={0}
-          value={mission.tokenReward ?? ""}
-          onChange={handleInputChange("tokenReward")}
-          wrapperClassName="w-full"
-        />
-      </FieldGroup>
-
-      {/* Bonus percent */}
-      <FieldGroup
-        htmlFor="bonusPercent"
-        label={FIELD_LABELS.bonusPercent}
-        error={errors.bonusPercent}
-      >
-        <Input
-          type="number"
-          icon="percent"
-          placeholder="0"
-          min={0}
-          max={100}
-          id="bonusPercent"
-          value={mission.bonusPercent ?? ""}
-          onChange={handleInputChange("bonusPercent")}
-          wrapperClassName="w-full"
-        />
-      </FieldGroup>
-
-      {/* XP reward */}
-      <FieldGroup
-        htmlFor="xpReward"
-        label={FIELD_LABELS.xpReward}
-        required
-        error={errors.xpReward}
-      >
-        <Input
-          id="xpReward"
-          type="number"
-          icon="stars"
-          placeholder="0"
-          min={0}
-          value={mission.xpReward ?? ""}
-          onChange={handleInputChange("xpReward")}
-          wrapperClassName="w-full"
-        />
-      </FieldGroup>
-
       {/* Category */}
       <FieldGroup
-        htmlFor="category"
+        htmlFor="mission-category"
         label={FIELD_LABELS.category}
         required
-        error={errors.category}
+        error={errors.category as string}
       >
         <Select
+          id="mission-category"
           options={CATEGORY_OPTIONS}
-          placeholder="Seleccionar categoría"
-          value={mission.category ?? ""}
-          onChange={handleSelectChange("category")}
+          value={mission.category ?? "daily"}
+          onChange={(val) => setFieldValue("category", val)}
           className="w-full"
         />
       </FieldGroup>
 
-      {/* Cover image */}
-      <div>
-        <span className="text-label-sm text-on-surface-variant mb-1 block">
-          Imagen de portada
-        </span>
-        {mission.coverImage ? (
-          <div className="relative rounded-lg overflow-hidden border border-outline-variant/30">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <Image
-              width={100}
-              height={100}
-              src={mission.coverImage}
-              alt="Cover preview"
-              className="w-full h-auto"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                onChange("coverImage", undefined);
-                if (fileInputRef.current) fileInputRef.current.value = "";
-              }}
-              className="absolute top-2 right-2 p-1.5 bg-surface-container/80 backdrop-blur-sm rounded-lg text-error hover:text-error/80 transition-colors"
-              aria-label="Eliminar imagen"
-            >
-              <span className="material-symbols-outlined text-lg">delete</span>
-            </button>
-          </div>
-        ) : (
-          <label className="flex flex-col items-center justify-center gap-2 p-8 rounded-lg border-2 border-dashed border-outline-variant/40 cursor-pointer hover:border-primary/30 transition-colors">
-            <span className="material-symbols-outlined text-3xl text-outline/60">
-              cloud_upload
-            </span>
-            <span className="text-body-md text-outline">
-              Hacé clic o arrastrá una imagen
-            </span>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleCoverUpload}
-            />
-          </label>
-        )}
-      </div>
+      {/* Rewards Grid */}
+      <MissionRewardFields formik={formik} rooms={rooms} />
+
+      {/* Cover Image Upload */}
+      <MissionCoverUpload
+        coverImage={mission.coverImage}
+        onChange={setFieldValue}
+      />
     </div>
   );
 }
 
 MissionFields.displayName = "MissionFields";
-
-export { MissionFields };

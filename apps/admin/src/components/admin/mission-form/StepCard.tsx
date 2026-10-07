@@ -1,24 +1,24 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
 import type { VerificationType } from "@shared/types";
+
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import type { StepCardProps } from "@/types/missions/StepBuilderTypes";
+import type { SearchSelectOption } from "@/types/SearchSelect";
+import { StepCardConfig } from "./StepCardConfig";
 
-const VERIFICATION_OPTIONS: { value: string; label: string }[] = [
-  { value: "upload_image", label: "Subir imagen" },
-  { value: "submit_text", label: "Enviar texto" },
-  { value: "manual_review", label: "Revisión manual" },
+const VERIFICATION_OPTIONS = [
+  { value: "IMAGE", label: "Captura / Imagen de evidencia" },
+  { value: "TEXT", label: "Texto / Código de confirmación" },
+  { value: "GAME_PLAY", label: "Juego en LuckyBet (GAME_PLAY)" },
 ];
 
-/**
- * StepCard — fila individual de paso en el StepBuilder.
- *
- * Muestra: badge numerado, input de título, select de tipo de verificación,
- * y botones de orden (subir/bajar) + eliminar.
- * El botón eliminar se deshabilita si es el único paso, con tooltip explicativo.
- */
-function StepCard({
+export type StepCardMode = "provider" | "game";
+
+export function StepCard({
   step,
   index,
   totalSteps,
@@ -27,88 +27,153 @@ function StepCard({
   onMoveUp,
   onMoveDown,
   errors,
+  games = [],
+  providers = [],
 }: StepCardProps) {
+  const isGamePlay = step.verificationType === "GAME_PLAY";
+  const gameConfig = step.targetConfig ?? { minBet: 1 };
+  const [mode, setMode] = useState<StepCardMode>(
+    step.targetConfig?.provider ? "provider" : "game",
+  );
+
+  const gameOptions: SearchSelectOption[] = useMemo(() => {
+    return games.map((g) => ({
+      value: String(g.name || g.id),
+      label: g.title || g.name,
+      sublabel: g.provider || g.label,
+    }));
+  }, [games]);
+
+  const providerOptions: SearchSelectOption[] = useMemo(() => {
+    return providers.map((p) => ({
+      value: p.name,
+      label: p.name,
+      sublabel: p.name && p.name !== p.slug ? p.name : undefined,
+    }));
+  }, [providers]);
+
+  const handleModeToggle = (selectedMode: StepCardMode) => {
+    if (mode === selectedMode) return;
+    setMode(selectedMode);
+    if (selectedMode === "game") {
+      onChange({
+        ...step,
+        targetConfig: {
+          gameId: games[0] ? String(games[0].name || games[0].id) : "",
+          provider: undefined,
+          minUniqueGames: undefined,
+          minBet: gameConfig.minBet || 1,
+        },
+      });
+    } else {
+      onChange({
+        ...step,
+        targetConfig: {
+          provider: providers[0]?.name || "",
+          gameId: undefined,
+          minUniqueGames: 1,
+          minBet: gameConfig.minBet || 1,
+        },
+      });
+    }
+  };
+
   return (
-    <div className="flex items-start gap-4 bg-surface-container rounded-lg p-4">
-      {/* Step number badge */}
-      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/15 text-primary text-label-sm font-bold shrink-0 mt-1">
+    <div className="flex items-start gap-3 sm:gap-4 bg-surface-container-low/80 border border-outline-variant/20 rounded-2xl p-4 transition-all">
+      <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-primary/15 border border-primary/30 text-primary text-xs font-bold shrink-0 mt-1 shadow-sm">
         {index + 1}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col gap-3">
+      <div className="flex-1 flex flex-col gap-3 min-w-0">
         <div>
           <Input
-            placeholder="Título del paso (obligatorio)"
+            id={`step-${index}-title`}
+            placeholder="Título o instrucción del paso (obligatorio)"
             value={step.title}
             onChange={(e) => onChange({ ...step, title: e.target.value })}
             wrapperClassName="w-full"
+            className="bg-surface-container-lowest/80 text-sm py-2.5"
           />
           {errors?.title && (
-            <p className="mt-1 text-label-sm text-error">{errors.title}</p>
+            <p className="mt-1 text-label-sm text-error text-xs">
+              {errors.title}
+            </p>
           )}
         </div>
+
         <Select
+          id={`step-${index}-type`}
           options={VERIFICATION_OPTIONS}
           value={step.verificationType}
-          onChange={(value) =>
-            onChange({ ...step, verificationType: value as VerificationType })
-          }
+          isRelative={true}
+          onChange={(value) => {
+            const vType = value as VerificationType;
+            onChange({
+              ...step,
+              verificationType: vType,
+              targetConfig:
+                vType === "GAME_PLAY"
+                  ? {
+                      gameId: games[0]
+                        ? String(games[0].name || games[0].id)
+                        : "",
+                      minBet: 1,
+                    }
+                  : undefined,
+            });
+          }}
           className="w-full"
         />
+
+        {/* GamePlay Configuration Section */}
+        {isGamePlay && (
+          <StepCardConfig
+            index={index}
+            mode={mode}
+            gameConfig={gameConfig}
+            gameOptions={gameOptions}
+            providerOptions={providerOptions}
+            onConfigChange={(cfg) => onChange({ ...step, targetConfig: cfg })}
+            onModeToggle={handleModeToggle}
+          />
+        )}
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-1 shrink-0 mt-1">
-        {/* Move up */}
         <button
           type="button"
           disabled={index === 0}
           onClick={onMoveUp}
-          className="p-1 rounded-md text-outline hover:text-on-surface hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          aria-label="Mover arriba"
+          className="p-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+          aria-label="Mover paso arriba"
         >
           <span className="material-symbols-outlined text-lg">
             arrow_upward
           </span>
         </button>
 
-        {/* Move down */}
         <button
           type="button"
           disabled={index === totalSteps - 1}
           onClick={onMoveDown}
-          className="p-1 rounded-md text-outline hover:text-on-surface hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          aria-label="Mover abajo"
+          className="p-1.5 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-high disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
+          aria-label="Mover paso abajo"
         >
           <span className="material-symbols-outlined text-lg">
             arrow_downward
           </span>
         </button>
 
-        {/* Remove — tooltip when last step */}
         <div className="relative group">
           <button
             type="button"
             disabled={totalSteps <= 1}
             onClick={onRemove}
-            className="p-1 rounded-md text-error/70 hover:text-error hover:bg-error/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="p-1.5 rounded-lg text-error/70 hover:text-error hover:bg-error-container/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all cursor-pointer"
             aria-label="Eliminar paso"
           >
-            <span className="material-symbols-outlined text-lg">
-              remove_circle
-            </span>
+            <span className="material-symbols-outlined text-lg">delete</span>
           </button>
-          {totalSteps <= 1 && (
-            <div
-              className="absolute bottom-full mb-2 left-[-200%] -translate-x-1/2
-              px-3 py-1.5 bg-surface-container-high text-on-surface
-              text-label-sm rounded-lg shadow-lg whitespace-nowrap opacity-0
-              group-hover:opacity-100 transition-opacity pointer-events-none z-100"
-            >
-              La misión debe tener al menos un paso
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -116,5 +181,3 @@ function StepCard({
 }
 
 StepCard.displayName = "StepCard";
-
-export { StepCard };
