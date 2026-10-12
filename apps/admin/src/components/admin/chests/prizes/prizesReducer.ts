@@ -10,6 +10,7 @@ import type {
   PrizesState,
   ResolveChestClaimPayload,
 } from "@/types/adminChests";
+import { getMessage } from "@/utils/getMessage";
 
 export const initialPrizesFilters: PrizesFilters = {
   playerId: "",
@@ -96,11 +97,6 @@ export function prizesReducer(
   }
 }
 
-function getMessage(msg: string | string[] | undefined): string {
-  if (!msg) return "Ocurrió un error inesperado";
-  return Array.isArray(msg) ? msg.join("; ") : msg;
-}
-
 export async function loadPrizes(
   dispatch: Dispatch<PrizesAction>,
   page: number,
@@ -137,7 +133,7 @@ export async function loadPrizes(
     dispatch({ type: "FETCH_ERROR" });
     casinoToast.error({
       title: "Error al cargar reclamos",
-      description: getMessage(res.message),
+      description: getMessage(res.message, res.errors),
     });
   } catch {
     dispatch({ type: "FETCH_ERROR" });
@@ -172,7 +168,7 @@ export async function resolveChestClaimAction(
     dispatch({ type: "SUBMIT_ERROR" });
     casinoToast.error({
       title: "Error al resolver reclamo",
-      description: getMessage(res.message),
+      description: getMessage(res.message, res.errors),
     });
     return false;
   } catch {

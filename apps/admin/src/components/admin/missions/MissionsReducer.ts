@@ -16,6 +16,7 @@ import {
 } from "@/types/missions/api-mappers";
 import type { MissionFilters } from "@/types/missions/FilterTabs";
 import type { PartialAdminMission } from "@/types/missions/MissionFormModalTypes";
+import { getMessage } from "@/utils/getMessage";
 
 /* ── Initial State ── */
 
@@ -157,11 +158,6 @@ export function missionsReducer(
 
 /* ── Helpers ── */
 
-function getMessage(msg: string | string[] | undefined): string {
-  if (!msg) return "Ocurrió un error inesperado";
-  return Array.isArray(msg) ? msg.join("; ") : msg;
-}
-
 const CATEGORY_TO_TYPE: Record<string, BackendMissionType> = {
   daily: "DAILY",
   weekly: "WEEKLY",
@@ -222,7 +218,7 @@ export async function loadMissions(
     });
     casinoToast.error({
       title: "Error al cargar misiones",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
   } catch {
     dispatch({
@@ -255,7 +251,7 @@ export async function createMissionAction(
     dispatch({ type: "SUBMIT_ERROR" });
     casinoToast.error({
       title: "Error al crear misión",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
     return false;
   } catch {
@@ -287,7 +283,7 @@ export async function updateMissionAction(
     dispatch({ type: "SUBMIT_ERROR" });
     casinoToast.error({
       title: "Error al guardar misión",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
     return false;
   } catch {
@@ -309,7 +305,7 @@ export async function activateMissionAction(id: string): Promise<boolean> {
     }
     casinoToast.error({
       title: "Error al activar misión",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
     return false;
   } catch {
@@ -333,7 +329,7 @@ export async function cancelMissionAction(id: string): Promise<boolean> {
     }
     casinoToast.error({
       title: "Error al cancelar misión",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
     return false;
   } catch {
@@ -357,7 +353,7 @@ export async function completeMissionAction(id: string): Promise<boolean> {
     }
     casinoToast.error({
       title: "Error al finalizar misión",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
     return false;
   } catch {

@@ -10,6 +10,7 @@ import type {
   LevelRewardsState,
   ResolveLevelRewardPayload,
 } from "@/types/adminLevels";
+import { getMessage } from "@/utils/getMessage";
 
 export const initialLevelRewardsFilters: LevelRewardsFilters = {
   status: "all",
@@ -92,11 +93,6 @@ export function levelRewardsReducer(
   }
 }
 
-function getMessage(msg: string | string[] | undefined): string {
-  if (!msg) return "Ocurrió un error inesperado";
-  return Array.isArray(msg) ? msg.join("; ") : msg;
-}
-
 export async function loadLevelRewards(
   dispatch: Dispatch<LevelRewardsAction>,
   page: number,
@@ -137,7 +133,7 @@ export async function loadLevelRewards(
 
   casinoToast.error({
     title: "Error al cargar recompensas de nivel",
-    description: getMessage(result.message),
+    description: getMessage(result.message, result.errors),
   });
   dispatch({ type: "FETCH_ERROR" });
 }
@@ -168,7 +164,7 @@ export async function resolveLevelRewardAction(
 
     casinoToast.error({
       title: "Error al resolver recompensa",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
     dispatch({ type: "SUBMIT_ERROR" });
     return false;

@@ -10,10 +10,9 @@ import { CloseMenu } from "@shared/icons/CloseMenu";
 import { Stars } from "@shared/icons/Stars";
 
 import { useAuthContext } from "@/hooks/useAuth";
-import { SparklesIcon } from "@/icons";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { ItemSidebar } from "./ItemSidebar";
 import { Logout } from "./Logout";
-import { useDashboardData } from "@/hooks/useDashboardData";
 
 export const MobileSidebar = ({
   open,
@@ -25,7 +24,7 @@ export const MobileSidebar = ({
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
   const { user, logout } = useAuthContext();
-  const {userRank} = useDashboardData()
+  const { userRank } = useDashboardData();
   const displayName = user?.name || user?.login || "Jugador";
 
   // Close drawer on route change
@@ -115,7 +114,9 @@ export const MobileSidebar = ({
                     {displayName}
                   </span>
                   <span className="text-[11px] text-on-surface-variant">
-                    {userRank ? `Rango: ${userRank.currentTier} ${userRank.currentXp} XP` : "Rango: Desconocido"}
+                    {userRank
+                      ? `Rango: ${userRank.currentTier} ${userRank.currentXp} XP`
+                      : "Rango: Desconocido"}
                   </span>
                 </div>
               </div>

@@ -57,9 +57,6 @@ export const MissionCard = ({ mission, onStart }: Props) => {
       ? (mission.rewardXp ?? 0)
       : 0;
 
-  const roomBonus =
-    isClientMission && mission.room ? Number(mission.room.bonus) || 0 : 0;
-
   const coverImage = isClientMission
     ? mission.imageUrl
     : "href" in mission
@@ -171,12 +168,7 @@ export const MissionCard = ({ mission, onStart }: Props) => {
 
           {/* Reward Pills */}
           <div className="mb-4">
-            <MissionRewardPills
-              coins={totalCoins}
-              xp={xpReward}
-              bonusPercent={roomBonus}
-              size="sm"
-            />
+            <MissionRewardPills coins={totalCoins} xp={xpReward} size="sm" />
           </div>
 
           {/* Steps Overview & Progress Bar */}

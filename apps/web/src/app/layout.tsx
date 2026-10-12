@@ -5,6 +5,7 @@ import "./globals.css";
 import { CasinoToaster } from "@shared/components/toasts/CasinoToaster";
 
 import { AuthContextProvider } from "@/context/AuthContext";
+import { CelebrationProvider } from "@/context/CelebrationContext";
 
 const beVietnamPro = Be_Vietnam_Pro({
   variable: "--font-be-vietnam-pro",
@@ -49,8 +50,10 @@ export default function RootLayout({
       </head>
       <body className="min-h-dvh flex flex-col bg-[#200C42] text-on-surface antialiased">
         <AuthContextProvider>
-          {children}
-          <CasinoToaster />
+          <CelebrationProvider>
+            {children}
+            <CasinoToaster />
+          </CelebrationProvider>
         </AuthContextProvider>
       </body>
     </html>

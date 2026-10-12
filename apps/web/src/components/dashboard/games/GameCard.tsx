@@ -2,12 +2,13 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useCallback } from "react";
+
+import { casinoToast } from "@shared/utils/casinoToast";
 
 import { UsersIcon } from "@/icons";
-import type { GameItem } from "@/types/dashboard";
-import { useCallback } from "react";
 import { luckybetClient } from "@/libs/luckybetClient";
-import { casinoToast } from "@shared/utils/casinoToast";
+import type { GameItem } from "@/types/dashboard";
 
 export const GameCard = ({
   title,
@@ -16,10 +17,12 @@ export const GameCard = ({
   alt,
   tag,
   tagColor = "gold",
-  activePlayers,id,
+  activePlayers,
+  id,
   jackpot,
-  mobile, token
-}: GameItem & { mobile: boolean, token: string | null}) => {
+  mobile,
+  token,
+}: GameItem & { mobile: boolean; token: string | null }) => {
   const tagColorClasses = {
     gold: "bg-secondary/20 text-secondary border-secondary/40",
     cyan: "bg-primary/20 text-primary border-primary/40",
@@ -29,36 +32,36 @@ export const GameCard = ({
 
   const handleCardRedirect = useCallback(async () => {
     if (!token) {
-        casinoToast.error('No tiene un token valido');
-        return;
-      }
+      casinoToast.error("No tiene un token valido");
+      return;
+    }
 
-    const newTab = window.open('about:blank', '_blank');
-      try {
-          const res = await luckybetClient.openGame(token, id, mobile);
+    const newTab = window.open("about:blank", "_blank");
+    try {
+      const res = await luckybetClient.openGame(token, id, mobile);
 
-          if (res.status === 'success' && res.content?.url) {
-            // 2. Navigate the opened tab to the game URL
-            if (newTab) {
-              newTab.location.href = res.content.url;
-            }
-          } else {
-            // Close the opened tab if the request failed or returned no URL
-            newTab?.close();
-            casinoToast.error('No se pudo obtener la URL del juego');
-          }
-        } catch {
-          newTab?.close();
-          casinoToast.error('Ocurrió un error al abrir el juego');
+      if (res.status === "success" && res.content?.url) {
+        // 2. Navigate the opened tab to the game URL
+        if (newTab) {
+          newTab.location.href = res.content.url;
         }
-  }, [ token, id, mobile])
+      } else {
+        // Close the opened tab if the request failed or returned no URL
+        newTab?.close();
+        casinoToast.error("No se pudo obtener la URL del juego");
+      }
+    } catch {
+      newTab?.close();
+      casinoToast.error("Ocurrió un error al abrir el juego");
+    }
+  }, [token, id, mobile]);
 
   return (
     <motion.div
       // onClick={handleCardRedirect}
       whileHover={{ y: -6, transition: { duration: 0.25 } }}
       tabIndex={0}
-      className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 shadow-xl cursor-pointer bg-surface-container"
+      className="group relative aspect-3/4 rounded-2xl overflow-hidden border border-white/10 shadow-xl cursor-pointer bg-surface-container"
     >
       {/* Game Image */}
       <Image

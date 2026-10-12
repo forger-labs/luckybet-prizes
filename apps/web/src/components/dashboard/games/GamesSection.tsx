@@ -2,12 +2,12 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
+import { useAuthContext } from "@/hooks/useAuth";
 import { SparklesIcon } from "@/icons";
 import type { GameItem } from "@/types/dashboard";
 import { GameCard } from "./GameCard";
-import { useAuthContext } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
 
 interface GamesSectionProps {
   games?: GameItem[];
@@ -20,20 +20,20 @@ export const GamesSection = ({
   isFallback = false,
   isLoading = false,
 }: GamesSectionProps) => {
-  const { token } = useAuthContext()
+  const { token } = useAuthContext();
 
-  const [mobile, setMobile] = useState(false)
+  const [mobile, setMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      setMobile(window.innerWidth < 900) // Luckybet breakpoint for mobile games
-    }
+      setMobile(window.innerWidth < 900); // Luckybet breakpoint for mobile games
+    };
 
-    handleResize() // Set initial state
+    handleResize(); // Set initial state
 
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <section className="space-y-4">

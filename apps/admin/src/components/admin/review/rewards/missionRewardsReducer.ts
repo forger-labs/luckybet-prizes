@@ -10,6 +10,7 @@ import type {
   MissionRewardsState,
   ResolveMissionRewardPayload,
 } from "@/types/review/AdminMissionRewards";
+import { getMessage } from "@/utils/getMessage";
 
 export const initialMissionRewardsFilters: MissionRewardsFilters = {
   status: "all",
@@ -91,11 +92,6 @@ export function missionRewardsReducer(
   }
 }
 
-function getMessage(msg: string | string[] | undefined): string {
-  if (!msg) return "Ocurrió un error inesperado";
-  return Array.isArray(msg) ? msg.join("; ") : msg;
-}
-
 export async function loadMissionRewards(
   dispatch: Dispatch<MissionRewardsAction>,
   page: number,
@@ -133,7 +129,7 @@ export async function loadMissionRewards(
 
   casinoToast.error({
     title: "Error al cargar recompensas",
-    description: getMessage(result.message),
+    description: getMessage(result.message, result.errors),
   });
   dispatch({ type: "FETCH_ERROR" });
 }
@@ -164,7 +160,7 @@ export async function resolveMissionRewardAction(
 
     casinoToast.error({
       title: "Error al resolver recompensa",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
     dispatch({ type: "SUBMIT_ERROR" });
     return false;

@@ -152,7 +152,7 @@ El sistema rechaza explícitamente la estética de casinos online baratos: sin f
 **Key Characteristics:**
 
 - **Oscuro pero no frío:** el navy profundo es el ancla visual, pero los acentos de neón y oro dan calidez y energía
-- **Glassmorphism como herramienta de jerarquía:** el blur y la translucencia diferencian niveles (cards, modales, popovers) sin recurrir a sombras pesadas
+- **Tonal Layering y bordes limpios como herramienta de jerarquía:** superficies sólidas con contraste tonal calibrado y bordes estructurales nítidos diferencian niveles (cards, modales, popovers) sin recurrir a sombras pesadas ni translucencias difusas
 - **Premio visual en los acentos:** el oro es reservado para recompensas y acciones de alto valor; el azul neón para progreso y estados activos
 - **Geometría amigable:** bordes redondeados generosos (8px–24px) para mantener la accesibilidad visual
 - **Consistente sobre sorpresivo:** el usuario navega entre módulos que se sienten del mismo lugar
@@ -216,19 +216,19 @@ El sistema utiliza un solo pairing de dos familias: Plus Jakarta Sans para titul
 
 ## 4. Elevation
 
-El sistema no utiliza sombras tradicionales para establecer jerarquía. En su lugar, usa **Tonal Layering** combinado con **Glassmorphism**: cada nivel de elevación se expresa como un color de superficie diferente, no como una sombra. Esto mantiene la estética limpia, oscura y cohesiva.
+El sistema no utiliza sombras tradicionales para establecer jerarquía. En su lugar, usa **Tonal Layering Sólido y Bordes Estructurales**: cada nivel de elevación se expresa como un color de superficie opaco más claro y un borde nítido, no como una sombra difusa ni transparencias empañadas. Esto mantiene la estética limpia, oscura, de alto rendimiento y libre de ruido visual.
 
 ### Tonal Scale (de más profundo a más elevado)
 
 1. **Abismo Profundo** (#0b1326) — Background general, nivel 0
 2. **Superficie Container Low** (#131b2e) — Backdrop de áreas secundarias
 3. **Superficie Container** (#171f33) — Cards, sidebars, paneles base (nivel 1)
-4. **Superficie Container High** (#222a3d) — Hover de cards, listas con interacción (nivel 1.5)
-5. **Superficie Container Highest** (#2d3449) — Hover intenso, elementos seleccionados (nivel 1.8)
+4. **Superficie Container High** (#222a3d) — Hover de cards, listas con interacción, modales (nivel 1.5)
+5. **Superficie Container Highest** (#2d3449) — Hover intenso, elementos seleccionados, popovers destacados (nivel 1.8)
 
-### Glassmorphism (nivel 2: modales, popovers, drawers)
+### Elevación de Contenedores Flotantes (nivel 2: modales, popovers, drawers)
 
-Los elementos flotantes usan `background: rgba(23, 31, 51, 0.85)` con `backdrop-filter: blur(16px)` y un borde de 1px con opacidad 12% blanca. Esto crea un vidrio esmerilado oscuro que se siente elevado sin recurrir a sombras.
+Los elementos flotantes usan superficies sólidas u opacas (`Superficie Container High` #222a3d o `Superficie Container` #171f33) con un borde estructural de 1px (`outline-variant` o blanco al 10%-15%). Se rechaza el uso de fondos traslúcidos con `backdrop-filter: blur()` (glassmorphism): las superficies son opacas para garantizar legibilidad instantánea, alto contraste y máximo rendimiento de renderizado en GPU.
 
 ### Glows (en lugar de sombras)
 
@@ -280,8 +280,8 @@ Los glows reemplazan a las sombras para elementos que necesitan atención:
 
 ### Modals / Dialogs
 
-- **Backdrop:** Negro al 60% con backdrop-filter blur. Cierra al hacer clic fuera o Escape.
-- **Panel:** Fondo superficie-container al 80% con backdrop-filter blur-xl (16px). Borde 1px opacidad 12% blanca. Radio 12px (rounded-md → xl en algunos casos).
+- **Backdrop:** Superficie oscura sólida atenuada (`rgba(6, 14, 32, 0.75)`). Sin blur pesado. Cierra al hacer clic fuera o Escape.
+- **Panel:** Fondo sólido opaco `Superficie Container High` (#222a3d). Borde estructural de 1px (`outline-variant` o blanco al 12%). Radio 16px (rounded-lg). Sin transparencias de fondo ni desenfoques innecesarios.
 - **Animación:** Scale (95% → 100%) + fade, 200ms ease-out. Solo en entrada.
 - **Header:** Separado por borde inferior de opacidad 10% blanca. Título en title-md.
 - **Body:** Max-height 70vh con overflow-y auto.
@@ -322,4 +322,5 @@ Los glows reemplazan a las sombras para elementos que necesitan atención:
 - **No uses** Display o Headline para labels de formulario, botones o metadatos. Cada nivel tiene su contexto.
 - **No anides** cards. Una card dentro de otra rompe el sistema de tonal layering.
 - **No uses** modales por defecto. Son la respuesta lazy. Agotá alternativas inline/progressive disclosure primero.
+- **No uses** glassmorphism, paneles traslúcidos con blur pesado o pseudo-vidrios. Generan ruido visual, comprometen el contraste del texto y degradan el rendimiento de renderizado. Las superficies deben ser sólidas, opacas y con bordes estructurales limpios.
 - **No uses** estilos de "app financiera" fría y transaccional. Midnight Harbor es un lounge, no un panel de inversiones.

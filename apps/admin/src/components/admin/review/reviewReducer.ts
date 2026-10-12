@@ -11,6 +11,7 @@ import type {
   ReviewFilters,
   ReviewStepSubmission,
 } from "@/types/review/ReviewSubmission";
+import { getMessage } from "@/utils/getMessage";
 
 export const PAGE_SIZE = 12;
 
@@ -160,11 +161,6 @@ export function reviewReducer(
   }
 }
 
-function getMessage(msg: string | string[] | undefined): string {
-  if (!msg) return "Ocurrió un error inesperado";
-  return Array.isArray(msg) ? msg.join("; ") : msg;
-}
-
 export async function loadReviewQueue(
   dispatch: Dispatch<ReviewAction>,
   page: number,
@@ -215,7 +211,7 @@ export async function loadReviewQueue(
 
   casinoToast.error({
     title: "Error al cargar cola de revisión",
-    description: getMessage(result.message),
+    description: getMessage(result.message, result.errors),
   });
   dispatch({ type: "FETCH_ERROR" });
 }
@@ -251,7 +247,7 @@ export async function reviewStepAction(
 
     casinoToast.error({
       title: "Error al calificar el paso",
-      description: getMessage(result.message),
+      description: getMessage(result.message, result.errors),
     });
     return false;
   } catch {

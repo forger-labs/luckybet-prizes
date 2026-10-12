@@ -9,6 +9,7 @@ import { casinoToast } from "@shared/utils/casinoToast";
 import { MissionDetailHero } from "@/components/mission/molecules/MissionDetailHero";
 import { MissionDetailSkeleton } from "@/components/mission/molecules/MissionDetailSkeleton";
 import { MissionStepItem } from "@/components/mission/molecules/MissionStepItem";
+import { useCelebration } from "@/context/CelebrationContext";
 import { BoltIcon, ChevronLeftIcon, SparklesIcon } from "@/icons";
 import { webApi } from "@/libs/apiWebGanaya";
 import type {
@@ -34,6 +35,7 @@ export default function MissionDetailPage() {
     useState<ClientMissionDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [actionLoading, setActionLoading] = useState<boolean>(false);
+  const { triggerCelebration } = useCelebration();
 
   // ── Load Mission & User Mission State ──
   const loadMissionData = useCallback(async () => {
@@ -281,6 +283,11 @@ export default function MissionDetailPage() {
     try {
       const res = await webApi.claimMissionReward(missionDetail.userMissionId);
       if (res.status) {
+        triggerCelebration({
+          coins: res.data?.coinsAmount || missionDetail.totalCoins,
+          title: "¡Misión Completada!",
+          subtitle: "Tus fichas han sido acreditadas a tu balance.",
+        });
         casinoToast.success({
           title: "¡Recompensa Reclamada!",
           description:
