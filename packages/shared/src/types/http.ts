@@ -43,7 +43,8 @@ export interface LocalStorageKeys {
 export interface ApiResponse<T> {
   status: boolean;
   data: T | null;
-  message: string | string[];
+  errors? : string[]
+  message: string;
 }
 
 export interface LoginResponse {
@@ -62,6 +63,7 @@ export interface PaginationMeta {
 export interface PaginatedApiResponse<T> {
   status: boolean;
   data: T | null;
-  message: string | string[];
+  message: string;
+  errors?: string[];
   meta: PaginationMeta | null;
 }

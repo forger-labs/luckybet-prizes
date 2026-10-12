@@ -10,6 +10,7 @@ import type {
   ChestsState,
   GetChestsQuery,
 } from "@/types/adminChests";
+import { getMessage } from "@/utils/getMessage";
 
 export const initialChestFilters: ChestFilters = {
   title: "",
@@ -103,11 +104,6 @@ export function chestsReducer(
   }
 }
 
-function getMessage(msg: string | string[] | undefined): string {
-  if (!msg) return "Ocurrió un error inesperado";
-  return Array.isArray(msg) ? msg.join("; ") : msg;
-}
-
 export async function loadChests(
   dispatch: Dispatch<ChestsAction>,
   page: number,
@@ -154,7 +150,7 @@ export async function loadChests(
     dispatch({ type: "FETCH_ERROR" });
     casinoToast.error({
       title: "Error al cargar cofres",
-      description: getMessage(res.message),
+      description: getMessage(res.message, res.errors),
     });
   } catch {
     dispatch({ type: "FETCH_ERROR" });
@@ -197,7 +193,7 @@ export async function createChestAction(
     dispatch({ type: "SUBMIT_ERROR" });
     casinoToast.error({
       title: "Error al crear cofre",
-      description: getMessage(res.message),
+      description: getMessage(res.message, res.errors),
     });
     return false;
   } catch {
@@ -246,7 +242,7 @@ export async function updateChestAction(
     dispatch({ type: "SUBMIT_ERROR" });
     casinoToast.error({
       title: "Error al actualizar cofre",
-      description: getMessage(res.message),
+      description: getMessage(res.message, res.errors),
     });
     return false;
   } catch {
@@ -275,7 +271,7 @@ export async function toggleChestStatusAction(
     }
     casinoToast.error({
       title: "Error al cambiar estado",
-      description: getMessage(res.message),
+      description: getMessage(res.message, res.errors),
     });
     return false;
   } catch {

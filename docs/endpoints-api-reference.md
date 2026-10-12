@@ -697,7 +697,7 @@ Controladores: `MissionsController` (Administración) y `PlayerMisionesControlle
       {
         "id": 1,
         "title": "Gana 5 rondas en Pragmatic",
-        "description": "Juega al menos 5 rondas con apuesta mínima de 1 USD",
+        "description": "Juega al menos 5 rondas con apuesta mínima de 1 fichas",
         "type": "DAILY",
         "status": "ACTIVE",
         "coinsAmount": 200,

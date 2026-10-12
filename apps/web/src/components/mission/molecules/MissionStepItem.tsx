@@ -256,7 +256,7 @@ export function MissionStepItem({
               </span>
               <span className="text-xs font-bold text-[#4ade80] block">
                 {minBet !== undefined && minBet > 0
-                  ? `$${minBet.toLocaleString()} USD / jugada`
+                  ? `$${minBet.toLocaleString()} fichas / jugada`
                   : "Sin mínimo de apuesta"}
               </span>
             </div>
