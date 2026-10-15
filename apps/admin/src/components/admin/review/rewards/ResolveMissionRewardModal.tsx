@@ -12,12 +12,6 @@ import type {
   ResolveMissionRewardPayload,
 } from "@/types/review/AdminMissionRewards";
 
-const ResolveSchema = Yup.object().shape({
-  action: Yup.string().oneOf(["RESOLVE_CLAIMED", "FORCE_RETRY"]).required(),
-  externalOperationId: Yup.string().optional(),
-  adminNotes: Yup.string().optional(),
-});
-
 export function ResolveMissionRewardModal({
   reward,
   open,
@@ -111,10 +105,9 @@ export function ResolveMissionRewardModal({
             externalOperationId: reward.externalOperationId || "",
             adminNotes: "",
           }}
-          validationSchema={ResolveSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, handleBlur, submitForm }) => (
+          {({ values, handleChange, handleBlur }) => (
             <Form className="flex flex-col gap-4">
               {selectedAction === "RESOLVE_CLAIMED" && (
                 <div className="flex flex-col gap-1.5">
@@ -164,7 +157,6 @@ export function ResolveMissionRewardModal({
                 </button>
                 <button
                   type="submit"
-                  onClick={submitForm}
                   disabled={isSubmitting}
                   className={`px-5 py-2.5 rounded-xl text-body-md font-bold transition-all active:scale-[0.98] cursor-pointer shadow-md ${
                     selectedAction === "RESOLVE_CLAIMED"
