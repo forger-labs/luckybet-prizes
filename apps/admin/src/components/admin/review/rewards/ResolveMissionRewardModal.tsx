@@ -51,7 +51,7 @@ export function ResolveMissionRewardModal({
       open={open}
       onClose={onClose}
       title="Resolver Reclamo de Misión"
-      subtitle={`Reclamo #${reward.id} para el Jugador #${reward.playerId}`}
+      subtitle={`Reclamo #${reward.id} para el Jugador ${reward.player?.username || ""}`}
       icon="build"
       size="md"
     >
@@ -114,7 +114,7 @@ export function ResolveMissionRewardModal({
           validationSchema={ResolveSchema}
           onSubmit={handleSubmit}
         >
-          {({ values, handleChange, handleBlur }) => (
+          {({ values, handleChange, handleBlur, submitForm }) => (
             <Form className="flex flex-col gap-4">
               {selectedAction === "RESOLVE_CLAIMED" && (
                 <div className="flex flex-col gap-1.5">
@@ -164,6 +164,7 @@ export function ResolveMissionRewardModal({
                 </button>
                 <button
                   type="submit"
+                  onCanPlay={submitForm}
                   disabled={isSubmitting}
                   className={`px-5 py-2.5 rounded-xl text-body-md font-bold transition-all active:scale-[0.98] cursor-pointer shadow-md ${
                     selectedAction === "RESOLVE_CLAIMED"
