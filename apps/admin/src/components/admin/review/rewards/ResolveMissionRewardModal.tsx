@@ -164,7 +164,7 @@ export function ResolveMissionRewardModal({
                 </button>
                 <button
                   type="submit"
-                  onCanPlay={submitForm}
+                  onClick={submitForm}
                   disabled={isSubmitting}
                   className={`px-5 py-2.5 rounded-xl text-body-md font-bold transition-all active:scale-[0.98] cursor-pointer shadow-md ${
                     selectedAction === "RESOLVE_CLAIMED"
