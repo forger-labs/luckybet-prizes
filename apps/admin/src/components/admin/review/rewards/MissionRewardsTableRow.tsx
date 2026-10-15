@@ -60,7 +60,7 @@ export function MissionRewardsTableRow({
             <span>P</span>
           </div>
           <span className="text-sm font-semibold text-on-surface">
-            Jugador #{reward.playerId}
+            Jugador #{reward.player?.username || reward.playerId}
           </span>
         </div>
       </td>

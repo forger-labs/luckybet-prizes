@@ -36,6 +36,7 @@ export function ResolveMissionRewardModal({
         externalOperationId: values.externalOperationId.trim() || undefined,
         adminNotes: values.adminNotes.trim() || undefined,
       };
+      console.log(payload)
 
       const success = await onResolve(payload);
       if (success) onClose();

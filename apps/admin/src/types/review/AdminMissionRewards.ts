@@ -9,6 +9,9 @@ export interface BackendMissionReward {
   userMissionId: number;
   playerId: number;
   coinsAmount: number;
+  player?: {
+    username: string;
+	}
   roomId?: number | null;
   experiencePoints: number;
   status: MissionRewardStatus;

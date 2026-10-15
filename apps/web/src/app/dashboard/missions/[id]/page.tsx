@@ -284,7 +284,7 @@ export default function MissionDetailPage() {
       const res = await webApi.claimMissionReward(missionDetail.userMissionId);
       if (res.status) {
         triggerCelebration({
-          coins: res.data?.coinsAmount || missionDetail.totalCoins,
+          coins: missionDetail.totalCoins,
           title: "¡Misión Completada!",
           subtitle: "Tus fichas han sido acreditadas a tu balance.",
         });
