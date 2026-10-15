@@ -30,8 +30,6 @@ export function ResolveMissionRewardModal({
         externalOperationId: values.externalOperationId.trim() || undefined,
         adminNotes: values.adminNotes.trim() || undefined,
       };
-      console.log(payload)
-
       const success = await onResolve(payload);
       if (success) onClose();
     },
@@ -50,6 +48,14 @@ export function ResolveMissionRewardModal({
       size="md"
     >
       <div className="flex flex-col gap-5 py-1">
+        {reward.errorMessage && (
+          <div className="bg-error/10 border border-error/20 rounded-xl p-3.5 mb-3">
+            <p className="text-[11px] text-on-error-variant leading-relaxed">
+              <span className="font-semibold">Error de entrega:</span>{" "}
+              {reward.errorMessage}{" "}
+            </p>{" "}
+          </div>
+        )}
         {/* Toggle de acción */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button

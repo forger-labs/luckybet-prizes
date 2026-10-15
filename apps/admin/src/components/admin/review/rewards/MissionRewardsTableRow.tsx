@@ -35,7 +35,6 @@ export function MissionRewardsTableRow({
   onResolve,
 }: MissionRewardsTableRowProps) {
   const isUncertain = reward.status === "TIMEOUT_UNCERTAIN";
-  const isPending = reward.status === "PENDING";
 
   return (
     <tr
@@ -60,7 +59,7 @@ export function MissionRewardsTableRow({
             <span>P</span>
           </div>
           <span className="text-sm font-semibold text-on-surface">
-            Jugador #{reward.player?.username || reward.playerId}
+            {reward.player?.username || `Jugador #${reward.playerId}`}
           </span>
         </div>
       </td>
@@ -68,7 +67,7 @@ export function MissionRewardsTableRow({
       {/* Misión de Usuario */}
       <td className="py-3.5 px-4">
         <span className="text-xs font-mono bg-surface-container px-2 py-1 rounded-md border border-outline-variant/20 text-on-surface-variant">
-          UserMission #{reward.userMissionId}
+          UserMission ID #{reward.userMissionId}
         </span>
       </td>
 
@@ -127,7 +126,7 @@ export function MissionRewardsTableRow({
 
       {/* Acciones */}
       <td className="py-3.5 px-4 sm:pr-6 text-right">
-        {(isUncertain || isPending) && (
+        {(isUncertain) && (
           <button
             type="button"
             onClick={() => onResolve(reward)}
